@@ -93,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (data['code'] == 0) {
         // 保存登录状态到本地
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('username', _usernameController.text);
+        await prefs.setString('loginName', _usernameController.text);
         await prefs.setBool('isLoggedIn', true);
         await prefs.setString('loginTime', DateTime.now().toIso8601String());
         await prefs.setString('actualName', data['data']['actualName']);

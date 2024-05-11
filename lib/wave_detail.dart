@@ -1,3 +1,4 @@
+import 'package:easyorder_mobile/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -36,7 +37,20 @@ List<TimeLine> parseTimeLine(String data) {
    print('timelines ${timelines}'); 
 
   return timelines;
+  
 }
+
+String parseOrderContent(String data) {
+  
+  String newOrderContent = normalizeNewlines(data);
+
+   print('newOrderContent ${newOrderContent}'); 
+
+  return newOrderContent;
+}
+
+
+
 
 // 一个辅助函数，用于根据行描述返回时间线对象的类型
 int getTypeFromDescription(String description) {
@@ -44,23 +58,17 @@ int getTypeFromDescription(String description) {
     return 1;
   } else if (description.contains('配货')) {
     return 2;
-  } else if (description.contains('对接')) {
-    return 3;
-  } else if (description.contains('对接收货')) {
+  }  else if (description.contains('对接收货')) {
     return 4;
   } else if (description.contains('拣货')) {
     return 4;
   } else if (description.contains('送货')) {
     return 5;
   }
+  else if (description.contains('对接')) {
+    return 3;
+  }
   return 0; // 使用0作为未知类型的默认值
-}
-
-// 使用前面给出的formatTimestamp函数
-String formatTimestamp(int timestamp) {
-  DateTime date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-  final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
-  return formatter.format(date);
 }
 
 
@@ -131,7 +139,7 @@ class _WaveDetailsScreenState extends State<WaveDetailsScreen> {
           Padding(
             padding: EdgeInsets.all(8.0),
             child: Text(
-              '波次编号: ${_wave.waveId}，共计: ${_wave.waveDetail!.addressCount}个地址\n时间：${_wave.createTime}',
+              '波次编号: ${_wave.waveId}，共计: ${_wave.waveDetail!.addressCount}个地址\n时间：${_wave.createTime}', style: Theme.of(context).textTheme.titleSmall,
             ),
           ),
           // SingleChildScrollView 包含剩余的可滚动内容
@@ -146,7 +154,7 @@ class _WaveDetailsScreenState extends State<WaveDetailsScreen> {
                       return Card(
                         margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                         child: ExpansionTile(
-                          title: Text('${addressSummary.address} (共计${addressSummary.orders.length}个订单)'),
+                          title: Text('${addressSummary.address} (共计${addressSummary.orders.length}个订单)' ,style: Theme.of(context).textTheme.titleSmall,),
                           children: addressSummary.orders.asMap().entries.map((entry) {
 
                             int idx = entry.key;
@@ -154,20 +162,40 @@ class _WaveDetailsScreenState extends State<WaveDetailsScreen> {
                             Color? bgColor = idx % 2 == 0 ? Colors.grey[200] : Colors.white; // 偶数索引使用浅灰色, 奇数索引使用白色
 
                             String printTimeStr = formatTimestamp(orderDetail.printTime);
+                            String curTimeStr = formatTimestamp(orderDetail.curTime);
+
+                            String content = parseOrderContent(orderDetail.content);
+
+                            String orderIdStr = orderDetail.orderId.toString();
 
                             return Container(
                                     color: bgColor,
                              child: ListTile(
-                              title: Text(orderDetail.orderId.toString()),
+                              title: 
+                              Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                    Text(orderIdStr, style: Theme.of(context).textTheme.titleSmall),
+                                    Text(orderDetail.curStatus, style: Theme.of(context).textTheme.titleSmall),
+                                    Text(formatTimeDifference( orderDetail.printTime, orderDetail.curTime), style: Theme.of(context).textTheme.titleSmall),],
+
+                              ),
+
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('地址: ${orderDetail.address}'),
-                                  Text('订单状态: ${orderDetail.curStatus}'),
-                                  Text('处理时间: ${orderDetail.curTime}'),
+                                  Text('处理时间: $curTimeStr'),
                                   Text('打单时间: $printTimeStr'),
-                                  Text('货物详情: ${orderDetail.content}'),
-                                  const Text('订单轨迹:'),
+
+                                  Center(
+                                  child: Text('货物详情', style: Theme.of(context).textTheme.titleSmall,),
+                                  ),
+                                  
+                                  Text(content),
+                                  Center(
+                                  child: Text('订单轨迹', style: Theme.of(context).textTheme.titleSmall,),
+                                  ),
                                   
                                   TimelineWidget(timelines: parseTimeLine(orderDetail.orderTrace),),
                                   
@@ -208,15 +236,15 @@ class TimelineWidget extends StatelessWidget {
         label = '打单';
         break;
       case 2: // 配货
-        icon = Icons.assignment;
+        icon = Icons.checklist;
         label = '配货';
         break;
       case 3: // 对接
-        icon = Icons.anchor;
+        icon = Icons.construction;
         label = '对接';
         break;
       case 4: // 拣货
-        icon = Icons.receipt;
+        icon = Icons.assignment;
         label = '拣货';
         break;
       case 5: // 送货

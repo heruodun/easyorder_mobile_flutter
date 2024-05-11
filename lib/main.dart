@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'login.dart';
 import 'wave_list.dart';
@@ -8,6 +9,7 @@ import 'wave_list.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   User? user = await User.getCurrentUser(); // 假设getCurrentUser()返回Future<User?>或Future<User>
+  print("user is $user");
   // 检查是否已登录，这里的逻辑可以根据你的需求来调整
   bool isLoggedIn = user?.isLoggedIn ?? false;
   Widget home = (!isLoggedIn || 
@@ -27,15 +29,35 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '大航',
+      title: '小王牛筋',
+
+       // 配置本地化
+            localizationsDelegates: [
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+            ],
+            supportedLocales: [
+                const Locale('zh', 'CH'),
+                const Locale('en', 'US'),
+            ],
+            locale: const Locale("zh"),
+
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
 
         // 定制文本主题
         textTheme:  TextTheme(
           displayLarge: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+          
+
+          titleLarge: TextStyle(fontSize: 18.0, color: Theme.of(context).colorScheme.primary),
+          titleMedium: TextStyle(fontSize: 16.0, color: Theme.of(context).colorScheme.primary),
+          titleSmall: TextStyle(fontSize: 14.0, color: Theme.of(context).colorScheme.primary),
+
           bodyLarge: TextStyle(fontSize: 14.0, color: Theme.of(context).colorScheme.primary),
-          bodyMedium: TextStyle(fontSize: 14.0, color: Theme.of(context).colorScheme.primary),
+          bodyMedium: TextStyle(fontSize: 12.0, color: Theme.of(context).colorScheme.primary),
+          bodySmall: TextStyle(fontSize: 10.0, color: Theme.of(context).colorScheme.primary),
+          
         ),
 
         // 定制图标主题

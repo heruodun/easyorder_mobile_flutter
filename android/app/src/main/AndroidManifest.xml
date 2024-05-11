@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="easyorder_mobile"
+        android:label="小王牛筋"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -41,4 +41,6 @@
             <data android:mimeType="text/plain"/>
         </intent>
     </queries>
+
+    <uses-permission android:name="android.permission.INTERNET"/>
 </manifest>
