@@ -123,10 +123,12 @@ class _WaveListScreenState extends State<WaveListScreen> {
 
               GestureDetector(
                 onTap: () => _selectDate(context),
+                onDoubleTap: () => _selectDate(context),
+                
                 child: Row(
                   children: [
                     const Icon(Icons.calendar_today),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 10, height: 20,),
                     Text(DateFormat('yyyy-MM-dd').format(selectedDate)),
                   ],
                 ),
@@ -142,7 +144,7 @@ class _WaveListScreenState extends State<WaveListScreen> {
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text('共计${waves.length}个波次'),
+            child: Text('共计${waves.length}个波次', style: Theme.of(context).textTheme.titleSmall),
           ),
           
           Expanded(
@@ -182,7 +184,7 @@ class _WaveListScreenState extends State<WaveListScreen> {
 
     return Center(
       child: LoadingAnimationWidget.horizontalRotatingDots(
-        color: Colors.green,
+        color: Colors.grey,
         size: 100,
       ));
   }
@@ -270,10 +272,10 @@ class WaveItem extends StatelessWidget {
     
     child: ListTile(
 
-      title: Text('波次编号: ${wave.waveId}'),
+      title: Text('波次编号: ${wave.waveId}', style: Theme.of(context).textTheme.titleSmall,),
 
       subtitle: Text('共计${wave.waveDetail?.addressCount}个地址, ${wave.waveDetail?.totalCount}个订单\n创建时间: ${wave.createTime}'),
-      leading: Text('${index + 1}'), // 显示从1开始的序号
+      leading: Text('${index + 1}', style: Theme.of(context).textTheme.bodyMedium,), // 显示从1开始的序号
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -320,7 +322,7 @@ Future<List<Wave>> fetchWavesByDate(DateTime date) async {
   final String formattedDate = DateFormat('yyyy-MM-dd').format(date);
   print(formattedDate);
   final response = await http.get(
-    Uri.parse('$httpHost/mobile/waveInfo?date=$formattedDate'),
+    Uri.parse('$httpHost/mobile/waveInfos?date=$formattedDate'),
   );
 
   if (response.statusCode == 200) {

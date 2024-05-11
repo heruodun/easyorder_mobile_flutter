@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:easyorder_mobile/wave_list.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
@@ -11,6 +12,8 @@ import 'scanner_error_widget.dart';
 import 'wave_data.dart';
 import 'package:vibration/vibration.dart';
 import 'package:beep_player/beep_player.dart';
+
+import 'wave_detail.dart';
 
 
 
@@ -27,7 +30,7 @@ class ScanScreen extends StatefulWidget {
 
 class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver{
   MobileScannerController controller = MobileScannerController(
-  torchEnabled: true, useNewCameraSelector: true,
+  torchEnabled: false, useNewCameraSelector: true,
   // formats: [BarcodeFormat.qrCode]
     // facing: CameraFacing.front,
     // detectionSpeed: DetectionSpeed.normal
@@ -41,7 +44,44 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver{
    late String _scanResultText = "扫码中...";
    late Color _scanResultColor = Colors.grey;
 
+  late Wave _wave;
+
    static const BeepFile _beepFile = BeepFile('assets/audio/beep.ogg');
+
+
+   // 从服务器获取波次数据的函数
+Future<Wave> fetchWavesById(int waveId) async {
+  final response = await http.get(
+    Uri.parse('$httpHost/mobile/waveInfo?waveId=$waveId'),
+  );
+
+  if (response.statusCode == 200) {
+    // Decode the JSON response.body into a Dart object.
+    String body = utf8.decode(response.bodyBytes);
+    final Map<String, dynamic> data = jsonDecode(body);
+    print('fetch by id : $data');
+    if (data['code'] == 0) {
+      return Wave.fromJson(data['data']);
+
+    } else {
+      throw Exception('Invalid response code: ${data['code']}');
+    }
+  } else {
+    throw Exception('Failed to load waves: ${response.statusCode}');
+  }
+}
+
+ void fetchData() {
+    // 服务器返回的JSON响应会被转换成一个包含Wave对象的列表
+
+    fetchWavesById(widget.wave!.waveId).then((data) {
+      setState(() {
+        _wave = data;
+        print('fetchWavesById $data');
+      });
+    });
+  }
+
 
 
   Widget _buildBarcode(Barcode? value) {
@@ -70,6 +110,8 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver{
     unawaited(controller.start());
 
     BeepPlayer.load(_beepFile);
+
+    _wave = widget.wave!;
   }
 
  @override
@@ -114,10 +156,16 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver{
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           ListTile(
-            title: Text('波次编号: ${widget.wave!.waveId}'),
-            subtitle: Text('共计${widget.wave!.waveDetail!.addressCount}个地址, ${widget.wave!.waveDetail!.totalCount}个订单\n创建时间: ${widget.wave!.createTime}'),
+            title: Text('波次编号: ${_wave.waveId}'),
+            subtitle: Text('共计${_wave.waveDetail!.addressCount}个地址, ${_wave.waveDetail?.totalCount}个订单\n创建时间: ${_wave.createTime}'),
             onTap: () {
-              // 执行点击操作逻辑，如果需要的话
+              // 点击时导航到波次详情页面
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => WaveDetailsScreen(wave: _wave),
+                  ),
+            );
             },
           ),
           
@@ -144,7 +192,7 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver{
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ToggleFlashlightButton(controller: controller),
-                  StartStopMobileScannerButton(controller: controller),
+                  // StartStopMobileScannerButton(controller: controller),
                   Expanded(child: Center(child: _buildBarcode(_barcode))),
                   SwitchCameraButton(controller: controller),
                   AnalyzeImageFromGalleryButton(controller: controller),
@@ -273,6 +321,7 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver{
           'order_id': orderId,
           'operator': user.actualName,
           'operation': type,
+          'wave_create_time': widget.wave!.createTime
         }),
       );
 
@@ -290,9 +339,11 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver{
 
           if(type == 1){
             _scanResultText = "加入波次成功\n$orderId";
+            fetchData();
           }
           else{
             _scanResultText = "撤出波次成功\n$orderId";
+            fetchData();
           }
           _scanResultColor = Colors.blue;
           });
@@ -301,10 +352,16 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver{
           
 
           setProcessed(orderId, waveId, type);
-        } else {
+        } else{
+
+          String body = utf8.decode(response.bodyBytes);
+          final Map<String, dynamic> data = jsonDecode(body);
+
+          String msg = data['msg'];
+
 
            setState(() {
-          _scanResultText = "扫码失败\n$orderId";
+          _scanResultText = "$msg\n$orderId";
           _scanResultColor = Colors.red;
            });
 
