@@ -1,52 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-
 import 'constants.dart';
+import 'user_data.dart';
 import 'wave_list.dart';
-
-//用户信息
-class User {
-  String? loginName;
-  String? actualName;
-  bool isLoggedIn;
-  String? loginTime;
-
-  // 这里我们使用命名构造器
-  User({
-    required this.loginName,
-    required this.actualName,
-    required this.isLoggedIn,
-    this.loginTime,
-  });
-
-  // 假设你想构建成一个静态的方法
-  static Future<User> getCurrentUser() async {
-    // 确保WidgetsBinding已初始化。
-    WidgetsFlutterBinding.ensureInitialized();
-    // 获取实例
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    
-    // 获取存储的用户信息
-    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-    String? loginName = prefs.getString('loginName'); // 使用默认值，防止null
-    String? actualName = prefs.getString('actualName'); // 使用默认值，防止null
-    String? loginTime = prefs.getString('loginTime');
-    
-    // 创建并返回用户对象
-    return User(
-      loginName: loginName,
-      actualName: actualName,
-      isLoggedIn: isLoggedIn,
-      loginTime: loginTime,
-    );
-  }
-}
-
 
 
 class LoginScreen extends StatefulWidget {
@@ -92,11 +51,8 @@ class _LoginScreenState extends State<LoginScreen> {
       print(data);
       if (data['code'] == 0) {
         // 保存登录状态到本地
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('loginName', _usernameController.text);
-        await prefs.setBool('isLoggedIn', true);
-        await prefs.setString('loginTime', DateTime.now().toIso8601String());
-        await prefs.setString('actualName', data['data']['actualName']);
+        User.saveCurrentUser( User.fromJson(data['data']));
+
         // 跳转到WaveListScreen
         Navigator.pushReplacement(
           context,

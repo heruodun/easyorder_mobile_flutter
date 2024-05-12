@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // 用于格式化日期
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'constants.dart';
 import 'login.dart';
 import 'scan.dart';
+import 'user_data.dart';
 import 'wave_detail.dart';
 import 'wave_data.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -56,8 +56,7 @@ class _WaveListScreenState extends State<WaveListScreen> {
 
 // 登出方法，清除SharedPreferences数据并导航到登录页面
   Future<void> _logout(BuildContext context) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // 清除所有SharedPreferences数据
+    await User.delCurrentUser(); // 清除数据
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) =>  LoginScreen()), // 替换为您的登录页面
     );
@@ -210,7 +209,7 @@ void _addNewWave() async {
   // 假设你要创建并传递一个新的Wave对象，你需要根据实际情况来构建它
 
   // 将Wave对象序列化为JSON
-  final waveJson = {'createMan':user.actualName};
+  final waveJson = {'createMan':user!.actualName};
 
   print(waveJson);
   
@@ -283,7 +282,7 @@ class WaveItem extends StatelessWidget {
             icon: const Icon(Icons.add),
             onPressed: () async {
                // 使用Navigator.push方法来跳转到ScanScreen，并传递新的Wave对象
-              final result = await Navigator.push(
+              await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => ScanScreen(wave: wave, type: 1,),
@@ -296,7 +295,7 @@ class WaveItem extends StatelessWidget {
             onPressed: () async {
               // 实现减少数量逻辑
               // 使用Navigator.push方法来跳转到ScanScreen，并传递新的Wave对象
-              final result = await Navigator.push(
+              await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => ScanScreen(wave: wave, type: -1,),

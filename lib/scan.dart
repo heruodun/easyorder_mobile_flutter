@@ -1,14 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:easyorder_mobile/wave_list.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'constants.dart';
-import 'login.dart';
 import 'scanner_button_widgets.dart';
 import 'scanner_error_widget.dart';
+import 'user_data.dart';
 import 'wave_data.dart';
 import 'package:vibration/vibration.dart';
 import 'package:beep_player/beep_player.dart';
@@ -319,7 +318,7 @@ Future<Wave> fetchWavesById(int waveId) async {
         'wave_id': waveId,
         'wave_alias': widget.wave!.waveAlias,
           'order_id': orderId,
-          'operator': user.actualName,
+          'operator': user!.actualName,
           'operation': type,
           'wave_create_time': widget.wave!.createTime
         }),
