@@ -24,6 +24,7 @@ class User {
         required this.phone,
         required this.token,
         required this.roleList,
+
     });
 
     factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
@@ -38,6 +39,7 @@ class User {
       return null;
     }
     // 正确的从JSON字符串转换为Map对象
+    print("cur user is $currentUserInfo");
     Map<String, dynamic> userMap = json.decode(currentUserInfo);
     return User.fromJson(userMap);
   }

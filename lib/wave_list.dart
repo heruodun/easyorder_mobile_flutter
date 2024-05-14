@@ -1,10 +1,11 @@
+import 'package:easyorder_mobile/scan_picker.dart';
+import 'package:easyorder_mobile/wave_detail_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // 用于格式化日期
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'constants.dart';
 import 'login.dart';
-import 'scan.dart';
 import 'user_data.dart';
 import 'wave_detail.dart';
 import 'wave_data.dart';
@@ -263,7 +264,7 @@ class WaveItem extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => WaveDetailsScreen(wave: wave),
+            builder: (context) => WaveDetailsPickerScreen(wave: wave),
           ),
         );
       },
@@ -285,7 +286,7 @@ class WaveItem extends StatelessWidget {
               await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ScanScreen(wave: wave, type: 1,),
+                  builder: (context) => ScanPickerScreen(wave: wave, type: 1,),
                 ),
               );
             },
@@ -298,7 +299,7 @@ class WaveItem extends StatelessWidget {
               await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ScanScreen(wave: wave, type: -1,),
+                  builder: (context) => ScanPickerScreen(wave: wave, type: -1,),
                 ),
               );
             },

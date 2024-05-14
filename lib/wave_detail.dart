@@ -17,20 +17,19 @@ List<TimeLine> parseTimeLine(String data) {
         String person = parts[0].split('：')[1];
         String time = parts[1].split('：')[1]; // 假设时间戳为整数
         int type = getTypeFromDescription(line); // 获取类型
+        String wave = getExtraFromDescription(line, parts);
 
         timelines.add(TimeLine(
           type: type,
           person: person,
           time: time,
+          extra: wave
         ));
       } catch (e) {
         // 可以在这里处理错误，例如解析错误
       }
     }
   }
-
-
-   print('timelines ${timelines}'); 
 
   return timelines;
   
@@ -39,9 +38,6 @@ List<TimeLine> parseTimeLine(String data) {
 String parseOrderContent(String data) {
   
   String newOrderContent = normalizeNewlines(data);
-
-   print('newOrderContent ${newOrderContent}'); 
-
   return newOrderContent;
 }
 
@@ -67,75 +63,72 @@ int getTypeFromDescription(String description) {
   return 0; // 使用0作为未知类型的默认值
 }
 
+// 一个辅助函数，用于根据行描述返回时间线对象的类型 拣货人：管理员，加入波次3时间：2024-05-14 22:10:35
+String getExtraFromDescription(String description, List<String> parts) {
+ if (description.contains('拣货')) {
+  String key = parts[1].split('：')[0];
+  
+  String wave = key.substring(0, key.length - 2); 
+    return wave;
+  } 
+  else{
+    return "";
+  }
+}
 
 
 
 
 
 
-class WaveDetailsScreen extends StatefulWidget {
+
+
+abstract class WaveDetailsScreen extends StatefulWidget {
   final Wave wave;
 
+  // 正确的构造函数写法
   const WaveDetailsScreen({super.key, required this.wave});
 
   @override
-  _WaveDetailsScreenState createState() => _WaveDetailsScreenState();
+  WaveDetailsScreenState createState(); // 确保有具体实现的子类
 }
 
-class _WaveDetailsScreenState extends State<WaveDetailsScreen> {
+abstract class WaveDetailsScreenState extends State<WaveDetailsScreen> {
   late Wave _wave;
-  bool _isLoading = true;
-  String _errorMessage = '';
+  bool isLoading = true;
+  String errorMessage = '';
 
   @override
   void initState() {
     super.initState();
+    print("init state");
+    _wave = widget.wave; // 直接赋值，因为widget是在构造时已经传入的
     _fetchWaveDetails();
   }
 
   void _fetchWaveDetails() {
-    try {
-
-        setState(() {
-          _wave = widget.wave;
-          _isLoading = false;
-        });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to load wave details: $e';
-        _isLoading = false;
-      });
-    }
+    // 这里假设将来可能会有异步获取详情的操作，目前设为同步
+    setState(() {
+      // 目前什么也不做，因为已经在 initState 中设置了 _wave，但可用于未来的异步操作
+      isLoading = false;
+    });
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Scaffold(
-        appBar: AppBar(title: Text('Loading Wave Details...')),
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
+      return buildWaveDetailsScreen(context);
+  }
 
-    if (_errorMessage.isNotEmpty) {
-      return Scaffold(
-        appBar: AppBar(title: Text('Error')),
-        body: Center(child: Text(_errorMessage)),
-      );
-    }
+  Widget buildWaveDetailsScreen(BuildContext context) {
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('波次详情'),
-      ),
-      body: Column(
+    return Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // 放置在SingleChildScrollView外面的Padding
           Padding(
             padding: EdgeInsets.all(8.0),
             child: Text(
-              '波次编号: ${_wave.waveId}，共计: ${_wave.waveDetail!.addressCount}个地址\n时间：${_wave.createTime}', style: Theme.of(context).textTheme.titleSmall,
+              '波次编号: ${_wave.waveId}，共计: ${_wave.waveDetail!.addressCount}个地址，共计：${_wave.waveDetail!.totalCount}个订单\n时间：${_wave.createTime}', style: Theme.of(context).textTheme.titleSmall,
             ),
           ),
           // SingleChildScrollView 包含剩余的可滚动内容
@@ -210,7 +203,6 @@ class _WaveDetailsScreenState extends State<WaveDetailsScreen> {
             ),
           ),
         ],
-      ),
     );
   }
 }
@@ -251,7 +243,7 @@ class TimelineWidget extends StatelessWidget {
         icon = Icons.help_outline;
         label = '未知';
     }
-    return {'icon': icon, 'label': label, 'time': timeline.time, 'person': timeline.person};
+    return {'icon': icon, 'label': label, 'time': timeline.time, 'person': timeline.person, 'extra': timeline.extra};
   }
 
   @override
@@ -264,7 +256,7 @@ class TimelineWidget extends StatelessWidget {
           children: [
             Icon(mappedEvent['icon'] as IconData, size: 16),
             const SizedBox(width: 8),
-            Text('${mappedEvent['label']} ${mappedEvent['person']} ${mappedEvent['time']}'),
+            Text('${mappedEvent['label']} ${mappedEvent['person']} ${mappedEvent['time']} ${mappedEvent['extra']}' ),
           ],
         );
       }
@@ -282,6 +274,7 @@ class TimeLine {
   int type;
   String person;
   String time;
+  String extra;
 
-  TimeLine({required this.type, required this.person, required this.time});
+  TimeLine({required this.type, required this.person, required this.time,  required this.extra});
 }

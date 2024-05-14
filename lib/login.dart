@@ -51,13 +51,29 @@ class _LoginScreenState extends State<LoginScreen> {
       print(data);
       if (data['code'] == 0) {
         // 保存登录状态到本地
-        User.saveCurrentUser( User.fromJson(data['data']));
+        User user = User.fromJson(data['data']);
+       
 
-        // 跳转到WaveListScreen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => WaveListScreen()),
-        );
+        if(user.roleList == null || user.roleList!.isEmpty){
+             // 显示错误信息
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("角色为空，请找管理员添加角色")),
+          );
+          return;
+        }
+        
+        User.saveCurrentUser(user);
+
+        
+
+        // 基于角色不同跳转到不同的Screen
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => WaveListScreen()),
+          );
+
+       
+      
       } else {
         // 显示错误信息
         ScaffoldMessenger.of(context).showSnackBar(

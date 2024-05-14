@@ -3,6 +3,14 @@ import 'package:intl/intl.dart';
 const httpHost = 'http://yangyi.ddns.net:1024';
 const httpHost2 = 'http://yangyi.ddns.net:5000';
 
+const prefix4picker = "picker_";
+const prefix4checker = "checker_";
+const prefix4shipper = "shipper_";
+
+
+
+
+
 String normalizeNewlines(String input) {
   // 使用正则表达式匹配连续的两个换行符，并将其替换为一个换行符。
   return input.replaceAll(RegExp(r'\n\n'), '\n');
@@ -24,3 +32,4 @@ String formatTimestamp(int timestamp) {
     final minutes = diff.inMinutes % 60;
     return '$hours小时$minutes分钟';
   }
+

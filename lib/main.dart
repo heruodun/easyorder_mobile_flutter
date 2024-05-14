@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'login.dart';
+import 'scan_shipper.dart';
 import 'user_data.dart';
 import 'wave_list.dart';
 
@@ -8,11 +9,11 @@ import 'wave_list.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   User? user = await User.getCurrentUser(); // 假设getCurrentUser()返回Future<User?>或Future<User>
-  print("user is $user");
+  
   // 检查是否已登录，这里的逻辑可以根据你的需求来调整
   Widget home = (user == null) 
-      ? LoginScreen() // 如果任何一个条件不满足，则显示登录页面
-      : WaveListScreen(); // 如果全部存在，直接跳转
+      ? const LoginScreen() // 如果任何一个条件不满足，则显示登录页面
+      : const ScanShipperScreen(); // 如果全部存在，直接跳转
   runApp(MyApp(home: home));
 }
 
