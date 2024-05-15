@@ -31,7 +31,7 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
   late Color scanResultColor = Colors.grey;
 
 
-   static const BeepFile _beepFile = BeepFile('assets/audio/beep.ogg');
+   static const BeepFile _beepFile = BeepFile('assets/audios/beep.ogg');
 
 
 
@@ -75,8 +75,11 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
     switch (state) {
       case AppLifecycleState.detached:
       case AppLifecycleState.hidden:
-      case AppLifecycleState.paused:
         return;
+      case AppLifecycleState.paused:
+        unawaited(_subscription?.cancel());
+        _subscription = null;
+        unawaited(controller.stop());
       case AppLifecycleState.resumed:
         _subscription = controller.barcodes.listen(_handleBarcode);
         unawaited(controller.start());
@@ -89,8 +92,8 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
 
   Widget buildScanScreen(BuildContext context) {
 
-     return Expanded(
-           child:  Stack(
+     return 
+           Stack(
         children: [
           MobileScanner(
             controller: controller,
@@ -121,8 +124,8 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
             ),
           ),
         ],
-      ),
       );
+      
 
   }
 

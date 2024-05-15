@@ -9,7 +9,6 @@ import 'constants.dart';
 import 'user_data.dart';
 import 'wave_data.dart';
 import 'package:vibration/vibration.dart';
-import 'wave_detail.dart';
 
 
 

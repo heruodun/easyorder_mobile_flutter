@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'constants.dart';
+import 'router.dart';
 import 'user_data.dart';
-import 'wave_list.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -64,12 +64,10 @@ class _LoginScreenState extends State<LoginScreen> {
         
         User.saveCurrentUser(user);
 
-        
 
-        // 基于角色不同跳转到不同的Screen
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => WaveListScreen()),
+            MaterialPageRoute(builder: (context) => mainWidget(user)),
           );
 
        
@@ -87,6 +85,8 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     }
   } 
+
+
 
   @override
   Widget build(BuildContext context) {

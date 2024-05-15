@@ -7,7 +7,6 @@ import 'package:http/http.dart' as http;
 import 'constants.dart';
 import 'login.dart';
 import 'user_data.dart';
-import 'wave_detail.dart';
 import 'wave_data.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 

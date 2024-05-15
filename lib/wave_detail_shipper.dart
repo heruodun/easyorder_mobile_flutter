@@ -69,16 +69,16 @@ class _WaveDetailsShipperScreenState extends WaveDetailsScreenState {
         padding: const EdgeInsets.all(8.0),
         child: ElevatedButton(
           onPressed: _isRequestInProgress ? null : _initiateHttpRequest,
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 50), // 宽度与屏幕一样宽，高度适宜
+          ),
           child: _isRequestInProgress
               ? const SizedBox(
                   width: double.infinity,
                   height: 16.0,
                   child: Center(child: CircularProgressIndicator(strokeWidth: 2.0)),
                 )
-              : const Text('发起请求'),
-          style: ElevatedButton.styleFrom(
-            minimumSize: Size(double.infinity, 50), // 宽度与屏幕一样宽，高度适宜
-          ),
+              : const Text('开始送货'),
         ),
       ),
     );

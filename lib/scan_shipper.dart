@@ -15,10 +15,10 @@ class ScanShipperScreen extends ScanScreenStateful {
   const ScanShipperScreen({super.key}) : super();
   
   @override
-  _ScanShipperState createState() => _ScanShipperState();
+  ScanShipperState createState() => ScanShipperState();
 }
 
-class _ScanShipperState extends ScanScreenState<ScanShipperScreen> {
+class ScanShipperState extends ScanScreenState<ScanShipperScreen> {
 
   
 
@@ -38,7 +38,21 @@ class _ScanShipperState extends ScanScreenState<ScanShipperScreen> {
     );
   }
 
- 
+
+void _navigateToScreen(Wave wave) {
+    super.controller.stop(); // 暂停扫描
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => WaveDetailsShipperScreen(wave: wave,)), 
+    ).then((_) {
+      // 当从ScreenX返回时，这里的代码被执行
+      if (mounted) {
+       super.controller.start();  // 恢复扫描
+      }
+    });
+  }
+
+
 
   @override
   void doProcess(String result) async {
@@ -65,15 +79,10 @@ class _ScanShipperState extends ScanScreenState<ScanShipperScreen> {
           print('fetch by id : $data');
           if (data['code'] == 0) {
             Wave wave = Wave.fromJson(data['data']);
-               setProcessed(orderId);
-                Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => WaveDetailsShipperScreen(wave: wave),
-              ),
-            );
+              //  setProcessed(orderId);
+             _navigateToScreen(wave);
 
-            super.controller.stop();
+           
           
           } else {
             String body = utf8.decode(response.bodyBytes);
