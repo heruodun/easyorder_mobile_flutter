@@ -1,5 +1,9 @@
+import 'dart:convert';
 import 'package:easyorder_mobile/wave_detail.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'constants.dart';
+import 'user_data.dart';
 
 
 
@@ -24,12 +28,7 @@ class _WaveDetailsShipperScreenState extends WaveDetailsScreenState {
     });
 
     try {
-      // TODO: 发送你的HTTP请求
-      // await yourHttpService.sendRequest();
-
-      // 假设这是一个异步操作，使用await等待操作完成
-      await Future.delayed(Duration(seconds: 2)); // 模拟网络请求延迟
-
+      await _makeHttpRequest(context, widget.wave.waveId);
       // 请求完成后更新状态
       setState(() {
         _isRequestInProgress = false;
@@ -43,6 +42,60 @@ class _WaveDetailsShipperScreenState extends WaveDetailsScreenState {
       });
     }
   }
+
+  Future<void> _makeHttpRequest(BuildContext context, int waveId) async {
+    User? user = await User.getCurrentUser(); 
+    // 将Wave对象序列化为JSON
+    final waveJson = {
+      'operator':user!.actualName,
+      'waveId':waveId
+    };
+    try {
+      
+       // 发送HTTP POST请求，将Wave保存到服务器上
+        final response = await http.post(
+        Uri.parse('$httpHost/mobile/waveInfo/ship'), 
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(waveJson),
+      );
+      
+      // 检查服务器响应是否成功
+      if (response.statusCode == 200) {
+          // 解析响应数据创建Wave对象
+          String body = utf8.decode(response.bodyBytes);
+          final Map<String, dynamic> data = jsonDecode(body);
+          print(data);
+          if (data['code'] == 0) {
+          // 如果请求成功，显示成功提示
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('开始送货了!')),
+          );
+          // 然后关闭当前屏幕
+          Navigator.pop(context);
+        }
+        else{
+          // 如果请求失败，显示失败提示
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('提交失败，请重试!')),
+          );
+        }
+      }else {
+        // 如果请求失败，显示失败提示
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('提交失败，请重试!')),
+        );
+      }
+    } catch (e) {
+      // 遇到异常，显示错误信息
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+
+  }
+
   
   @override
   Widget build(BuildContext context) {
