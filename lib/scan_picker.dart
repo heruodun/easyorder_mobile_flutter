@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'constants.dart';
+import 'login.dart';
 import 'user_data.dart';
 import 'wave_data.dart';
 import 'package:vibration/vibration.dart';
@@ -71,6 +72,16 @@ Future<Wave> fetchWavesById(int waveId) async {
   }
 
 
+   // 处理PopupMenuButton选项的选中事件
+  void _onSelected(BuildContext context, int item) {
+    switch (item) {
+      case 0:
+        logout(context);
+        break;
+      // 其他case...
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +97,10 @@ Future<Wave> fetchWavesById(int waveId) async {
     return Scaffold(
       appBar: AppBar(
         title:  Text(appBarStr),
+      
       ),
+
+     
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[

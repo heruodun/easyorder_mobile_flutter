@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'router.dart';
+import 'login.dart';
+import 'role_router.dart';
 import 'user_data.dart';
 
 
@@ -8,8 +9,12 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   User? user = await User.getCurrentUser(); // 假设getCurrentUser()返回Future<User?>或Future<User>
   
-
-  runApp(MyApp(home: mainWidget(user)));
+  Widget home = LoginScreen();
+  if(user != null){
+    home = MultiRoleScreen(user:user);
+  }
+  
+  runApp(MyApp(home: home));
 }
 
 

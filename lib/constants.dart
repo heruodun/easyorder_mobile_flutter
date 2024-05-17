@@ -3,8 +3,16 @@ import 'package:intl/intl.dart';
 const httpHost = 'http://yangyi.ddns.net:1024';
 const httpHost2 = 'http://yangyi.ddns.net:5000';
 
-const prefix4picker = "picker_";
+// 配货
 const prefix4checker = "checker_";
+
+// 做货
+const prefix4maker = "maker_";
+
+// 拣货
+const prefix4picker = "picker_";
+
+// 送货
 const prefix4shipper = "shipper_";
 
 

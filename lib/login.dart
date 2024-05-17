@@ -4,21 +4,31 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'constants.dart';
-import 'router.dart';
+import 'role_router.dart';
 import 'user_data.dart';
 
+
+// 登出方法，清除SharedPreferences数据并导航到登录页面
+  Future<void> logout(BuildContext context) async {
+    await User.delCurrentUser(); // 清除数据
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) =>  const LoginScreen()), // 替换为您的登录页面
+    );
+  }
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  LoginScreenState createState() => LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  TextEditingController _usernameController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+class LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  
 
   Future<void> _login() async {
 
@@ -48,7 +58,6 @@ class _LoginScreenState extends State<LoginScreen> {
     if (response.statusCode == 200) {
       String body = utf8.decode(response.bodyBytes);
       var data = jsonDecode(body);
-      print(data);
       if (data['code'] == 0) {
         // 保存登录状态到本地
         User user = User.fromJson(data['data']);
@@ -67,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => mainWidget(user)),
+            MaterialPageRoute(builder: (context) => MultiRoleScreen(user: user,)),
           );
 
        

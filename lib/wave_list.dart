@@ -11,7 +11,12 @@ import 'wave_data.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class WaveListScreen extends StatefulWidget {
-  const WaveListScreen({super.key});
+  final User user;
+  const WaveListScreen({
+    super.key,
+    required this.user,
+  });
+
 
   @override
   _WaveListScreenState createState() => _WaveListScreenState();
@@ -21,6 +26,7 @@ class _WaveListScreenState extends State<WaveListScreen> {
   DateTime selectedDate = DateTime.now();
   List<Wave> waves = []; // 波次列表数据
   bool _isCompleted = false; 
+  
 
   @override 
   void initState() {
@@ -44,42 +50,21 @@ class _WaveListScreenState extends State<WaveListScreen> {
     });
   }
 
-   // 处理PopupMenuButton选项的选中事件
-  void _onSelected(BuildContext context, int item) {
-    switch (item) {
-      case 0:
-        _logout(context);
-        break;
-      // 其他case...
-    }
-  }
 
-// 登出方法，清除SharedPreferences数据并导航到登录页面
-  Future<void> _logout(BuildContext context) async {
-    await User.delCurrentUser(); // 清除数据
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) =>  LoginScreen()), // 替换为您的登录页面
-    );
-  }
+
+
 
   @override
   Widget build(BuildContext context) {
+
+   
+
     return Scaffold(
       appBar: AppBar(
         
         title: const Text('波次列表'),
 
-        actions: <Widget>[
-          PopupMenuButton<int>(
-            onSelected: (item) => _onSelected(context, item),
-            itemBuilder: (context) => [
-              const PopupMenuItem<int>(
-                value: 0,
-                child: Text('登出'),
-              ),
-            ],
-          )
-        ]
+       
       ),
       body: Column(
         children: [
@@ -172,9 +157,14 @@ class _WaveListScreenState extends State<WaveListScreen> {
           ),
         ],
       ),
+
+     
+     
+      
     );
   }
 
+  
   
   Widget _buildResultLayer() {
     if (_isCompleted) {
@@ -189,10 +179,12 @@ class _WaveListScreenState extends State<WaveListScreen> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
+    // 获取当前时间的前一天
+    final DateTime previousDay = DateTime.now().subtract(const Duration(days: 1));
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: selectedDate,
-      firstDate: DateTime(2000),
+      firstDate: previousDay,
       lastDate: DateTime(2101),
     );
     if (picked != null && picked != selectedDate) {
@@ -319,7 +311,6 @@ class WaveItem extends StatelessWidget {
 // 从服务器获取波次数据的函数
 Future<List<Wave>> fetchWavesByDate(DateTime date) async {
   final String formattedDate = DateFormat('yyyy-MM-dd').format(date);
-  print(formattedDate);
   final response = await http.get(
     Uri.parse('$httpHost/mobile/waveInfos?date=$formattedDate'),
   );
@@ -328,7 +319,6 @@ Future<List<Wave>> fetchWavesByDate(DateTime date) async {
     // Decode the JSON response.body into a Dart object.
     String body = utf8.decode(response.bodyBytes);
     final Map<String, dynamic> data = jsonDecode(body);
-    print(data);
     if (data['code'] == 0) {
       print(data['data']);
       return waveListFromJson(body).wave;

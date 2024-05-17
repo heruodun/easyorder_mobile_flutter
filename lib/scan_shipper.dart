@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'constants.dart';
+import 'login.dart';
 import 'wave_data.dart';
 
 
@@ -32,10 +33,31 @@ class ScanShipperState extends ScanScreenState<ScanShipperScreen> {
     return Scaffold(
       appBar: AppBar(
         title:  Text(appBarStr),
+         actions: <Widget>[
+          PopupMenuButton<int>(
+            onSelected: (item) => _onSelected(context, item),
+            itemBuilder: (context) => [
+              const PopupMenuItem<int>(
+                value: 0,
+                child: Text('登出'),
+              ),
+            ],
+          )
+        ],
       ),
       body: 
           super.buildScanScreen(context),
     );
+  }
+
+     // 处理PopupMenuButton选项的选中事件
+  void _onSelected(BuildContext context, int item) {
+    switch (item) {
+      case 0:
+        logout(context);
+        break;
+      // 其他case...
+    }
   }
 
 
