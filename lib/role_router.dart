@@ -1,11 +1,17 @@
 import 'package:easyorder_mobile/my.dart';
+import 'package:easyorder_mobile/scan.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'bottom_nav_bar.dart';
+import 'main.dart';
 import 'scan_checker.dart';
 import 'scan_maker.dart';
 import 'scan_shipper.dart';
 import 'user_data.dart';
 import 'wave_list.dart';
+
+
+
 
 class MultiRoleScreen extends StatefulWidget {
   final User user;
@@ -19,39 +25,54 @@ class MultiRoleScreen extends StatefulWidget {
 class _MultiRoleScreenState extends State<MultiRoleScreen> {
   int _currentIndex = 0;
   late List<Widget> _screens;
+ 
 
   @override
   void initState() {
     super.initState();
-    // 初始化屏幕列表，基于角色
+      // 初始化屏幕列表，基于角色
     List<String> roles = widget.user.roleList!.cast<String>();
-
     _screens = [];
-
+    
     if(roles.contains("peihuo")){
-      _screens.add( const ScanCheckerScreen());
+      ScanCheckerScreen checkerScreen =  const ScanCheckerScreen();
+      _screens.add(checkerScreen);
+    }
+    
+    if(roles.contains("duijie")){
+      ScanMakerScreen makerScreen =  const ScanMakerScreen();
+      _screens.add (makerScreen);
     }
 
-    if(roles.contains("duijie")){
-      _screens.add (const ScanMakerScreen());
-    }
 
     if(roles.contains("jianhuo")){
        _screens.add (WaveListScreen(user: widget.user));
     }
 
-    if(roles.contains("songhuo")){
-      _screens.add( const ScanShipperScreen());
-    }
 
+    if(roles.contains("songhuo")){
+      ScanShipperScreen shipperScreen = const ScanShipperScreen();
+      _screens.add(shipperScreen);
+    }
     _screens.add( MyScreen(user: widget.user));
 
   }
 
-  void _onSelect(int index) {
+ 
+
+  Future<void> _onSelect(int index, BottomNavigationBarItem item) async {
+
+    // 启动当前选中屏幕的扫码器
+    if (item.label == '配货' || item.label == '对接' || item.label == '送货') {
+      controller.start();
+    }
+    else{
+      controller.stop();
+    }
     setState(() {
       _currentIndex = index;
     });
+
   }
 
   @override

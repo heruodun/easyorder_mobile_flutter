@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:easyorder_mobile/scan.dart';
-import 'package:easyorder_mobile/wave_detail_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'constants.dart';
-import 'login.dart';
 import 'user_data.dart';
 import 'wave_data.dart';
 import 'package:vibration/vibration.dart';
+
+import 'wave_detail_picker.dart';
 
 
 
@@ -18,7 +18,7 @@ class ScanPickerScreen extends ScanScreenStateful {
   final Wave? wave; // 接收从上一个界面传递过来的Wave对象
   final int type;
 
-  const ScanPickerScreen({super.key, this.wave, required this.type}) : super();
+  const ScanPickerScreen({super.key, this.wave, required this.type});
   
   @override
   _ScanPickerState createState() => _ScanPickerState();
@@ -38,7 +38,6 @@ Future<Wave> fetchWavesById(int waveId) async {
     // Decode the JSON response.body into a Dart object.
     String body = utf8.decode(response.bodyBytes);
     final Map<String, dynamic> data = jsonDecode(body);
-    print('fetch by id : $data');
     if (data['code'] == 0) {
       return Wave.fromJson(data['data']);
 
@@ -56,7 +55,6 @@ Future<Wave> fetchWavesById(int waveId) async {
     fetchWavesById(widget.wave!.waveId).then((data) {
       setState(() {
         _wave = data;
-        print('fetchWavesById $data');
       });
     });
   }
@@ -71,16 +69,6 @@ Future<Wave> fetchWavesById(int waveId) async {
     _wave = widget.wave!;
   }
 
-
-   // 处理PopupMenuButton选项的选中事件
-  void _onSelected(BuildContext context, int item) {
-    switch (item) {
-      case 0:
-        logout(context);
-        break;
-      // 其他case...
-    }
-  }
 
 
   @override
@@ -99,7 +87,6 @@ Future<Wave> fetchWavesById(int waveId) async {
         title:  Text(appBarStr),
       
       ),
-
      
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -117,7 +104,7 @@ Future<Wave> fetchWavesById(int waveId) async {
             );
             },
           ),
-          super.buildScanScreen(context),
+          Expanded(child: super.buildScanScreen(context),),
         ],
       ),
     );
@@ -127,6 +114,8 @@ Future<Wave> fetchWavesById(int waveId) async {
 
   @override
   void doProcess(String result) async {
+    print(" picker doProcess------------------");
+
       RegExp pattern = RegExp(r'\d+');
       RegExpMatch? match = pattern.firstMatch(result);
 

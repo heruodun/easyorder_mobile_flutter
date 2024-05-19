@@ -1,11 +1,20 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'main.dart';
 import 'scanner_button_widgets.dart';
 import 'scanner_error_widget.dart';
 import 'package:beep_player/beep_player.dart';
 
 
+ MobileScannerController controller = MobileScannerController(
+  torchEnabled: false, useNewCameraSelector: true,
+  // formats: [BarcodeFormat.qrCode]
+    // facing: CameraFacing.front,
+    // detectionSpeed: DetectionSpeed.normal
+    // detectionTimeoutMs: 1000,
+    returnImage: true,
+  );
 
 abstract class ScanScreenStateful extends StatefulWidget {
   const ScanScreenStateful({super.key});
@@ -14,15 +23,10 @@ abstract class ScanScreenStateful extends StatefulWidget {
   ScanScreenState createState();
 }
 
-abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> with WidgetsBindingObserver{
-  MobileScannerController controller = MobileScannerController(
-  torchEnabled: false, useNewCameraSelector: true,
-  // formats: [BarcodeFormat.qrCode]
-    // facing: CameraFacing.front,
-    // detectionSpeed: DetectionSpeed.normal
-    // detectionTimeoutMs: 1000,
-    returnImage: true,
-  );
+abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> with RouteAware, WidgetsBindingObserver{
+
+  
+ 
   Barcode? _barcode;
   StreamSubscription<Object?>? _subscription;
   bool _isProcessing = false;
@@ -30,44 +34,21 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
   late String scanResultText = "扫码中...";
   late Color scanResultColor = Colors.grey;
 
-
-   static const BeepFile _beepFile = BeepFile('assets/audios/beep.ogg');
-
-
-
-
-
-  Widget _buildBarcode(Barcode? value) {
-    if (value == null) {
-      return const Text(
-        '请扫码!',
-        overflow: TextOverflow.fade,
-        style: TextStyle(color: Colors.white),
-      );
-    }
-
-    return Text(
-      value.displayValue ?? '无扫码结果',
-      overflow: TextOverflow.fade,
-      style: const TextStyle(color: Colors.white),
-    );
-  }
+  static const BeepFile _beepFile = BeepFile('assets/audios/beep.ogg');
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-
+    // WidgetsBinding.instance.addObserver(this);
     _subscription = controller.barcodes.listen(_handleBarcode);
 
-    unawaited(controller.start());
-
+    controller.start();
+    
     BeepPlayer.load(_beepFile);
   }
 
- @override
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print("resume。。。。。。。。。。。。。。。。。。。。。。。。");
     if (!controller.value.isInitialized) {
       return;
     }
@@ -75,14 +56,13 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
     switch (state) {
       case AppLifecycleState.detached:
       case AppLifecycleState.hidden:
-        return;
       case AppLifecycleState.paused:
-        unawaited(_subscription?.cancel());
-        _subscription = null;
-        unawaited(controller.stop());
+        // unawaited(controller.stop());
+        return;
       case AppLifecycleState.resumed:
         _subscription = controller.barcodes.listen(_handleBarcode);
         unawaited(controller.start());
+        break;
       case AppLifecycleState.inactive:
         unawaited(_subscription?.cancel());
         _subscription = null;
@@ -91,8 +71,8 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
   }
 
   Widget buildScanScreen(BuildContext context) {
-
      return 
+        
            Stack(
         children: [
           MobileScanner(
@@ -177,6 +157,22 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
   }
 
 
+  Widget _buildBarcode(Barcode? value) {
+    if (value == null) {
+      return const Text(
+        '请扫码!',
+        overflow: TextOverflow.fade,
+        style: TextStyle(color: Colors.white),
+      );
+    }
+
+    return Text(
+      value.displayValue ?? '无扫码结果',
+      overflow: TextOverflow.fade,
+      style: const TextStyle(color: Colors.white),
+    );
+  }
+
   Future<void> _processScanResult(String? result) async {
       // 检查扫描结果的格式
     if(result != null && RegExp(r'^\d+\$xiaowangniujin$').hasMatch(result)){
@@ -207,12 +203,44 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
 
   @override
   Future<void> dispose() async {
+    routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
     unawaited(_subscription?.cancel());
     _subscription = null;
     super.dispose();
-    await controller.dispose();
+    // await controller.dispose();                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
     BeepPlayer.unload(_beepFile);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+   @override
+  void didPush() {
+    // 当前页面推入时
+    controller.start();
+    
+  }
+
+  @override
+  void didPopNext() {
+    // 当从其他页面返回到当前页面时
+       controller.start();
+  }
+
+  @override
+  void didPop() {
+    // 当前页面被弹出时
+      controller.stop();
+  }
+
+  @override
+  void didPushNext() {
+    // 当前页面推入其他页面时
+      controller.stop();
   }
 
 }

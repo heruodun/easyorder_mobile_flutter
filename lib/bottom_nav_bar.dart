@@ -7,7 +7,7 @@ class RoleBasedNavBar extends StatefulWidget {
   final List<BottomNavigationBarItem> itemsPick;
   final List<BottomNavigationBarItem> itemsShip;
   final List<BottomNavigationBarItem> itemsMy;
-  final Function(int) onSelect;
+  final Function(int, BottomNavigationBarItem) onSelect;
 
   const RoleBasedNavBar({
     super.key,
@@ -72,7 +72,7 @@ class _RoleBasedNavBarState extends State<RoleBasedNavBar> {
         setState(() {
           _selectedIndex = index;
         });
-        widget.onSelect(index); // Call the unified onSelect callback
+        widget.onSelect(index, navBarItems[index]); // Call the unified onSelect callback
       },
     );
   }

@@ -13,7 +13,7 @@ import 'package:vibration/vibration.dart';
 // 做货
 class ScanMakerScreen extends ScanScreenStateful {
 
-  const ScanMakerScreen({super.key}) : super();
+  const ScanMakerScreen({super.key, });
   
   @override
   _ScanMakerState createState() => _ScanMakerState();
@@ -42,6 +42,8 @@ class _ScanMakerState extends ScanScreenState<ScanMakerScreen> {
 
   @override
   void doProcess(String result) async {
+    print(" maker doProcess------------------");
+
       RegExp pattern = RegExp(r'\d+');
       RegExpMatch? match = pattern.firstMatch(result);
 
@@ -66,13 +68,14 @@ class _ScanMakerState extends ScanScreenState<ScanMakerScreen> {
         try {
 
           var response = await http.post(
-          Uri.parse('$httpHost2/order/operation'),
+          Uri.parse('$httpHost2/order/operation2'),
           headers: {
             'Content-Type': 'application/json',
           },
           body: json.encode({
-            'order_id': orderId,
+             'order_id': orderId,
             'operator': user!.actualName,
+            'type': 200,
           }),
         );
 
@@ -82,8 +85,10 @@ class _ScanMakerState extends ScanScreenState<ScanMakerScreen> {
           if (response.statusCode == 200) {
 
             Vibration.vibrate();
-            super.scanResultText = "对接扫码成功\n$orderId";
-            super.scanResultColor = Colors.blue;
+             setState(() {
+              super.scanResultText = "对接扫码成功\n$orderId";
+              super.scanResultColor = Colors.blue;
+             });
 
             setProcessed(orderId);
           } else{
@@ -134,7 +139,7 @@ void setProcessed(int orderId) async {
 
 
  String _makeScanKey(int orderId) {
-    return '$prefix4picker$orderId';
+    return '$prefix4maker$orderId';
   }
 }
 

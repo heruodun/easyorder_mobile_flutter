@@ -4,12 +4,14 @@ import 'login.dart';
 import 'role_router.dart';
 import 'user_data.dart';
 
+// 0表示未打开 1表示打开
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   User? user = await User.getCurrentUser(); // 假设getCurrentUser()返回Future<User?>或Future<User>
   
-  Widget home = LoginScreen();
+  Widget home = const LoginScreen();
   if(user != null){
     home = MultiRoleScreen(user:user);
   }
@@ -26,6 +28,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+
+      navigatorObservers: [routeObserver],
       title: '小王牛筋',
 
        // 配置本地化

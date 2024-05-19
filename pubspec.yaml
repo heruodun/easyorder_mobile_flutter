@@ -46,6 +46,7 @@ dependencies:
   beep_player: ^0.0.1
   loading_animation_widget: ^1.2.1
   json_annotation: ^4.9.0
+  visibility_detector: ^0.4.0+2
 
 dev_dependencies:
   flutter_test:

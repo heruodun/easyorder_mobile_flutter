@@ -16,10 +16,10 @@ class ScanCheckerScreen extends ScanScreenStateful {
   const ScanCheckerScreen({super.key}) : super();
   
   @override
-  _ScanCheckerState createState() => _ScanCheckerState();
+  ScanCheckerState createState() => ScanCheckerState();
 }
 
-class _ScanCheckerState extends ScanScreenState<ScanCheckerScreen> {
+class ScanCheckerState extends ScanScreenState<ScanCheckerScreen> {
   
 
 
@@ -42,6 +42,7 @@ class _ScanCheckerState extends ScanScreenState<ScanCheckerScreen> {
 
   @override
   void doProcess(String result) async {
+    print(" checker doProcess------------------");
       RegExp pattern = RegExp(r'\d+');
       RegExpMatch? match = pattern.firstMatch(result);
 
@@ -66,13 +67,14 @@ class _ScanCheckerState extends ScanScreenState<ScanCheckerScreen> {
         try {
 
           var response = await http.post(
-          Uri.parse('$httpHost2/order/operation'),
+          Uri.parse('$httpHost2/order/operation2'),
           headers: {
             'Content-Type': 'application/json',
           },
           body: json.encode({
             'order_id': orderId,
             'operator': user!.actualName,
+            'type': 100,
           }),
         );
 
@@ -82,8 +84,10 @@ class _ScanCheckerState extends ScanScreenState<ScanCheckerScreen> {
           if (response.statusCode == 200) {
 
             Vibration.vibrate();
-            super.scanResultText = "配货扫码成功\n$orderId";
-            super.scanResultColor = Colors.blue;
+             setState(() {
+              super.scanResultText = "配货扫码成功\n$orderId";
+              super.scanResultColor = Colors.blue;
+             });
 
             setProcessed(orderId);
           } else{

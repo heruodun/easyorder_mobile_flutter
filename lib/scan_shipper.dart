@@ -13,7 +13,7 @@ import 'wave_data.dart';
 // 送货
 class ScanShipperScreen extends ScanScreenStateful {
 
-  const ScanShipperScreen({super.key}) : super();
+  const ScanShipperScreen({super.key});
   
   @override
   ScanShipperState createState() => ScanShipperState();
@@ -62,14 +62,14 @@ class ScanShipperState extends ScanScreenState<ScanShipperScreen> {
 
 
 void _navigateToScreen(Wave wave) {
-    super.controller.stop(); // 暂停扫描
+    controller.stop(); // 暂停扫描
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => WaveDetailsShipperScreen(wave: wave,)), 
     ).then((_) {
       // 当从ScreenX返回时，这里的代码被执行
       if (mounted) {
-       super.controller.start();  // 恢复扫描
+       controller.start();  // 恢复扫描
       }
     });
   }
@@ -78,6 +78,9 @@ void _navigateToScreen(Wave wave) {
 
   @override
   void doProcess(String result) async {
+
+    print(" shipper doProcess------------------");
+
       RegExp pattern = RegExp(r'\d+');
       RegExpMatch? match = pattern.firstMatch(result);
 
