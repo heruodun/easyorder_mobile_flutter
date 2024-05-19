@@ -25,9 +25,8 @@ class MyScreen extends StatelessWidget {
         ]
       ),
       body:  Center(
-        child: Text('我的姓名：${user.actualName}', style: TextStyle(fontSize: 24)),
+        child: Text(user.actualName, style: const TextStyle(fontSize: 24)),
       ),
-      // You can also include other widgets like FloatingActionButton if needed
     );
   }
 

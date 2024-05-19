@@ -72,7 +72,7 @@ class _WaveListScreenState extends State<WaveListScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
              IconButton(
-                icon: const Icon(Icons.add),
+                icon: const Icon(Icons.add, size: 25),
                 onPressed: () {
                   // 显示对话框
                   showDialog(
@@ -110,16 +110,15 @@ class _WaveListScreenState extends State<WaveListScreen> {
                 
                 child: Row(
                   children: [
-                    const Icon(Icons.calendar_today),
-                    const SizedBox(width: 10, height: 20,),
-                    Text(DateFormat('yyyy-MM-dd').format(selectedDate)),
+                    const Icon(Icons.calendar_today, size: 25),
+                    const SizedBox(width: 10, height: 10,),
+                    Text(DateFormat('yyyy-MM-dd').format(selectedDate),  style: Theme.of(context).textTheme.titleSmall),
                   ],
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.refresh),
+                icon: const Icon(Icons.refresh, size: 25,),
                 onPressed: () {
-                  // 处理搜索按钮逻辑
                   fetchData(); // 重新获取数据
                 },
               ),
@@ -264,13 +263,14 @@ class WaveItem extends StatelessWidget {
 
       title: Text('波次编号: ${wave.waveId}', style: Theme.of(context).textTheme.titleSmall,),
 
-      subtitle: Text('共计${wave.waveDetail?.addressCount}个地址, ${wave.waveDetail?.totalCount}个订单\n创建时间: ${wave.createTime}'),
+      subtitle: Text('共计${wave.waveDetail?.addressCount}个地址, ${wave.waveDetail?.totalCount}个订单\n${wave.createTime}'),
       leading: Text('${index + 1}', style: Theme.of(context).textTheme.bodyMedium,), // 显示从1开始的序号
-      trailing: Row(
+      trailing: wave.status != null && wave.status == 1 ? null
+        : Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add, color: Colors.green,),
             onPressed: () async {
                // 使用Navigator.push方法来跳转到ScanScreen，并传递新的Wave对象
               await Navigator.push(
@@ -282,7 +282,7 @@ class WaveItem extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.remove),
+            icon: const Icon(Icons.remove, color: Colors.red,),
             onPressed: () async {
               // 实现减少数量逻辑
               // 使用Navigator.push方法来跳转到ScanScreen，并传递新的Wave对象

@@ -143,7 +143,14 @@ abstract class WaveDetailsScreenState extends State<WaveDetailsScreen> {
                       return Card(
                         margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
                         child: ExpansionTile(
-                          title: Text('${addressSummary.address} (共计${addressSummary.orders.length}个订单)' ,style: Theme.of(context).textTheme.titleSmall,),
+                          title: 
+                              Row(
+                                children: [
+                                    const Icon(Icons.location_on, size: 16, color: Colors.green), // 地址图标
+                                     Expanded(child: Text('${addressSummary.address} (共计${addressSummary.orders.length}个订单)' ,style: Theme.of(context).textTheme.titleSmall,))
+                                    ],
+                              ),
+
                           children: addressSummary.orders.asMap().entries.map((entry) {
 
                             int idx = entry.key;
@@ -166,7 +173,12 @@ abstract class WaveDetailsScreenState extends State<WaveDetailsScreen> {
                                     children: [
                                     Text(orderIdStr, style: Theme.of(context).textTheme.titleSmall),
                                     Text(orderDetail.curStatus, style: Theme.of(context).textTheme.titleSmall),
-                                    Text(formatTimeDifference( orderDetail.printTime, orderDetail.curTime), style: Theme.of(context).textTheme.titleSmall),],
+
+                                    Row(
+                                      children:[
+                                    const Icon(Icons.hourglass_bottom, size: 14, color: Colors.blue),
+                                    Text(formatTimeDifference( orderDetail.printTime, orderDetail.curTime), style: Theme.of(context).textTheme.titleSmall)],
+                                    )],
 
                               ),
 
@@ -177,13 +189,13 @@ abstract class WaveDetailsScreenState extends State<WaveDetailsScreen> {
                                   Text('处理时间: $curTimeStr'),
                                   Text('打单时间: $printTimeStr'),
 
-                                  Center(
-                                  child: Text('货物详情', style: Theme.of(context).textTheme.titleSmall,),
+                                  const Center(
+                                  child:  Icon(Icons.shopping_bag, size: 14, color: Colors.blue),
                                   ),
                                   
                                   Text(content),
-                                  Center(
-                                  child: Text('订单轨迹', style: Theme.of(context).textTheme.titleSmall,),
+                                  const Center(
+                                  child: Icon(Icons.linear_scale_sharp, size: 14, color: Colors.blue),
                                   ),
                                   
                                   TimelineWidget(timelines: parseTimeLine(orderDetail.orderTrace),),
@@ -254,13 +266,13 @@ class TimelineWidget extends StatelessWidget {
       if (mappedEvent['time']?.isNotEmpty == true && mappedEvent['person']?.isNotEmpty == true) {
         return Row(
           children: [
-            Icon(mappedEvent['icon'] as IconData, size: 16),
+            Icon(mappedEvent['icon'] as IconData, size: 16, color: Colors.grey,),
             const SizedBox(width: 8),
             Text('${mappedEvent['label']} ${mappedEvent['person']} ${mappedEvent['time']} ${mappedEvent['extra']}' ),
           ],
         );
       }
-      return SizedBox.shrink(); // 如果时间或参与者为空，则返回一个空的SizedBox
+      return const SizedBox.shrink(); // 如果时间或参与者为空，则返回一个空的SizedBox
     }).toList();
 
     return Column(

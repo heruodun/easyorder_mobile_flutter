@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:easyorder_mobile/wave_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:vibration/vibration.dart';
 import 'constants.dart';
 import 'user_data.dart';
 
@@ -69,6 +70,7 @@ class _WaveDetailsShipperScreenState extends WaveDetailsScreenState {
           print(data);
           if (data['code'] == 0) {
           // 如果请求成功，显示成功提示
+          Vibration.vibrate();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('开始送货了!')),
           );

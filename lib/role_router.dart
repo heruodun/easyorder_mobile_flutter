@@ -1,7 +1,6 @@
 import 'package:easyorder_mobile/my.dart';
 import 'package:easyorder_mobile/scan.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'bottom_nav_bar.dart';
 import 'scan_checker.dart';
 import 'scan_maker.dart';
