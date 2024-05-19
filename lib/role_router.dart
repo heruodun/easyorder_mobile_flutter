@@ -1,9 +1,8 @@
 import 'package:easyorder_mobile/my.dart';
 import 'package:easyorder_mobile/scan.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:provider/provider.dart';
 import 'bottom_nav_bar.dart';
-import 'main.dart';
 import 'scan_checker.dart';
 import 'scan_maker.dart';
 import 'scan_shipper.dart';
@@ -25,6 +24,7 @@ class MultiRoleScreen extends StatefulWidget {
 class _MultiRoleScreenState extends State<MultiRoleScreen> {
   int _currentIndex = 0;
   late List<Widget> _screens;
+
  
 
   @override
@@ -62,6 +62,7 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
 
   Future<void> _onSelect(int index, BottomNavigationBarItem item) async {
 
+
     // 启动当前选中屏幕的扫码器
     if (item.label == '配货' || item.label == '对接' || item.label == '送货') {
       controller.start();
@@ -77,6 +78,10 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+  
+
+    
     List<String> roles = widget.user.roleList!.cast<String>();
     // 使用RoleBasedNavBar组件作为底部导航
     return Scaffold(
@@ -101,6 +106,7 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
         itemsMy: const [
           BottomNavigationBarItem(icon: Icon(Icons.person), label: '我的'),
         ], 
+        
         onSelect: _onSelect,
       ),
     );

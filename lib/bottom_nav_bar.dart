@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class RoleBasedNavBar extends StatefulWidget {
   final List<String> roles;
@@ -26,21 +27,14 @@ class RoleBasedNavBar extends StatefulWidget {
 
 class _RoleBasedNavBarState extends State<RoleBasedNavBar> {
   int _selectedIndex = 0;
+  List<BottomNavigationBarItem> navBarItems = []; // We'll build this list dynamically
 
   @override
   void initState() {
     super.initState();
-  }
+    // 假设你在这里构建了`navBarItems`列表
+   
 
-
-
-@override
-  Widget build(BuildContext context) {
-    List<BottomNavigationBarItem> navBarItems = []; // We'll build this list dynamically
-
-    // Populate `_navBarItems` based on roles
-    // Note: The order of roles here will dictate the order in which they appear in the nav bar.
-    // For example, if 'peihuo' should come before 'duijie', ensure it's added first.
     if (widget.roles.contains("peihuo")) {
       navBarItems.addAll(widget.itemsCheck);
     }
@@ -57,6 +51,24 @@ class _RoleBasedNavBarState extends State<RoleBasedNavBar> {
     }
 
     navBarItems.addAll(widget.itemsMy);
+    
+    // 只在组件初始化时设置这些值
+    final provider = Provider.of<BottomNavigationBarProvider>(context, listen: false);
+    provider.currentIndex = 0;  // 或根据需要设置
+    provider.currentLabel = navBarItems[provider.currentIndex].label!;
+
+  }
+
+
+
+@override
+  Widget build(BuildContext context) {
+    final provider = Provider.of<BottomNavigationBarProvider>(context);
+
+    // Populate `_navBarItems` based on roles
+    // Note: The order of roles here will dictate the order in which they appear in the nav bar.
+    // For example, if 'peihuo' should come before 'duijie', ensure it's added first.
+    
     // add other roles similarly...
     
     // Now, when onTap is called, simply pass the index to the widget.onSelect callback.
@@ -69,11 +81,35 @@ class _RoleBasedNavBarState extends State<RoleBasedNavBar> {
       items: navBarItems,
       currentIndex: _selectedIndex,
       onTap: (index) {
+        provider.currentIndex = index;
+        provider.currentLabel = navBarItems[index].label!;
+
+        print("provider " + provider.currentLabel);
+
         setState(() {
           _selectedIndex = index;
         });
         widget.onSelect(index, navBarItems[index]); // Call the unified onSelect callback
       },
     );
+  }
+}
+
+class BottomNavigationBarProvider with ChangeNotifier {
+  int _currentIndex = 0;
+  String _currentLabel = "";
+
+  int get currentIndex => _currentIndex;
+
+  set currentIndex(int index) {
+    _currentIndex = index;
+    notifyListeners();
+  }
+
+  String get currentLabel => _currentLabel;
+
+  set currentLabel(String label) {
+    _currentLabel = label;
+    notifyListeners();
   }
 }

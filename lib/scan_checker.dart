@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:easyorder_mobile/scan.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'bottom_nav_bar.dart';
 import 'constants.dart';
 import 'user_data.dart';
 import 'package:vibration/vibration.dart';
@@ -42,6 +44,11 @@ class ScanCheckerState extends ScanScreenState<ScanCheckerScreen> {
 
   @override
   void doProcess(String result) async {
+    final provider = Provider.of<BottomNavigationBarProvider>(context, listen: false);
+     if (provider.currentIndex != 0) {
+      print("Not  checker doProcess------------------");
+      return;
+     }
     print(" checker doProcess------------------");
       RegExp pattern = RegExp(r'\d+');
       RegExpMatch? match = pattern.firstMatch(result);

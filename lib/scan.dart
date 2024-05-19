@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:provider/provider.dart';
+import 'bottom_nav_bar.dart';
 import 'main.dart';
 import 'scanner_button_widgets.dart';
 import 'scanner_error_widget.dart';
@@ -24,8 +26,6 @@ abstract class ScanScreenStateful extends StatefulWidget {
 }
 
 abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> with RouteAware, WidgetsBindingObserver{
-
-  
  
   Barcode? _barcode;
   StreamSubscription<Object?>? _subscription;
@@ -137,7 +137,26 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
   }
 
    void _handleBarcode(BarcodeCapture barcodes) {
+     final provider = Provider.of<BottomNavigationBarProvider>(context, listen: false);
     if (mounted) {
+      if(widget.runtimeType.toString() == "ScanCheckerScreen" && provider.currentLabel != "配货"){
+        return;
+      }
+
+      if(widget.runtimeType.toString() == "ScanMakerScreen" && provider.currentLabel != "对接"){
+        return;
+      }
+
+      if(widget.runtimeType.toString() == "ScanPickerScreen" && provider.currentLabel != "拣货"){
+        return;
+      }
+
+      if(widget.runtimeType.toString() == "ScanShipperScreen" && provider.currentLabel != "送货"){
+        return;
+      }
+
+      print("cur run wiget ${widget.runtimeType.toString()}  ${provider.currentLabel}");
+
 
        if (!_isProcessing) {
 
@@ -182,7 +201,6 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
        scanResultText = "非有效订单号";
       scanResultColor = Colors.red;
     }
-
      // 显示结果，1秒后隐藏结果层并重置状态
     setState(() {
         _isResultDisplayed = true;
@@ -196,7 +214,6 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
     });
 
   }
-
   void doProcess(String result);
 
 

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'bottom_nav_bar.dart';
 import 'login.dart';
 import 'role_router.dart';
 import 'user_data.dart';
+import 'package:provider/provider.dart';
 
 // 0表示未打开 1表示打开
 final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
@@ -16,7 +18,12 @@ Future<void> main() async {
     home = MultiRoleScreen(user:user);
   }
   
-  runApp(MyApp(home: home));
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => BottomNavigationBarProvider(),
+      child: MyApp(home: home)
+    ),
+    );
 }
 
 

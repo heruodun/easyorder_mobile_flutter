@@ -1,4 +1,3 @@
-import 'package:easyorder_mobile/role_router.dart';
 import 'package:easyorder_mobile/scan_picker.dart';
 import 'package:easyorder_mobile/wave_detail_picker.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +5,6 @@ import 'package:intl/intl.dart'; // 用于格式化日期
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'constants.dart';
-import 'main.dart';
 import 'user_data.dart';
 import 'wave_data.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
