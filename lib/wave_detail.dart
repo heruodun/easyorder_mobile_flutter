@@ -120,6 +120,13 @@ abstract class WaveDetailsScreenState extends State<WaveDetailsScreen> {
   }
 
   Widget buildWaveDetailsScreen(BuildContext context) {
+    String showShipIds = "无";
+    if(_wave.shipIds != null){
+      showShipIds = _wave.shipIds!;
+    }
+
+    String showWaveInfo = "波次编号: ${_wave.waveId}，共计: ${_wave.waveDetail!.addressCount}个地址，共计：${_wave.waveDetail!.totalCount}个订单\n时间：${_wave.createTime}\n送货单：$showShipIds";
+
 
     return Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -128,7 +135,9 @@ abstract class WaveDetailsScreenState extends State<WaveDetailsScreen> {
           Padding(
             padding: EdgeInsets.all(8.0),
             child: Text(
-              '波次编号: ${_wave.waveId}，共计: ${_wave.waveDetail!.addressCount}个地址，共计：${_wave.waveDetail!.totalCount}个订单\n时间：${_wave.createTime}', style: Theme.of(context).textTheme.titleSmall,
+              showWaveInfo
+              
+              , style: Theme.of(context).textTheme.titleSmall,
             ),
           ),
           // SingleChildScrollView 包含剩余的可滚动内容

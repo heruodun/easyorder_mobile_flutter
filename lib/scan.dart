@@ -194,11 +194,11 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
 
   Future<void> _processScanResult(String? result) async {
       // 检查扫描结果的格式
-    if(result != null && RegExp(r'^\d+\$xiaowangniujin$').hasMatch(result)){
+    if(result != null && (RegExp(r'^\d+\$xiaowangniujin$').hasMatch(result) || result.startsWith('XK-'))){
         doProcess(result);
     }
     else{
-       scanResultText = "非有效订单号";
+       scanResultText = "非有效单号";
       scanResultColor = Colors.red;
     }
      // 显示结果，1秒后隐藏结果层并重置状态

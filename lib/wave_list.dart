@@ -1,3 +1,4 @@
+import 'package:easyorder_mobile/scan.dart';
 import 'package:easyorder_mobile/scan_picker.dart';
 import 'package:easyorder_mobile/wave_detail_picker.dart';
 import 'package:flutter/material.dart';
@@ -39,12 +40,15 @@ class _WaveListScreenState extends State<WaveListScreen> {
     setState(() {
         waves = [];
         _isCompleted = false;
+
       });
 
     fetchWavesByDate(selectedDate).then((data) {
       setState(() {
         waves = data;
         _isCompleted = true;
+        controller.stop();
+
       });
     });
   }
@@ -72,7 +76,7 @@ class _WaveListScreenState extends State<WaveListScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
              IconButton(
-                icon: const Icon(Icons.add, size: 25),
+                icon: const Icon(Icons.add_box, size: 25),
                 onPressed: () {
                   // 显示对话框
                   showDialog(
@@ -247,6 +251,8 @@ class WaveItem extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
+
+    print("wave ${wave.waveId} ${wave.status}");
     return InkWell(
       onTap: () {
         // 点击时导航到波次详情页面
@@ -261,14 +267,54 @@ class WaveItem extends StatelessWidget {
     
     child: ListTile(
 
-      title: Text('波次编号: ${wave.waveId}', style: Theme.of(context).textTheme.titleSmall,),
+      title: Text('波次: ${wave.waveId}', style: Theme.of(context).textTheme.titleSmall,),
 
       subtitle: Text('共计${wave.waveDetail?.addressCount}个地址, ${wave.waveDetail?.totalCount}个订单\n${wave.createTime}'),
       leading: Text('${index + 1}', style: Theme.of(context).textTheme.bodyMedium,), // 显示从1开始的序号
-      trailing: wave.status != null && wave.status == 1 ? null
-        : Row(
+      trailing: wave.status != null && wave.status == 1 ? 
+
+      Column(
+        // mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [const Icon(Icons.local_shipping, color: Colors.blueGrey,),  Text(' 已发货', style: Theme.of(context).textTheme.bodySmall,),], // 图标],
+        )
+     
+        : 
+        Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+           Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+        
+          IconButton(
+            icon: const Icon(Icons.add_circle, color: Colors.green,),
+            onPressed: () async {
+               // 使用Navigator.push方法来跳转到ScanScreen，并传递新的Wave对象
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ScanPickerScreen(wave: wave, type: 1,),
+                ),
+              );
+            },
+          ),
+        
+        ]),
+        
+          IconButton(
+            icon: const Icon(Icons.remove_circle, color: Colors.red,),
+            onPressed: () async {
+               // 使用Navigator.push方法来跳转到ScanScreen，并传递新的Wave对象
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ScanPickerScreen(wave: wave, type: 2,),
+                ),
+              );
+            },
+          ),
+        
           IconButton(
             icon: const Icon(Icons.add, color: Colors.green,),
             onPressed: () async {
@@ -276,7 +322,7 @@ class WaveItem extends StatelessWidget {
               await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ScanPickerScreen(wave: wave, type: 1,),
+                  builder: (context) => ScanPickerScreen(wave: wave, type: 3,),
                 ),
               );
             },
@@ -289,13 +335,13 @@ class WaveItem extends StatelessWidget {
               await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ScanPickerScreen(wave: wave, type: -1,),
+                  builder: (context) => ScanPickerScreen(wave: wave, type: 4,),
                 ),
               );
             },
           ),
         ],
-      ),
+              ),
     )
     );
   }

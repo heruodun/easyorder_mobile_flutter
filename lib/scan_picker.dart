@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'package:easyorder_mobile/scan.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -76,11 +77,18 @@ Future<Wave> fetchWavesById(int waveId) async {
 
     String appBarStr;
     if(widget.type == 1){
-      appBarStr = "加入波次";
+      appBarStr = "送货单加入波次";
+    }
+    else if(widget.type == 2){
+      appBarStr = "送货单撤出波次";
+    }
+     else if(widget.type == 3){
+      appBarStr = "配货单加入波次";
     }
     else{
-      appBarStr = "撤出波次";
+      appBarStr = "配货单撤出波次";
     }
+
 
     return Scaffold(
       appBar: AppBar(
@@ -114,8 +122,110 @@ Future<Wave> fetchWavesById(int waveId) async {
 
   @override
   void doProcess(String result) async {
-    print(" picker doProcess------------------");
 
+      int type = widget.type;
+
+      if(type == 3 || type == 4){
+        doProcessOrder(result);
+      }
+      else{
+         doProcessShip(result);
+      }
+  }
+
+   Future<void> doProcessShip(String result) async {
+      String shipId = result;
+      int waveId = widget.wave!.waveId;
+      int widgetType = widget.type;
+
+      int type = 1;
+      if(widgetType == 2){
+        type = -1;
+      }
+
+    bool hasProcessed =  await isProcessed(shipId, waveId, type);
+
+    if(hasProcessed){
+      if(type == 1){
+      super.scanResultText = "送货单已加入波次\n$shipId";
+
+      }else{
+      super.scanResultText = "送货单已撤出波次\n$shipId";
+
+      }
+      super.scanResultColor = Colors.yellow;
+    }
+    else{
+
+      User? user = await User.getCurrentUser(); 
+
+      try {
+
+        var response = await http.post(
+        Uri.parse('$httpHost/mobile/waveInfo/addDelShip'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+        'waveId': waveId,
+        'shipIds': shipId,
+        'type': type,
+        }),
+      );
+
+       
+        if (response.statusCode == 200) {
+
+          Vibration.vibrate();
+
+          setState(() {
+
+          if(type == 1){
+            super.scanResultText = "送货单加入波次成功\n$shipId";
+            fetchData();
+          }
+          else{
+            super.scanResultText = "送货单撤出波次成功\n$shipId";
+            fetchData();
+          }
+          super.scanResultColor = Colors.blue;
+          });
+
+
+          setProcessed(shipId, waveId, type);
+        } else{
+
+          String body = utf8.decode(response.bodyBytes);
+          final Map<String, dynamic> data = jsonDecode(body);
+
+          String msg = data['msg'];
+
+
+           setState(() {
+          super.scanResultText = "$msg\n$shipId";
+          super.scanResultColor = Colors.red;
+           });
+
+
+          
+        }
+      } catch (e) {
+         setState(() {
+          
+          super.scanResultText = "扫码异常\n$shipId";
+          super.scanResultColor = Colors.red;
+
+        });
+
+
+
+      }
+
+    }
+
+   }
+
+  Future<void> doProcessOrder(String result) async {
       RegExp pattern = RegExp(r'\d+');
       RegExpMatch? match = pattern.firstMatch(result);
 
@@ -127,14 +237,14 @@ Future<Wave> fetchWavesById(int waveId) async {
 
       int orderId = int.parse(orderIdStr);
       int waveId = widget.wave!.waveId;
-      int type = widget.type;
+      int widgetType = widget.type;
 
-      if(type != 1){
+      int type = 1;
+      if(widgetType == 4){
         type = -1;
       }
-      
 
-    bool hasProcessed =  await isProcessed(orderId, waveId, type);
+    bool hasProcessed =  await isProcessed(orderIdStr, waveId, type);
 
     if(hasProcessed){
       if(type == 1){
@@ -190,7 +300,7 @@ Future<Wave> fetchWavesById(int waveId) async {
          
           
 
-          setProcessed(orderId, waveId, type);
+          setProcessed(orderIdStr, waveId, type);
         } else{
 
           String body = utf8.decode(response.bodyBytes);
@@ -227,7 +337,7 @@ Future<Wave> fetchWavesById(int waveId) async {
 
 
   
-Future<bool> isProcessed(int orderId, int waveId, int type) async {
+Future<bool> isProcessed(String orderId, int waveId, int type) async {
    final SharedPreferences prefs = await SharedPreferences.getInstance();
     String key = _makeScanKey(orderId, waveId, type);
     int? lastTimestamp = prefs.getInt(key);
@@ -241,7 +351,7 @@ Future<bool> isProcessed(int orderId, int waveId, int type) async {
     return true;
 }
 
-void setProcessed(int orderId, int waveId, int type) async {
+void setProcessed(String orderId, int waveId, int type) async {
    final SharedPreferences prefs = await SharedPreferences.getInstance();
     String key = _makeScanKey(orderId, waveId, type);
     String revertKey = _makeScanKey(orderId, waveId, -type);
@@ -251,8 +361,11 @@ void setProcessed(int orderId, int waveId, int type) async {
 }
 
 
- String _makeScanKey(int orderId, int waveId, int type) {
+ String _makeScanKey(String orderId, int waveId, int type) {
     return '${orderId}_${waveId}_$type';
   }
+
+
+  
 }
 
