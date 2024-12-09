@@ -74,14 +74,14 @@ class ScanCheckerState extends ScanScreenState<ScanCheckerScreen> {
         try {
 
           var response = await http.post(
-          Uri.parse('$httpHost2/order/operation2'),
+          Uri.parse('$httpHost/order/scan'),
           headers: {
             'Content-Type': 'application/json',
           },
           body: json.encode({
-            'order_id': orderId,
+            'orderId': orderId,
             'operator': user!.actualName,
-            'type': 100,
+            'operation': 100,
           }),
         );
 

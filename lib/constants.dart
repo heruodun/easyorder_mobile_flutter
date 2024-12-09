@@ -16,6 +16,23 @@ const prefix4picker = "picker_";
 const prefix4shipper = "shipper_";
 
 
+//配货
+const int operationCheck = 100;
+
+//对接
+const int operationAlign = 200;
+
+//做货
+const int operationMake = 300;
+
+//拣货
+const int operationPick = 400;
+
+//送货
+const int operationShip = 500;
+
+
+
 
 
 

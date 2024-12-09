@@ -240,7 +240,7 @@ void _addNewWave() async {
 }
 }
 
-class WaveItem extends StatelessWidget {
+class WaveItem extends StatefulWidget {
   final Wave wave;
   final int index; // 添加index参数
   final int addressCount;
@@ -250,7 +250,18 @@ class WaveItem extends StatelessWidget {
 
   
   @override
+  State<StatefulWidget> createState() => WaveItemScreenState();
+}
+
+class WaveItemScreenState extends State<WaveItem>{
+  final TextEditingController _controller = TextEditingController();
+  int shipCount = 0;
+
+   @override
   Widget build(BuildContext context) {
+
+    Wave wave = widget.wave;
+    int index = widget.index;
 
     print("wave ${wave.waveId} ${wave.status}");
     return InkWell(
@@ -269,51 +280,41 @@ class WaveItem extends StatelessWidget {
 
       title: Text('波次: ${wave.waveId}', style: Theme.of(context).textTheme.titleSmall,),
 
-      subtitle: Text('共计${wave.waveDetail?.addressCount}个地址, ${wave.waveDetail?.totalCount}个订单\n${wave.createTime}'),
+      subtitle: Text('${wave.waveDetail?.addressCount}地址, ${wave.waveDetail?.totalCount}订单\n${wave.createTime}'),
       leading: Text('${index + 1}', style: Theme.of(context).textTheme.bodyMedium,), // 显示从1开始的序号
       trailing: wave.status != null && wave.status == 1 ? 
 
-      Column(
-        // mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [const Icon(Icons.local_shipping, color: Colors.blueGrey,),  Text(' 已发货', style: Theme.of(context).textTheme.bodySmall,),], // 图标],
+      Row(
+        mainAxisSize: MainAxisSize.min,
+
+        children: [
+          Text('自作主张', style: Theme.of(context).textTheme.titleSmall,),
+          Text('$shipCount  ', style: Theme.of(context).textTheme.titleSmall,),
+
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.local_shipping, color: Colors.blueGrey,),  
+              Text(' 已发货', style: Theme.of(context).textTheme.bodySmall,),
+            ],
+          ) 
+        ]// 图标],
         )
      
         : 
+
         Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-           Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-        
+          Text('$shipCount', style: Theme.of(context).textTheme.titleSmall,),
+
           IconButton(
-            icon: const Icon(Icons.add_circle, color: Colors.green,),
+            icon: const Icon(Icons.edit, color: Colors.black,),
             onPressed: () async {
-               // 使用Navigator.push方法来跳转到ScanScreen，并传递新的Wave对象
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ScanPickerScreen(wave: wave, type: 1,),
-                ),
-              );
+              addItemDialog();
             },
           ),
-        
-        ]),
-        
-          IconButton(
-            icon: const Icon(Icons.remove_circle, color: Colors.red,),
-            onPressed: () async {
-               // 使用Navigator.push方法来跳转到ScanScreen，并传递新的Wave对象
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ScanPickerScreen(wave: wave, type: 2,),
-                ),
-              );
-            },
-          ),
+
         
           IconButton(
             icon: const Icon(Icons.add, color: Colors.green,),
@@ -345,6 +346,77 @@ class WaveItem extends StatelessWidget {
     )
     );
   }
+
+  
+
+  @override
+  void initState() {
+    super.initState();
+    // 初始化 shipCount
+    if(widget.wave.shipCount == null){
+      shipCount = 0;
+    }
+    else{
+      shipCount = widget.wave.shipCount!;
+      }
+  }
+
+  Future<void> addItemDialog() async {
+    // 设置输入框初始值为当前 shipCount 的值
+    _controller.text = shipCount.toString();
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // 禁止在外部点击关闭对话框
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('送货单数量'),
+          content: TextField(
+            controller: _controller,
+            decoration: const InputDecoration(hintText: '请输入数量'),
+            keyboardType: TextInputType.number,
+          ),
+          actions: <Widget>[
+           
+            TextButton(
+              child: const Text('取消'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+             TextButton(
+              child: const Text('保存'),
+              onPressed: () async {
+                final int? newCount = int.tryParse(_controller.text);
+                if (newCount != null) {
+                  // 调用http服务
+                  final response = await http.post(
+                    Uri.parse('https://your-api-endpoint.com/update'),
+                    body: {'shipCount': newCount.toString()},
+                  );
+
+                  if (response.statusCode == 200) {
+                    // 更新内部状态，关闭对话框
+                    setState(() {
+                      shipCount = newCount;
+                    });
+                    Navigator.of(context).pop();
+                  } else {
+                    // 处理错误情况
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('更新失败，请重试')),
+                    );
+                  }
+                }
+              },
+            ),
+
+          ],
+        );
+      },
+    );
+  }
+
 }
 
 

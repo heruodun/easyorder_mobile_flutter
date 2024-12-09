@@ -35,6 +35,7 @@ class Wave {
     WaveDetail? waveDetail;
     int? status;
     String? shipIds;
+    int? shipCount;
 
     Wave({
         required this.waveId,
@@ -47,6 +48,7 @@ class Wave {
         required this.waveDetail,
         required this.status,
         required this.shipIds,
+        required this.shipCount,
     });
 
     factory Wave.fromJson(Map<String, dynamic> json) => Wave(
@@ -59,7 +61,8 @@ class Wave {
         lastScanTime: json["lastScanTime"],
         waveDetail: json["waveDetail"] == null ? null : WaveDetail.fromJson(json["waveDetail"]),
         status: json["status"],
-        shipIds: json["shipIds"]
+        shipIds: json["shipIds"],
+        shipCount: json["shipCount"]
     );
 
     Map<String, dynamic> toJson() => {
@@ -73,6 +76,7 @@ class Wave {
         "waveDetail": waveDetail == null ? "" : toJson(),
         "status": status,
         "shipIds": shipIds,
+        "shipCount": shipCount,
     };
 }
 

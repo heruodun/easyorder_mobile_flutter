@@ -76,13 +76,7 @@ Future<Wave> fetchWavesById(int waveId) async {
   Widget build(BuildContext context) {
 
     String appBarStr;
-    if(widget.type == 1){
-      appBarStr = "送货单加入波次";
-    }
-    else if(widget.type == 2){
-      appBarStr = "送货单撤出波次";
-    }
-     else if(widget.type == 3){
+    if(widget.type == 3){
       appBarStr = "配货单加入波次";
     }
     else{
@@ -128,102 +122,9 @@ Future<Wave> fetchWavesById(int waveId) async {
       if(type == 3 || type == 4){
         doProcessOrder(result);
       }
-      else{
-         doProcessShip(result);
-      }
+      
   }
 
-   Future<void> doProcessShip(String result) async {
-      String shipId = result;
-      int waveId = widget.wave!.waveId;
-      int widgetType = widget.type;
-
-      int type = 1;
-      if(widgetType == 2){
-        type = -1;
-      }
-
-    bool hasProcessed =  await isProcessed(shipId, waveId, type);
-
-    if(hasProcessed){
-      if(type == 1){
-      super.scanResultText = "送货单已加入波次\n$shipId";
-
-      }else{
-      super.scanResultText = "送货单已撤出波次\n$shipId";
-
-      }
-      super.scanResultColor = Colors.yellow;
-    }
-    else{
-
-      User? user = await User.getCurrentUser(); 
-
-      try {
-
-        var response = await http.post(
-        Uri.parse('$httpHost/mobile/waveInfo/addDelShip'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
-        'waveId': waveId,
-        'shipIds': shipId,
-        'type': type,
-        }),
-      );
-
-       
-        if (response.statusCode == 200) {
-
-          Vibration.vibrate();
-
-          setState(() {
-
-          if(type == 1){
-            super.scanResultText = "送货单加入波次成功\n$shipId";
-            fetchData();
-          }
-          else{
-            super.scanResultText = "送货单撤出波次成功\n$shipId";
-            fetchData();
-          }
-          super.scanResultColor = Colors.blue;
-          });
-
-
-          setProcessed(shipId, waveId, type);
-        } else{
-
-          String body = utf8.decode(response.bodyBytes);
-          final Map<String, dynamic> data = jsonDecode(body);
-
-          String msg = data['msg'];
-
-
-           setState(() {
-          super.scanResultText = "$msg\n$shipId";
-          super.scanResultColor = Colors.red;
-           });
-
-
-          
-        }
-      } catch (e) {
-         setState(() {
-          
-          super.scanResultText = "扫码异常\n$shipId";
-          super.scanResultColor = Colors.red;
-
-        });
-
-
-
-      }
-
-    }
-
-   }
 
   Future<void> doProcessOrder(String result) async {
       RegExp pattern = RegExp(r'\d+');
@@ -263,17 +164,17 @@ Future<Wave> fetchWavesById(int waveId) async {
       try {
 
         var response = await http.post(
-        Uri.parse('$httpHost2/wave/operation'),
+        Uri.parse('$httpHost/mobile/order/wave/order/addOrDel'),
         headers: {
           'Content-Type': 'application/json',
         },
         body: json.encode({
-        'wave_id': waveId,
-        'wave_alias': widget.wave!.waveAlias,
-          'order_id': orderId,
+        'waveId': waveId,
+        'waveAlias': widget.wave!.waveAlias,
+          'orderId': orderId,
           'operator': user!.actualName,
           'operation': type,
-          'wave_create_time': widget.wave!.createTime
+          'waveCreateTime': widget.wave!.createTime
         }),
       );
 
