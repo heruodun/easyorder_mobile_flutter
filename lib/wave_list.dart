@@ -288,8 +288,9 @@ class WaveItemScreenState extends State<WaveItem>{
         mainAxisSize: MainAxisSize.min,
 
         children: [
-          Text('自作主张', style: Theme.of(context).textTheme.titleSmall,),
-          Text('$shipCount  ', style: Theme.of(context).textTheme.titleSmall,),
+          Text('$shipCount  ', style: const TextStyle(color: Colors.red, fontSize: 20,) ),
+          Text('自作主张  ', style: Theme.of(context).textTheme.titleSmall,),
+         
 
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -309,7 +310,7 @@ class WaveItemScreenState extends State<WaveItem>{
           Text('$shipCount', style: Theme.of(context).textTheme.titleSmall,),
 
           IconButton(
-            icon: const Icon(Icons.edit, color: Colors.black,),
+            icon: const Icon(Icons.edit_note, color: Colors.black,),
             onPressed: () async {
               addItemDialog();
             },
