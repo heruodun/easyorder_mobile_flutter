@@ -1,7 +1,6 @@
 import 'package:intl/intl.dart';
 
 const httpHost = 'http://yangyi.ddns.net:1024';
-const httpHost2 = 'http://yangyi.ddns.net:5000';
 
 // 配货
 const prefix4checker = "checker_";

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
+import 'package:easyorder_mobile/http_client.dart';
 import 'package:easyorder_mobile/scan.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -32,7 +32,7 @@ class _ScanPickerState extends ScanScreenState<ScanPickerScreen> {
    // 从服务器获取波次数据的函数
 Future<Wave> fetchWavesById(int waveId) async {
   final response = await http.get(
-    Uri.parse('$httpHost/mobile/waveInfo?waveId=$waveId'),
+    Uri.parse('$httpHost/mobile/order/wave/get/$waveId'),
   );
 
   if (response.statusCode == 200) {
@@ -163,25 +163,23 @@ Future<Wave> fetchWavesById(int waveId) async {
 
       try {
 
-        var response = await http.post(
-        Uri.parse('$httpHost/mobile/order/wave/order/addOrDel'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
+        var response = await httpClient(
+        uri: Uri.parse('$httpHost/mobile/order/wave/order/addOrDel'),
+        body: {
         'waveId': waveId,
         'waveAlias': widget.wave!.waveAlias,
           'orderId': orderId,
           'operator': user!.actualName,
           'operation': type,
           'waveCreateTime': widget.wave!.createTime
-        }),
+        },
+        method: "POST",
       );
 
         print(response.statusCode);
 
        
-        if (response.statusCode == 200) {
+        if (response.isSuccess) {
 
           Vibration.vibrate();
 
@@ -204,10 +202,8 @@ Future<Wave> fetchWavesById(int waveId) async {
           setProcessed(orderIdStr, waveId, type);
         } else{
 
-          String body = utf8.decode(response.bodyBytes);
-          final Map<String, dynamic> data = jsonDecode(body);
-
-          String msg = data['msg'];
+        
+          String msg = response.message;
 
 
            setState(() {

@@ -1,3 +1,4 @@
+import 'package:easyorder_mobile/http_client.dart';
 import 'package:easyorder_mobile/scan.dart';
 import 'package:easyorder_mobile/scan_picker.dart';
 import 'package:easyorder_mobile/wave_detail_picker.dart';
@@ -262,6 +263,7 @@ class WaveItemScreenState extends State<WaveItem>{
 
     Wave wave = widget.wave;
     int index = widget.index;
+    String shipManText = wave.shipMan?? ''; 
 
     print("wave ${wave.waveId} ${wave.status}");
     return InkWell(
@@ -288,9 +290,11 @@ class WaveItemScreenState extends State<WaveItem>{
         mainAxisSize: MainAxisSize.min,
 
         children: [
-          Text('$shipCount  ', style: const TextStyle(color: Colors.red, fontSize: 20,) ),
-          Text('自作主张  ', style: Theme.of(context).textTheme.titleSmall,),
-         
+          Text('$shipCount', style: const TextStyle(color: Colors.blue, fontSize: 20,) ),
+          const SizedBox(width: 8), // 设置你想要的间距
+          
+          Text(shipManText, style: Theme.of(context).textTheme.titleSmall,overflow: TextOverflow.ellipsis, maxLines: 1),
+          const SizedBox(width: 8), // 设置你想要的间距
 
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -307,12 +311,12 @@ class WaveItemScreenState extends State<WaveItem>{
         Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('$shipCount', style: Theme.of(context).textTheme.titleSmall,),
+          Text('$shipCount', style: Theme.of(context).textTheme.titleLarge,),
 
           IconButton(
-            icon: const Icon(Icons.edit_note, color: Colors.black,),
+            icon: const Icon(Icons.edit, color: Colors.blue,),
             onPressed: () async {
-              addItemDialog();
+              addItemDialog(wave.waveId);
             },
           ),
 
@@ -362,7 +366,7 @@ class WaveItemScreenState extends State<WaveItem>{
       }
   }
 
-  Future<void> addItemDialog() async {
+  Future<void> addItemDialog(int waveId) async {
     // 设置输入框初始值为当前 shipCount 的值
     _controller.text = shipCount.toString();
 
@@ -373,6 +377,7 @@ class WaveItemScreenState extends State<WaveItem>{
         return AlertDialog(
           title: const Text('送货单数量'),
           content: TextField(
+            style: Theme.of(context).textTheme.titleLarge,
             controller: _controller,
             decoration: const InputDecoration(hintText: '请输入数量'),
             keyboardType: TextInputType.number,
@@ -390,22 +395,30 @@ class WaveItemScreenState extends State<WaveItem>{
               onPressed: () async {
                 final int? newCount = int.tryParse(_controller.text);
                 if (newCount != null) {
-                  // 调用http服务
-                  final response = await http.post(
-                    Uri.parse('https://your-api-endpoint.com/update'),
-                    body: {'shipCount': newCount.toString()},
+                   // 调用http服务
+                  final response = await httpClient(
+                    uri: Uri.parse('$httpHost/mobile/order/wave/shipCount/update'),
+                    body: {
+                      'shipCount': newCount,
+                      'waveId':waveId
+                      },
+                    method: "POST",
                   );
 
-                  if (response.statusCode == 200) {
+                  if (response.isSuccess) {
                     // 更新内部状态，关闭对话框
                     setState(() {
                       shipCount = newCount;
                     });
                     Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                       const SnackBar(content: Text('更新成功')),
+                    );
                   } else {
+                    String msg = response.message;
                     // 处理错误情况
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('更新失败，请重试')),
+                       SnackBar(content: Text(msg)),
                     );
                   }
                 }

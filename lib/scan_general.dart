@@ -1,3 +1,5 @@
+
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:easyorder_mobile/http_client.dart';
@@ -12,7 +14,7 @@ import 'package:vibration/vibration.dart';
 
 
 
-// 配货
+// 通用
 class ScanCheckerScreen extends ScanScreenStateful {
 
   const ScanCheckerScreen({super.key}) : super();
@@ -22,13 +24,15 @@ class ScanCheckerScreen extends ScanScreenStateful {
 }
 
 class ScanCheckerState extends ScanScreenState<ScanCheckerScreen> {
-  
-
 
   @override
   Widget build(BuildContext context) {
 
-    String appBarStr = "配货扫码";
+    final provider = Provider.of<BottomNavigationBarProvider>(context, listen: false);
+
+    String operation = provider.currentLabel;
+
+    String appBarStr = "$operation扫码";
     
 
     return Scaffold(
@@ -44,11 +48,11 @@ class ScanCheckerState extends ScanScreenState<ScanCheckerScreen> {
 
   @override
   void doProcess(String result) async {
+
     final provider = Provider.of<BottomNavigationBarProvider>(context, listen: false);
-     if (provider.currentIndex != 0) {
-      print("Not  checker doProcess------------------");
-      return;
-     }
+
+    String operation = provider.currentLabel;
+     
     print(" checker doProcess------------------");
       RegExp pattern = RegExp(r'\d+');
       RegExpMatch? match = pattern.firstMatch(result);
@@ -61,10 +65,10 @@ class ScanCheckerState extends ScanScreenState<ScanCheckerScreen> {
 
       int orderId = int.parse(orderIdStr);
 
-      bool hasProcessed =  await isProcessed(orderId);
+      bool hasProcessed =  await isProcessed(operation, orderId);
 
       if(hasProcessed){
-        super.scanResultText = "已配货扫码\n$orderId";
+        super.scanResultText = "已$operation扫码\n$orderId";
         super.scanResultColor = Colors.yellow;
       }
       else{
@@ -79,18 +83,17 @@ class ScanCheckerState extends ScanScreenState<ScanCheckerScreen> {
             body: {
               'orderId': orderId,
               'operator': user!.actualName,
-              'operation': 100,
+              'operationStr': operation,
             },
             method: 'POST',
           );
-          print(response.message);
           if (response.isSuccess) {
             Vibration.vibrate();
              setState(() {
-              super.scanResultText = "配货扫码成功\n$orderId";
+              super.scanResultText = "$operation扫码成功\n$orderId";
               super.scanResultColor = Colors.blue;
              });
-            setProcessed(orderId);
+            setProcessed(operation,orderId);
           } else{
             String msg = response.message;
             setState(() {
@@ -113,9 +116,9 @@ class ScanCheckerState extends ScanScreenState<ScanCheckerScreen> {
 
 
   
-Future<bool> isProcessed(int orderId) async {
+Future<bool> isProcessed(String operation, int orderId) async {
    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String key = _makeScanKey(orderId);
+    String key = _makeScanKey(operation, orderId);
     int? lastTimestamp = prefs.getInt(key);
     int currentTimeMillis = DateTime.now().millisecondsSinceEpoch;
     if (lastTimestamp == null || (currentTimeMillis - lastTimestamp) >= 5 * 60 * 1000) {
@@ -124,16 +127,16 @@ Future<bool> isProcessed(int orderId) async {
     return true;
 }
 
-void setProcessed(int orderId) async {
+void setProcessed(String operation, int orderId) async {
    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String key = _makeScanKey(orderId);
+    String key = _makeScanKey(operation, orderId);
     int currentTimeMillis = DateTime.now().millisecondsSinceEpoch;
     prefs.setInt(key, currentTimeMillis);
 }
 
 
- String _makeScanKey(int orderId) {
-    return '$prefix4picker$orderId';
+ String _makeScanKey(String operation, int orderId) {
+    String key = '$operation$orderId';
+    return base64.encode(utf8.encode(key));
   }
 }
-

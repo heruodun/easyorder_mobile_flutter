@@ -95,7 +95,7 @@ void _navigateToScreen(Wave wave) {
       
     try{
          final response = await http.get(
-          Uri.parse('$httpHost/mobile/waveInfoFromOrderId?orderId=$orderId'),);
+          Uri.parse('$httpHost/mobile/order/wave/queryByOrder/$orderId'),);
 
         if (response.statusCode == 200) {
           // Decode the JSON response.body into a Dart object.

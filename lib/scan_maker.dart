@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:easyorder_mobile/http_client.dart';
 import 'package:easyorder_mobile/scan.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'constants.dart';
 import 'user_data.dart';
@@ -67,44 +67,32 @@ class _ScanMakerState extends ScanScreenState<ScanMakerScreen> {
 
         try {
 
-          var response = await http.post(
-          Uri.parse('$httpHost/order/scan'),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: json.encode({
-             'orderId': orderId,
-            'operator': user!.actualName,
-            'operation': 200,
-          }),
-        );
-
-          print(response.statusCode);
-
-        
-          if (response.statusCode == 200) {
-
+            var response = await httpClient(
+            uri: Uri.parse('$httpHost/mobile/order/scan'),
+            
+            body: {
+              'orderId': orderId,
+              'operator': user!.actualName,
+              'operation': 200,
+            },
+            method: 'POST',
+          );
+          if (response.isSuccess) {
             Vibration.vibrate();
              setState(() {
               super.scanResultText = "对接扫码成功\n$orderId";
               super.scanResultColor = Colors.blue;
              });
-
             setProcessed(orderId);
           } else{
-
-            String body = utf8.decode(response.bodyBytes);
-            final Map<String, dynamic> data = jsonDecode(body);
-
-            String msg = data['msg'];
-
+            String msg = response.message;
             setState(() {
             super.scanResultText = "$msg\n$orderId";
             super.scanResultColor = Colors.red;
             });
-
           }
         } catch (e) {
+
           setState(() {
             super.scanResultText = "扫码异常\n$orderId";
             super.scanResultColor = Colors.red;
