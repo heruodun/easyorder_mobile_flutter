@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:easyorder_mobile/http_client.dart';
 import 'package:easyorder_mobile/scan.dart';
 import 'package:flutter/material.dart';
