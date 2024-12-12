@@ -2,9 +2,6 @@ import 'package:easyorder_mobile/constants.dart';
 import 'package:flutter/material.dart';
 import 'wave_data.dart';
 
-
-
-
 List<TimeLine> parseTimeLine(String data) {
   List<String> lines = data.split("\n\n");
   List<TimeLine> timelines = []; // 初始化一个用于存储TimeLine对象的list
@@ -12,19 +9,16 @@ List<TimeLine> parseTimeLine(String data) {
   // 循环处理每一段数据
   for (var line in lines) {
     List<String> parts = line.split('，');
-    if (parts.length >= 2) { // 确保有足够的数据进行解析
+    if (parts.length >= 2) {
+      // 确保有足够的数据进行解析
       try {
         String person = parts[0].split('：')[1];
         String time = parts[1].split('：')[1]; // 假设时间戳为整数
         int type = getTypeFromDescription(line); // 获取类型
         String wave = getExtraFromDescription(line, parts);
 
-        timelines.add(TimeLine(
-          type: type,
-          person: person,
-          time: time,
-          extra: wave
-        ));
+        timelines
+            .add(TimeLine(type: type, person: person, time: time, extra: wave));
       } catch (e) {
         // 可以在这里处理错误，例如解析错误
       }
@@ -32,17 +26,12 @@ List<TimeLine> parseTimeLine(String data) {
   }
 
   return timelines;
-  
 }
 
 String parseOrderContent(String data) {
-  
   String newOrderContent = normalizeNewlines(data);
   return newOrderContent;
 }
-
-
-
 
 // 一个辅助函数，用于根据行描述返回时间线对象的类型
 int getTypeFromDescription(String description) {
@@ -50,14 +39,13 @@ int getTypeFromDescription(String description) {
     return 1;
   } else if (description.contains('配货')) {
     return 2;
-  }  else if (description.contains('对接收货')) {
+  } else if (description.contains('对接收货')) {
     return 4;
   } else if (description.contains('拣货')) {
     return 4;
   } else if (description.contains('送货')) {
     return 5;
-  }
-  else if (description.contains('对接')) {
+  } else if (description.contains('对接')) {
     return 3;
   }
   return 0; // 使用0作为未知类型的默认值
@@ -65,23 +53,15 @@ int getTypeFromDescription(String description) {
 
 // 一个辅助函数，用于根据行描述返回时间线对象的类型 拣货人：管理员，加入波次3时间：2024-05-14 22:10:35
 String getExtraFromDescription(String description, List<String> parts) {
- if (description.contains('拣货')) {
-  String key = parts[1].split('：')[0];
-  
-  String wave = key.substring(0, key.length - 2); 
+  if (description.contains('拣货')) {
+    String key = parts[1].split('：')[0];
+
+    String wave = key.substring(0, key.length - 2);
     return wave;
-  } 
-  else{
+  } else {
     return "";
   }
 }
-
-
-
-
-
-
-
 
 abstract class WaveDetailsScreen extends StatefulWidget {
   final Wave wave;
@@ -114,121 +94,135 @@ abstract class WaveDetailsScreenState extends State<WaveDetailsScreen> {
     });
   }
 
-    @override
+  @override
   Widget build(BuildContext context) {
-      return buildWaveDetailsScreen(context);
+    return buildWaveDetailsScreen(context);
   }
 
   Widget buildWaveDetailsScreen(BuildContext context) {
-    String showShipIds = "无";
-    if(_wave.shipIds != null){
-      showShipIds = _wave.shipIds!;
-    }
+    int? shipCount = widget.wave.shipCount;
 
-    String showWaveInfo = "波次编号: ${_wave.waveId}，共计: ${_wave.waveDetail!.addressCount}个地址，共计：${_wave.waveDetail!.totalCount}个订单\n时间：${_wave.createTime}\n送货单：$showShipIds";
-
+    String showWaveInfo =
+        "波次编号: ${_wave.waveId}，共计: ${_wave.waveDetail!.addressCount}个地址，共计：${_wave.waveDetail!.totalCount}个订单\n时间：${_wave.createTime}\n送货单数量：$shipCount";
 
     return Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // 放置在SingleChildScrollView外面的Padding
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text(
-              showWaveInfo
-              
-              , style: Theme.of(context).textTheme.titleSmall,
-            ),
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // 放置在SingleChildScrollView外面的Padding
+        Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text(
+            showWaveInfo,
+            style: Theme.of(context).textTheme.titleSmall,
           ),
-          // SingleChildScrollView 包含剩余的可滚动内容
-          Expanded(
-            child: SingleChildScrollView(
-              child: 
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  ..._wave.waveDetail!.addresses.map(
-                    (addressSummary) {
-                      return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                        child: ExpansionTile(
-                          title: 
-                              Row(
-                                children: [
-                                    const Icon(Icons.location_on, size: 16, color: Colors.green), // 地址图标
-                                     Expanded(child: Text('${addressSummary.address} (共计${addressSummary.orders.length}个订单)' ,style: Theme.of(context).textTheme.titleSmall,))
-                                    ],
-                              ),
-
-                          children: addressSummary.orders.asMap().entries.map((entry) {
-
-                            int idx = entry.key;
-                            var orderDetail = entry.value;
-                            Color? bgColor = idx % 2 == 0 ? Colors.grey[200] : Colors.white; // 偶数索引使用浅灰色, 奇数索引使用白色
-
-                            String printTimeStr = formatTimestamp(orderDetail.printTime);
-                            String curTimeStr = formatTimestamp(orderDetail.curTime);
-
-                            String content = parseOrderContent(orderDetail.content);
-
-                            String orderIdStr = orderDetail.orderId.toString();
-
-                            return Container(
-                                    color: bgColor,
-                             child: ListTile(
-                              title: 
-                              Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                    Text(orderIdStr, style: Theme.of(context).textTheme.titleSmall),
-                                    Text(orderDetail.curStatus, style: Theme.of(context).textTheme.titleSmall),
-
-                                    Row(
-                                      children:[
-                                    const Icon(Icons.hourglass_bottom, size: 14, color: Colors.blue),
-                                    Text(formatTimeDifference( orderDetail.printTime, orderDetail.curTime), style: Theme.of(context).textTheme.titleSmall)],
-                                    )],
-
-                              ),
-
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('地址: ${orderDetail.address}'),
-                                  Text('处理时间: $curTimeStr'),
-                                  Text('打单时间: $printTimeStr'),
-
-                                  const Center(
-                                  child:  Icon(Icons.shopping_bag, size: 14, color: Colors.blue),
-                                  ),
-                                  
-                                  Text(content),
-                                  const Center(
-                                  child: Icon(Icons.linear_scale_sharp, size: 14, color: Colors.blue),
-                                  ),
-                                  
-                                  TimelineWidget(timelines: parseTimeLine(orderDetail.orderTrace),),
-                                  
-                                ],
-                              ),
-                              isThreeLine: true,
-                            )
-                            );
-                          }).toList(),
+        ),
+        // SingleChildScrollView 包含剩余的可滚动内容
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                ..._wave.waveDetail!.addresses.map(
+                  (addressSummary) {
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 12.0),
+                      child: ExpansionTile(
+                        title: Row(
+                          children: [
+                            const Icon(Icons.location_on,
+                                size: 16, color: Colors.green), // 地址图标
+                            Expanded(
+                                child: Text(
+                              '${addressSummary.address} (共计${addressSummary.orders.length}个订单)',
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ))
+                          ],
                         ),
-                      );
-                    },
-                  ).toList(),
-                ],
-              ),
+                        children:
+                            addressSummary.orders.asMap().entries.map((entry) {
+                          int idx = entry.key;
+                          var orderDetail = entry.value;
+                          Color? bgColor = idx % 2 == 0
+                              ? Colors.grey[200]
+                              : Colors.white; // 偶数索引使用浅灰色, 奇数索引使用白色
+
+                          String printTimeStr =
+                              formatTimestamp(orderDetail.printTime);
+                          String curTimeStr =
+                              formatTimestamp(orderDetail.curTime);
+
+                          String content =
+                              parseOrderContent(orderDetail.content);
+
+                          String orderIdStr = orderDetail.orderId.toString();
+
+                          return Container(
+                              color: bgColor,
+                              child: ListTile(
+                                title: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(orderIdStr,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall),
+                                    Text(orderDetail.curStatus,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.hourglass_bottom,
+                                            size: 14, color: Colors.blue),
+                                        Text(
+                                            formatTimeDifference(
+                                                orderDetail.printTime,
+                                                orderDetail.curTime),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleSmall)
+                                      ],
+                                    )
+                                  ],
+                                ),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('地址: ${orderDetail.address}'),
+                                    Text('处理时间: $curTimeStr'),
+                                    Text('打单时间: $printTimeStr'),
+                                    const Center(
+                                      child: Icon(Icons.shopping_bag,
+                                          size: 14, color: Colors.blue),
+                                    ),
+                                    Text(content),
+                                    const Center(
+                                      child: Icon(Icons.linear_scale_sharp,
+                                          size: 14, color: Colors.blue),
+                                    ),
+                                    TimelineWidget(
+                                      timelines:
+                                          parseTimeLine(orderDetail.orderTrace),
+                                    ),
+                                  ],
+                                ),
+                                isThreeLine: true,
+                              ));
+                        }).toList(),
+                      ),
+                    );
+                  },
+                ).toList(),
+              ],
             ),
           ),
-        ],
+        ),
+      ],
     );
   }
 }
-
-
 
 class TimelineWidget extends StatelessWidget {
   final List<TimeLine> timelines;
@@ -264,7 +258,13 @@ class TimelineWidget extends StatelessWidget {
         icon = Icons.help_outline;
         label = '未知';
     }
-    return {'icon': icon, 'label': label, 'time': timeline.time, 'person': timeline.person, 'extra': timeline.extra};
+    return {
+      'icon': icon,
+      'label': label,
+      'time': timeline.time,
+      'person': timeline.person,
+      'extra': timeline.extra
+    };
   }
 
   @override
@@ -272,12 +272,18 @@ class TimelineWidget extends StatelessWidget {
     List<Widget> eventWidgets = timelines.map((TimeLine timeline) {
       var mappedEvent = _mapEvent(timeline);
       // 根据时间和参与者是否存在来决定是否展示该行
-      if (mappedEvent['time']?.isNotEmpty == true && mappedEvent['person']?.isNotEmpty == true) {
+      if (mappedEvent['time']?.isNotEmpty == true &&
+          mappedEvent['person']?.isNotEmpty == true) {
         return Row(
           children: [
-            Icon(mappedEvent['icon'] as IconData, size: 16, color: Colors.grey,),
+            Icon(
+              mappedEvent['icon'] as IconData,
+              size: 16,
+              color: Colors.grey,
+            ),
             const SizedBox(width: 8),
-            Text('${mappedEvent['label']} ${mappedEvent['person']} ${mappedEvent['time']} ${mappedEvent['extra']}' ),
+            Text(
+                '${mappedEvent['label']} ${mappedEvent['person']} ${mappedEvent['time']} ${mappedEvent['extra']}'),
           ],
         );
       }
@@ -297,5 +303,9 @@ class TimeLine {
   String time;
   String extra;
 
-  TimeLine({required this.type, required this.person, required this.time,  required this.extra});
+  TimeLine(
+      {required this.type,
+      required this.person,
+      required this.time,
+      required this.extra});
 }

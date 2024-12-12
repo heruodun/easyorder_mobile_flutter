@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:easyorder_mobile/user_data.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
@@ -8,15 +9,14 @@ import 'scanner_button_widgets.dart';
 import 'scanner_error_widget.dart';
 import 'package:beep_player/beep_player.dart';
 
-
- MobileScannerController controller = MobileScannerController(
+MobileScannerController controller = MobileScannerController(
   torchEnabled: false, useNewCameraSelector: true,
   // formats: [BarcodeFormat.qrCode]
-    // facing: CameraFacing.front,
-    // detectionSpeed: DetectionSpeed.normal
-    // detectionTimeoutMs: 1000,
-    returnImage: true,
-  );
+  // facing: CameraFacing.front,
+  // detectionSpeed: DetectionSpeed.normal
+  // detectionTimeoutMs: 1000,
+  returnImage: true,
+);
 
 abstract class ScanScreenStateful extends StatefulWidget {
   const ScanScreenStateful({super.key});
@@ -25,8 +25,8 @@ abstract class ScanScreenStateful extends StatefulWidget {
   ScanScreenState createState();
 }
 
-abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> with RouteAware, WidgetsBindingObserver{
- 
+abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
+    with RouteAware, WidgetsBindingObserver {
   Barcode? _barcode;
   StreamSubscription<Object?>? _subscription;
   bool _isProcessing = false;
@@ -43,7 +43,7 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
     _subscription = controller.barcodes.listen(_handleBarcode);
 
     controller.start();
-    
+
     BeepPlayer.load(_beepFile);
   }
 
@@ -71,48 +71,42 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
   }
 
   Widget buildScanScreen(BuildContext context) {
-     return 
-        
-           Stack(
-        children: [
-          MobileScanner(
-            controller: controller,
-            errorBuilder: (context, error, child) {
-              return ScannerErrorWidget(error: error);
-            },
-            // fit: BoxFit.contain,
-          ),
+    return Stack(
+      children: [
+        MobileScanner(
+          controller: controller,
+          errorBuilder: (context, error, child) {
+            return ScannerErrorWidget(error: error);
+          },
+          // fit: BoxFit.contain,
+        ),
 
-           _buildResultLayer(), // 处理结果
+        _buildResultLayer(), // 处理结果
 
-          Align(
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
             alignment: Alignment.bottomCenter,
-            child: Container(
-              alignment: Alignment.bottomCenter,
-              height: 100,
-              color: Colors.black.withOpacity(0.4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ToggleFlashlightButton(controller: controller),
-                  // StartStopMobileScannerButton(controller: controller),
-                  Expanded(child: Center(child: _buildBarcode(_barcode))),
-                  SwitchCameraButton(controller: controller),
-                  AnalyzeImageFromGalleryButton(controller: controller),
-                ],
-              ),
+            height: 100,
+            color: Colors.black.withOpacity(0.4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ToggleFlashlightButton(controller: controller),
+                // StartStopMobileScannerButton(controller: controller),
+                Expanded(child: Center(child: _buildBarcode(_barcode))),
+                SwitchCameraButton(controller: controller),
+                AnalyzeImageFromGalleryButton(controller: controller),
+              ],
             ),
           ),
-        ],
-      );
-      
-
+        ),
+      ],
+    );
   }
-
 
   @override
   Widget build(BuildContext context) {
-
     return buildScanScreen(context);
   }
 
@@ -136,45 +130,26 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
     );
   }
 
-   void _handleBarcode(BarcodeCapture barcodes) {
-     final provider = Provider.of<BottomNavigationBarProvider>(context, listen: false);
-    if (mounted) {
-      if(widget.runtimeType.toString() == "ScanCheckerScreen" && provider.currentLabel != "配货"){
-        return;
+  void _handleBarcode(BarcodeCapture barcodes) {
+    final provider =
+        Provider.of<BottomNavigationBarProvider>(context, listen: false);
+    if (mounted && canProcess(provider.currentLabel)) {
+      print(
+          "cur run wiget ${widget.runtimeType.toString()}  ${provider.currentLabel}");
+
+      if (!_isProcessing) {
+        setState(() {
+          _isProcessing = true;
+          _barcode = barcodes.barcodes.firstOrNull;
+          if (_barcode != null) {
+            _processScanResult(_barcode!.displayValue); // 处理扫描结果
+          } else {
+            print("null");
+          }
+        });
       }
-
-      if(widget.runtimeType.toString() == "ScanMakerScreen" && provider.currentLabel != "对接"){
-        return;
-      }
-
-      if(widget.runtimeType.toString() == "ScanPickerScreen" && provider.currentLabel != "拣货"){
-        return;
-      }
-
-      if(widget.runtimeType.toString() == "ScanShipperScreen" && provider.currentLabel != "送货"){
-        return;
-      }
-
-      print("cur run wiget ${widget.runtimeType.toString()}  ${provider.currentLabel}");
-
-
-       if (!_isProcessing) {
-
-          setState(() {
-            _isProcessing = true;
-            _barcode = barcodes.barcodes.firstOrNull;
-            if (_barcode != null) {
-              _processScanResult(_barcode!.displayValue); // 处理扫描结果
-            }
-            else{
-              print("null");
-            }
-            
-          });
-    }
     }
   }
-
 
   Widget _buildBarcode(Barcode? value) {
     if (value == null) {
@@ -192,31 +167,44 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
     );
   }
 
-  Future<void> _processScanResult(String? result) async {
-      // 检查扫描结果的格式
-    if(result != null && (RegExp(r'^\d+\$xiaowangniujin$').hasMatch(result) || result.startsWith('XK-'))){
-        doProcess(result);
+  Future<bool> isMatch(result) async {
+    User? user = await User.getCurrentUser();
+    List<String?>? scanRuleList = user?.scanRuleList;
+    if (result != null && (RegExp(r'^\d+\$xiaowangniujin$').hasMatch(result))) {
+      return true;
     }
-    else{
-       scanResultText = "非有效单号";
+    for (String? rule in scanRuleList ?? []) {
+      if (rule != null && result != null && result.endsWith(rule)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Future<void> _processScanResult(String? result) async {
+    // 检查扫描结果的格式
+    if (await isMatch(result)) {
+      doProcess(result!);
+    } else {
+      scanResultText = "非有效单号";
       scanResultColor = Colors.red;
     }
-     // 显示结果，1秒后隐藏结果层并重置状态
+    // 显示结果，1秒后隐藏结果层并重置状态
     setState(() {
-        _isResultDisplayed = true;
+      _isResultDisplayed = true;
     });
 
     await Future.delayed(const Duration(seconds: 1));
 
     setState(() {
-        _isResultDisplayed = false;
-        _isProcessing = false;
+      _isResultDisplayed = false;
+      _isProcessing = false;
     });
-
   }
+
   void doProcess(String result);
 
-
+  bool canProcess(String currentLabel);
 
   @override
   Future<void> dispose() async {
@@ -225,7 +213,7 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
     unawaited(_subscription?.cancel());
     _subscription = null;
     super.dispose();
-    // await controller.dispose();                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+    // await controller.dispose();
     BeepPlayer.unload(_beepFile);
   }
 
@@ -235,30 +223,27 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T> wi
     routeObserver.subscribe(this, ModalRoute.of(context)!);
   }
 
-   @override
+  @override
   void didPush() {
     // 当前页面推入时
     controller.start();
-    
   }
 
   @override
   void didPopNext() {
     // 当从其他页面返回到当前页面时
-       controller.start();
+    controller.start();
   }
 
   @override
   void didPop() {
     // 当前页面被弹出时
-      controller.stop();
+    controller.stop();
   }
 
   @override
   void didPushNext() {
     // 当前页面推入其他页面时
-      controller.stop();
+    controller.stop();
   }
-
 }
-

@@ -1,13 +1,16 @@
+import 'package:easyorder_mobile/constants.dart';
+import 'package:easyorder_mobile/user_role.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class RoleBasedNavBar extends StatefulWidget {
-  final List<String> roles;
+  final List<Role> roles;
   final List<BottomNavigationBarItem> itemsCheck;
   final List<BottomNavigationBarItem> itemsMake;
   final List<BottomNavigationBarItem> itemsPick;
   final List<BottomNavigationBarItem> itemsShip;
   final List<BottomNavigationBarItem> itemsMy;
+  final List<BottomNavigationBarItem> itemsAdditional;
   final Function(int, BottomNavigationBarItem) onSelect;
 
   const RoleBasedNavBar({
@@ -18,6 +21,7 @@ class RoleBasedNavBar extends StatefulWidget {
     required this.itemsPick,
     required this.itemsShip,
     required this.itemsMy,
+    required this.itemsAdditional,
     required this.onSelect,
   });
 
@@ -27,56 +31,56 @@ class RoleBasedNavBar extends StatefulWidget {
 
 class _RoleBasedNavBarState extends State<RoleBasedNavBar> {
   int _selectedIndex = 0;
-  List<BottomNavigationBarItem> navBarItems = []; // We'll build this list dynamically
+  List<BottomNavigationBarItem> navBarItems =
+      []; // We'll build this list dynamically
 
   @override
   void initState() {
     super.initState();
     // 假设你在这里构建了`navBarItems`列表
-   
 
-    if (widget.roles.contains("peihuo")) {
+    if (widget.roles.any((role) => role.roleCode == peihuoRoleCode)) {
       navBarItems.addAll(widget.itemsCheck);
     }
-    if (widget.roles.contains("duijie")) {
+    if (widget.roles.any((role) => role.roleCode == duijieRoleCode)) {
       navBarItems.addAll(widget.itemsMake);
     }
 
-    if (widget.roles.contains("jianhuo")) {
+    if (widget.roles.any((role) => role.roleCode == jianhuoRoleCode)) {
       navBarItems.addAll(widget.itemsPick);
     }
 
-    if (widget.roles.contains("songhuo")) {
+    if (widget.roles.any((role) => role.roleCode == songhuoRoleCode)) {
       navBarItems.addAll(widget.itemsShip);
     }
 
-    navBarItems.addAll(widget.itemsMy);
-    
-    // 只在组件初始化时设置这些值
-    final provider = Provider.of<BottomNavigationBarProvider>(context, listen: false);
-    provider.currentIndex = 0;  // 或根据需要设置
-    provider.currentLabel = navBarItems[provider.currentIndex].label!;
+    navBarItems.addAll(widget.itemsAdditional);
 
+    navBarItems.addAll(widget.itemsMy);
+
+    // 只在组件初始化时设置这些值
+    final provider =
+        Provider.of<BottomNavigationBarProvider>(context, listen: false);
+    provider.currentIndex = 0; // 或根据需要设置
+    provider.currentLabel = navBarItems[provider.currentIndex].label!;
   }
 
-
-
-@override
+  @override
   Widget build(BuildContext context) {
     final provider = Provider.of<BottomNavigationBarProvider>(context);
 
     // Populate `_navBarItems` based on roles
     // Note: The order of roles here will dictate the order in which they appear in the nav bar.
     // For example, if 'peihuo' should come before 'duijie', ensure it's added first.
-    
+
     // add other roles similarly...
-    
+
     // Now, when onTap is called, simply pass the index to the widget.onSelect callback.
     return BottomNavigationBar(
-        type: BottomNavigationBarType.fixed, // 将类型设置为固定
-         backgroundColor: Colors.white, // 设置导航栏背景颜色，可按需调整
-        selectedItemColor: Theme.of(context).primaryColor, // 被选中项的颜色
-        unselectedItemColor: Colors.grey, // 未选中项的颜色
+      type: BottomNavigationBarType.fixed, // 将类型设置为固定
+      backgroundColor: Colors.white, // 设置导航栏背景颜色，可按需调整
+      selectedItemColor: Theme.of(context).primaryColor, // 被选中项的颜色
+      unselectedItemColor: Colors.grey, // 未选中项的颜色
 
       items: navBarItems,
       currentIndex: _selectedIndex,
@@ -89,7 +93,8 @@ class _RoleBasedNavBarState extends State<RoleBasedNavBar> {
         setState(() {
           _selectedIndex = index;
         });
-        widget.onSelect(index, navBarItems[index]); // Call the unified onSelect callback
+        widget.onSelect(
+            index, navBarItems[index]); // Call the unified onSelect callback
       },
     );
   }

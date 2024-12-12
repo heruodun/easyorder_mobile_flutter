@@ -1,8 +1,6 @@
 import 'package:easyorder_mobile/wave_detail.dart';
 import 'package:flutter/material.dart';
 
-
-
 class WaveDetailsPickerScreen extends WaveDetailsScreen {
   // 构造函数：接收一个 Wave 对象并将其传递给父类构造函数
   const WaveDetailsPickerScreen({super.key, required super.wave});
@@ -12,11 +10,7 @@ class WaveDetailsPickerScreen extends WaveDetailsScreen {
   WaveDetailsScreenState createState() => _WaveDetailsPickerScreenState();
 }
 
-  
 class _WaveDetailsPickerScreenState extends WaveDetailsScreenState {
- 
-
- 
   @override
   Widget build(BuildContext context) {
     if (super.isLoading) {
@@ -34,11 +28,9 @@ class _WaveDetailsPickerScreenState extends WaveDetailsScreenState {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('波次详情'),
-      ),
-      body: 
-      buildWaveDetailsScreen(context)
-    );
+        appBar: AppBar(
+          title: const Text('波次详情'),
+        ),
+        body: buildWaveDetailsScreen(context));
   }
 }

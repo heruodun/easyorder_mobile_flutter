@@ -12,45 +12,35 @@ import 'package:vibration/vibration.dart';
 
 import 'wave_detail_picker.dart';
 
-
-
 // 拣货用的
 class ScanPickerScreen extends ScanScreenStateful {
   final Wave? wave; // 接收从上一个界面传递过来的Wave对象
   final int type;
 
   const ScanPickerScreen({super.key, this.wave, required this.type});
-  
+
   @override
   _ScanPickerState createState() => _ScanPickerState();
 }
 
 class _ScanPickerState extends ScanScreenState<ScanPickerScreen> {
-  
   late Wave _wave;
 
-   // 从服务器获取波次数据的函数
-Future<Wave> fetchWavesById(int waveId) async {
-  final response = await http.get(
-    Uri.parse('$httpHost/mobile/order/wave/get/$waveId'),
-  );
+  // 从服务器获取波次数据的函数
+  Future<Wave> fetchWavesById(int waveId) async {
+    final response = await httpClient(
+      uri: Uri.parse('$httpHost/app/order/wave/get/$waveId'),
+      method: "GET",
+    );
 
-  if (response.statusCode == 200) {
-    // Decode the JSON response.body into a Dart object.
-    String body = utf8.decode(response.bodyBytes);
-    final Map<String, dynamic> data = jsonDecode(body);
-    if (data['code'] == 0) {
-      return Wave.fromJson(data['data']);
-
+    if (response.isSuccess) {
+      return Wave.fromJson(response.data);
     } else {
-      throw Exception('Invalid response code: ${data['code']}');
+      throw Exception(response.message);
     }
-  } else {
-    throw Exception('Failed to load waves: ${response.statusCode}');
   }
-}
 
- void fetchData() {
+  void fetchData() {
     // 服务器返回的JSON响应会被转换成一个包含Wave对象的列表
 
     fetchWavesById(widget.wave!.waveId).then((data) {
@@ -60,209 +50,168 @@ Future<Wave> fetchWavesById(int waveId) async {
     });
   }
 
-
-
-
-
   @override
   void initState() {
     super.initState();
     _wave = widget.wave!;
   }
 
-
-
   @override
   Widget build(BuildContext context) {
-
     String appBarStr;
-    if(widget.type == 3){
+    if (widget.type == 3) {
       appBarStr = "配货单加入波次";
-    }
-    else{
+    } else {
       appBarStr = "配货单撤出波次";
     }
 
-
     return Scaffold(
       appBar: AppBar(
-        title:  Text(appBarStr),
-      
+        title: Text(appBarStr),
       ),
-     
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           ListTile(
             title: Text('波次编号: ${_wave.waveId}'),
-            subtitle: Text('共计${_wave.waveDetail!.addressCount}个地址, ${_wave.waveDetail?.totalCount}个订单\n创建时间: ${_wave.createTime}'),
+            subtitle: Text(
+                '共计${_wave.waveDetail!.addressCount}个地址, ${_wave.waveDetail?.totalCount}个订单\n创建时间: ${_wave.createTime}'),
             onTap: () {
               // 点击时导航到波次详情页面
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => WaveDetailsPickerScreen(wave: _wave),
-                  ),
-            );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => WaveDetailsPickerScreen(wave: _wave),
+                ),
+              );
             },
           ),
-          Expanded(child: super.buildScanScreen(context),),
+          Expanded(
+            child: super.buildScanScreen(context),
+          ),
         ],
       ),
     );
   }
 
- 
-
   @override
   void doProcess(String result) async {
+    int type = widget.type;
 
-      int type = widget.type;
-
-      if(type == 3 || type == 4){
-        doProcessOrder(result);
-      }
-      
+    if (type == 3 || type == 4) {
+      doProcessOrder(result);
+    }
   }
 
-
   Future<void> doProcessOrder(String result) async {
-      RegExp pattern = RegExp(r'\d+');
-      RegExpMatch? match = pattern.firstMatch(result);
+    RegExp pattern = RegExp(r'\d+');
+    RegExpMatch? match = pattern.firstMatch(result);
 
-      String? orderIdStr = match?.group(0);
-      if(orderIdStr == null){
-        //异常了
-        return;
-      }
+    String? orderIdStr = match?.group(0);
+    if (orderIdStr == null) {
+      //异常了
+      return;
+    }
 
-      int orderId = int.parse(orderIdStr);
-      int waveId = widget.wave!.waveId;
-      int widgetType = widget.type;
+    int orderId = int.parse(orderIdStr);
+    int waveId = widget.wave!.waveId;
+    int widgetType = widget.type;
 
-      int type = 1;
-      if(widgetType == 4){
-        type = -1;
-      }
+    int type = 1;
+    if (widgetType == 4) {
+      type = -1;
+    }
 
-    bool hasProcessed =  await isProcessed(orderIdStr, waveId, type);
+    bool hasProcessed = await isProcessed(orderIdStr, waveId, type);
 
-    if(hasProcessed){
-      if(type == 1){
-      super.scanResultText = "已加入波次\n$orderId";
-
-      }else{
-      super.scanResultText = "已撤出波次\n$orderId";
-
+    if (hasProcessed) {
+      if (type == 1) {
+        super.scanResultText = "已加入波次\n$orderId";
+      } else {
+        super.scanResultText = "已撤出波次\n$orderId";
       }
       super.scanResultColor = Colors.yellow;
-    }
-    else{
-
-      User? user = await User.getCurrentUser(); 
+    } else {
+      User? user = await User.getCurrentUser();
 
       try {
-
         var response = await httpClient(
-        uri: Uri.parse('$httpHost/mobile/order/wave/order/addOrDel'),
-        body: {
-        'waveId': waveId,
-        'waveAlias': widget.wave!.waveAlias,
-          'orderId': orderId,
-          'operator': user!.actualName,
-          'operation': type,
-          'waveCreateTime': widget.wave!.createTime
-        },
-        method: "POST",
-      );
+          uri: Uri.parse('$httpHost/app/order/wave/order/addOrDel'),
+          body: {
+            'waveId': waveId,
+            'waveAlias': widget.wave!.waveAlias,
+            'orderId': orderId,
+            'operator': user!.actualName,
+            'operation': type,
+            'waveCreateTime': widget.wave!.createTime
+          },
+          method: "POST",
+        );
 
         print(response.statusCode);
 
-       
         if (response.isSuccess) {
-
           Vibration.vibrate();
 
           setState(() {
-
-          if(type == 1){
-            super.scanResultText = "加入波次成功\n$orderId";
-            fetchData();
-          }
-          else{
-            super.scanResultText = "撤出波次成功\n$orderId";
-            fetchData();
-          }
-          super.scanResultColor = Colors.blue;
+            if (type == 1) {
+              super.scanResultText = "加入波次成功\n$orderId";
+              fetchData();
+            } else {
+              super.scanResultText = "撤出波次成功\n$orderId";
+              fetchData();
+            }
+            super.scanResultColor = Colors.blue;
           });
 
-         
-          
-
           setProcessed(orderIdStr, waveId, type);
-        } else{
-
-        
+        } else {
           String msg = response.message;
 
-
-           setState(() {
-          super.scanResultText = "$msg\n$orderId";
-          super.scanResultColor = Colors.red;
-           });
-
-
-          
+          setState(() {
+            super.scanResultText = "$msg\n$orderId";
+            super.scanResultColor = Colors.red;
+          });
         }
       } catch (e) {
-         setState(() {
-          
+        setState(() {
           super.scanResultText = "扫码异常\n$orderId";
           super.scanResultColor = Colors.red;
-
         });
-
-
-
       }
-
     }
-   
   }
 
-
-
-
-  
-Future<bool> isProcessed(String orderId, int waveId, int type) async {
-   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  Future<bool> isProcessed(String orderId, int waveId, int type) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     String key = _makeScanKey(orderId, waveId, type);
     int? lastTimestamp = prefs.getInt(key);
     print('lastTimestamp $lastTimestamp');
     int currentTimeMillis = DateTime.now().millisecondsSinceEpoch;
-     print('currentTimeMillis $currentTimeMillis');
+    print('currentTimeMillis $currentTimeMillis');
 
-    if (lastTimestamp == null || (currentTimeMillis - lastTimestamp) >= 5 * 60 * 1000) {
+    if (lastTimestamp == null ||
+        (currentTimeMillis - lastTimestamp) >= 5 * 60 * 1000) {
       return false;
     }
     return true;
-}
+  }
 
-void setProcessed(String orderId, int waveId, int type) async {
-   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  void setProcessed(String orderId, int waveId, int type) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     String key = _makeScanKey(orderId, waveId, type);
     String revertKey = _makeScanKey(orderId, waveId, -type);
     int currentTimeMillis = DateTime.now().millisecondsSinceEpoch;
     prefs.setInt(key, currentTimeMillis);
     prefs.remove(revertKey);
-}
+  }
 
-
- String _makeScanKey(String orderId, int waveId, int type) {
+  String _makeScanKey(String orderId, int waveId, int type) {
     return '${orderId}_${waveId}_$type';
   }
 
-
-  
+  @override
+  bool canProcess(String currentLabel) {
+    return currentLabel == "拣货";
+  }
 }
-

@@ -1,5 +1,8 @@
+import 'package:easyorder_mobile/constants.dart';
 import 'package:easyorder_mobile/my.dart';
 import 'package:easyorder_mobile/scan.dart';
+import 'package:easyorder_mobile/scan_general.dart';
+import 'package:easyorder_mobile/user_role.dart';
 import 'package:flutter/material.dart';
 import 'bottom_nav_bar.dart';
 import 'scan_checker.dart';
@@ -7,9 +10,6 @@ import 'scan_maker.dart';
 import 'scan_shipper.dart';
 import 'user_data.dart';
 import 'wave_list.dart';
-
-
-
 
 class MultiRoleScreen extends StatefulWidget {
   final User user;
@@ -23,65 +23,78 @@ class MultiRoleScreen extends StatefulWidget {
 class _MultiRoleScreenState extends State<MultiRoleScreen> {
   int _currentIndex = 0;
   late List<Widget> _screens;
-
- 
+  late List<Role> roles;
+  late List<Role> filteredRoles;
 
   @override
   void initState() {
     super.initState();
-      // 初始化屏幕列表，基于角色
-    List<String> roles = widget.user.roleList!.cast<String>();
+    // 初始化屏幕列表，基于角色
+    roles = widget.user.roleInfoList!.cast<Role>();
     _screens = [];
-    
-    if(roles.contains("peihuo")){
-      ScanCheckerScreen checkerScreen =  const ScanCheckerScreen();
+
+    if (roles.any((role) => role.roleCode == peihuoRoleCode)) {
+      ScanCheckerScreen checkerScreen = const ScanCheckerScreen();
       _screens.add(checkerScreen);
     }
-    
-    if(roles.contains("duijie")){
-      ScanMakerScreen makerScreen =  const ScanMakerScreen();
-      _screens.add (makerScreen);
+
+    if (roles.any((role) => role.roleCode == duijieRoleCode)) {
+      ScanMakerScreen makerScreen = const ScanMakerScreen();
+      _screens.add(makerScreen);
     }
 
-
-    if(roles.contains("jianhuo")){
-       _screens.add (WaveListScreen(user: widget.user));
+    if (roles.any((role) => role.roleCode == jianhuoRoleCode)) {
+      _screens.add(WaveListScreen(user: widget.user));
     }
 
-
-    if(roles.contains("songhuo")){
+    if (roles.any((role) => role.roleCode == songhuoRoleCode)) {
       ScanShipperScreen shipperScreen = const ScanShipperScreen();
       _screens.add(shipperScreen);
     }
-    _screens.add( MyScreen(user: widget.user));
 
+    //获取扫码类型角色
+    filteredRoles = roles.where((role) => role.roleType == 1).toList();
+
+    // 循环处理其他角色
+    for (Role role in filteredRoles) {
+      if (!inList(role.roleCode)) {
+        // 如果角色代码不在常量列表中，则生成 ScanGeneralScreen
+        ScanGeneralScreen otherScreen = ScanGeneralScreen(role: role);
+        _screens.add(otherScreen);
+      }
+    }
+    _screens.add(MyScreen(user: widget.user));
   }
 
- 
-
   Future<void> _onSelect(int index, BottomNavigationBarItem item) async {
-
-
     // 启动当前选中屏幕的扫码器
-    if (item.label == '配货' || item.label == '对接' || item.label == '送货') {
+    if (item.label == '配货' ||
+        item.label == '对接' ||
+        item.label == '送货' ||
+        (roles.any((role) => role.roleName == item.label))) {
       controller.start();
-    }
-    else{
+    } else {
       controller.stop();
     }
     setState(() {
       _currentIndex = index;
     });
-
   }
 
   @override
   Widget build(BuildContext context) {
-
-  
-
-    
-    List<String> roles = widget.user.roleList!.cast<String>();
+    List<Role> roles = widget.user.roleInfoList!.cast<Role>();
+    // 动态创建 BottomNavigationBarItem 列表
+    List<BottomNavigationBarItem> additionalItems = [];
+    for (Role role in roles) {
+      // 根据角色添加 BottomNavigationBarItem
+      if (!inList(role.roleCode) && role.roleType == 1) {
+        additionalItems.add(
+          BottomNavigationBarItem(
+              icon: getIconFromString(role.menuIcon), label: role.roleName),
+        );
+      }
+    }
     // 使用RoleBasedNavBar组件作为底部导航
     return Scaffold(
       body: IndexedStack(
@@ -96,16 +109,17 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
         itemsMake: const [
           BottomNavigationBarItem(icon: Icon(Icons.construction), label: '对接'),
         ],
-          itemsPick: const [
+        itemsPick: const [
           BottomNavigationBarItem(icon: Icon(Icons.assignment), label: '拣货'),
         ],
         itemsShip: const [
-          BottomNavigationBarItem(icon: Icon(Icons.local_shipping), label: '送货'),
-        ], 
+          BottomNavigationBarItem(
+              icon: Icon(Icons.local_shipping), label: '送货'),
+        ],
+        itemsAdditional: additionalItems,
         itemsMy: const [
           BottomNavigationBarItem(icon: Icon(Icons.person), label: '我的'),
-        ], 
-        
+        ],
         onSelect: _onSelect,
       ),
     );

@@ -7,14 +7,13 @@ import 'constants.dart';
 import 'role_router.dart';
 import 'user_data.dart';
 
-
 // 登出方法，清除SharedPreferences数据并导航到登录页面
-  Future<void> logout(BuildContext context) async {
-    await User.delCurrentUser(); // 清除数据
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) =>  const LoginScreen()), // 替换为您的登录页面
-    );
-  }
+Future<void> logout(BuildContext context) async {
+  await User.delCurrentUser(); // 清除数据
+  Navigator.of(context).pushReplacement(
+    MaterialPageRoute(builder: (context) => const LoginScreen()), // 替换为您的登录页面
+  );
+}
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -28,20 +27,17 @@ class LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  
-
   Future<void> _login() async {
-
-    int loginDevice = 6;
+    int loginDevice = 5;
     if (!kIsWeb) {
-      if(Platform.isAndroid){
+      if (Platform.isAndroid) {
         loginDevice = 2;
       }
-      if(Platform.isIOS){
+      if (Platform.isIOS) {
         loginDevice = 3;
       }
     }
-    
+
     // // 这里应替换为对应的HTTP请求URL和登录逻辑
     var response = await http.post(
       Uri.parse('$httpHost/mobile/login'),
@@ -61,26 +57,24 @@ class LoginScreenState extends State<LoginScreen> {
       if (data['code'] == 0) {
         // 保存登录状态到本地
         User user = User.fromJson(data['data']);
-       
 
-        if(user.roleList == null || user.roleList!.isEmpty){
-             // 显示错误信息
+        if (user.roleInfoList == null || user.roleInfoList!.isEmpty) {
+          // 显示错误信息
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("角色为空，请找管理员添加角色")),
           );
           return;
         }
-        
+
         User.saveCurrentUser(user);
 
-
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => MultiRoleScreen(user: user,)),
-          );
-
-       
-      
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => MultiRoleScreen(
+                    user: user,
+                  )),
+        );
       } else {
         // 显示错误信息
         ScaffoldMessenger.of(context).showSnackBar(
@@ -93,9 +87,7 @@ class LoginScreenState extends State<LoginScreen> {
         const SnackBar(content: Text('网络请求出错')),
       );
     }
-  } 
-
-
+  }
 
   @override
   Widget build(BuildContext context) {

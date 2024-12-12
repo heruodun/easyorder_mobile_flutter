@@ -4,56 +4,65 @@
 
 import 'dart:convert';
 
-WaveList waveListFromJson(String str) => WaveList.fromJson(json.decode(str));
+WaveList waveListFromJson(List<dynamic> json) {
+  return WaveList.fromJson(json);
+}
+
+// WaveList waveListFromJson(String str) => WaveList.fromJson(json.decode(str));
 
 String waveListToJson(WaveList data) => json.encode(data.toJson());
 
 class WaveList {
-    List<Wave> wave;
+  List<Wave> wave;
 
-    WaveList({
-        required this.wave,
-    });
+  WaveList({
+    required this.wave,
+  });
 
-    factory WaveList.fromJson(Map<String, dynamic> json) => WaveList(
-        wave: List<Wave>.from(json["data"].map((x) => Wave.fromJson(x))),
-    );
+  factory WaveList.fromJson(List<dynamic> json) {
+    List<Wave> waves = json.map((waveJson) => Wave.fromJson(waveJson)).toList();
+    return WaveList(wave: waves);
+  }
 
-    Map<String, dynamic> toJson() => {
+  // factory WaveList.fromJson(List<dynamic> json) => WaveList(
+  //       wave: List<Wave>.from(json["data"].map((x) => Wave.fromJson(x))),
+  //     );
+
+  Map<String, dynamic> toJson() => {
         "data": List<dynamic>.from(wave.map((x) => x.toJson())),
-    };
+      };
 }
 
 class Wave {
-    int waveId;
-    String waveAlias;
-    String createMan;
-    dynamic createTime;
-    dynamic updateTime;
-    dynamic firstScanTime;
-    dynamic lastScanTime;
-    WaveDetail? waveDetail;
-    int? status;
-    String? shipIds;
-    int? shipCount;
-    String? shipMan;
+  int waveId;
+  String waveAlias;
+  String createMan;
+  dynamic createTime;
+  dynamic updateTime;
+  dynamic firstScanTime;
+  dynamic lastScanTime;
+  WaveDetail? waveDetail;
+  int? status;
+  String? shipIds;
+  int? shipCount;
+  String? shipMan;
 
-    Wave({
-        required this.waveId,
-        required this.waveAlias,
-        required this.createMan,
-        required this.createTime,
-        required this.updateTime,
-        required this.firstScanTime,
-        required this.lastScanTime,
-        required this.waveDetail,
-        required this.status,
-        required this.shipIds,
-        required this.shipCount,
-        required this.shipMan,
-    });
+  Wave({
+    required this.waveId,
+    required this.waveAlias,
+    required this.createMan,
+    required this.createTime,
+    required this.updateTime,
+    required this.firstScanTime,
+    required this.lastScanTime,
+    required this.waveDetail,
+    required this.status,
+    required this.shipIds,
+    required this.shipCount,
+    required this.shipMan,
+  });
 
-    factory Wave.fromJson(Map<String, dynamic> json) => Wave(
+  factory Wave.fromJson(Map<String, dynamic> json) => Wave(
         waveId: json["waveId"],
         waveAlias: json["waveAlias"],
         createMan: json["createMan"],
@@ -61,14 +70,16 @@ class Wave {
         updateTime: json["updateTime"],
         firstScanTime: json["firstScanTime"],
         lastScanTime: json["lastScanTime"],
-        waveDetail: json["waveDetail"] == null ? null : WaveDetail.fromJson(json["waveDetail"]),
+        waveDetail: json["waveDetail"] == null
+            ? null
+            : WaveDetail.fromJson(json["waveDetail"]),
         status: json["status"],
         shipIds: json["shipIds"],
         shipCount: json["shipCount"],
         shipMan: json["shipMan"],
-    );
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "waveId": waveId,
         "waveAlias": waveAlias,
         "createMan": createMan,
@@ -81,91 +92,94 @@ class Wave {
         "shipIds": shipIds,
         "shipCount": shipCount,
         "shipMan": shipMan,
-    };
+      };
 }
 
 class WaveDetail {
-    List<Address> addresses;
-    int totalCount;
-    int addressCount;
+  List<Address> addresses;
+  int totalCount;
+  int addressCount;
 
-    WaveDetail({
-        required this.addresses,
-        required this.totalCount,
-        required this.addressCount,
-    });
+  WaveDetail({
+    required this.addresses,
+    required this.totalCount,
+    required this.addressCount,
+  });
 
-    
-
-    factory WaveDetail.fromJson(Map<String, dynamic> json) => WaveDetail(
-        addresses: json["addresses"] == null ? [] : List<Address>.from(json["addresses"].map((x) => Address.fromJson(x))),
+  factory WaveDetail.fromJson(Map<String, dynamic> json) => WaveDetail(
+        addresses: json["addresses"] == null
+            ? []
+            : List<Address>.from(
+                json["addresses"].map((x) => Address.fromJson(x))),
         totalCount: json["totalCount"],
         addressCount: json["addressCount"],
-    );
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "addresses": List<dynamic>.from(addresses.map((x) => x.toJson())),
         "totalCount": totalCount,
         "addressCount": addressCount,
-    };
+      };
 }
 
 class Address {
-    String address;
-    int orderCount;
-    List<Order> orders;
+  String address;
+  int orderCount;
+  List<Order> orders;
 
-    Address({
-        required this.address,
-        required this.orderCount,
-        required this.orders,
-    });
+  Address({
+    required this.address,
+    required this.orderCount,
+    required this.orders,
+  });
 
-    factory Address.fromJson(Map<String, dynamic> json) => Address(
+  factory Address.fromJson(Map<String, dynamic> json) => Address(
         address: json["address"],
         orderCount: json["orderCount"],
-        orders: json["orders"] == null ? [] : List<Order>.from(json["orders"].map((x) => Order.fromJson(x))),
-    );
+        orders: json["orders"] == null
+            ? []
+            : List<Order>.from(json["orders"].map((x) => Order.fromJson(x))),
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "address": address,
         "orderCount": orderCount,
         "orders": List<dynamic>.from(orders.map((x) => x.toJson())),
-    };
+      };
 }
 
 class Order {
-    String curStatus;
-    String address;
-    dynamic printer;
-    dynamic curTime;
-    String content;
-    DateTime updateTime;
-    dynamic curMan;
-    int waveId;
-    dynamic printTime;
-    dynamic syncStatus;
-    int id;
-    int orderId;
-    dynamic orderTrace;
+  String curStatus;
+  String address;
+  dynamic printer;
+  dynamic curTime;
+  String content;
+  DateTime updateTime;
+  dynamic curMan;
+  int waveId;
+  dynamic printTime;
+  dynamic syncStatus;
+  int id;
+  int orderId;
+  dynamic orderTrace;
 
-    Order({
-        required this.curStatus,
-        required this.address,
-        required this.printer,
-        required this.curTime,
-        required this.content,
-        required this.updateTime,
-        required this.curMan,
-        required this.waveId,
-        required this.printTime,
-        required this.syncStatus,
-        required this.id,
-        required this.orderId,
-        required this.orderTrace,
-    });
+  Order({
+    required this.curStatus,
+    required this.address,
+    required this.printer,
+    required this.curTime,
+    required this.content,
+    required this.updateTime,
+    required this.curMan,
+    required this.waveId,
+    required this.printTime,
+    required this.syncStatus,
+    required this.id,
+    required this.orderId,
+    required this.orderTrace,
+  });
 
-    factory Order.fromJson(Map<String, dynamic> json) => Order(
+  factory Order.fromJson(Map<String, dynamic> json) => Order(
         curStatus: json["cur_status"],
         address: json["address"],
         printer: json["printer"],
@@ -179,9 +193,9 @@ class Order {
         id: json["id"],
         orderId: json["order_id"],
         orderTrace: json["order_trace"],
-    );
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "cur_status": curStatus,
         "address": address,
         "printer": printer,
@@ -195,6 +209,5 @@ class Order {
         "id": id,
         "order_id": orderId,
         "order_trace": orderTrace,
-    };
+      };
 }
-

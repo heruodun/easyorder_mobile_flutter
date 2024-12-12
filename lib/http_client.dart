@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:easyorder_mobile/user_data.dart';
 import 'package:http/http.dart' as http;
 
 class HttpResponseModel {
@@ -17,10 +18,11 @@ class HttpResponseModel {
 
 Future<HttpResponseModel> httpClient({
   required Uri uri,
-  required dynamic body,
+  dynamic body,
   required String method,
 }) async {
   late http.Response response;
+  User? user = await User.getCurrentUser();
 
   try {
     if (method.toUpperCase() == 'POST') {
@@ -28,33 +30,47 @@ Future<HttpResponseModel> httpClient({
         uri,
         headers: {
           'Content-Type': 'application/json',
+          'X-Access-Token': user!.token
         },
         body: json.encode(body),
       );
     } else if (method.toUpperCase() == 'GET') {
-      response = await http.get(uri);
-    } else if (method.toUpperCase() == 'PUT') {
-      response = await http.post(
+      response = await http.get(
         uri,
         headers: {
           'Content-Type': 'application/json',
+          'X-Access-Token': user!.token
+        },
+      );
+    } else if (method.toUpperCase() == 'PUT') {
+      response = await http.put(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Access-Token': user!.token
         },
         body: json.encode(body),
       );
     } else if (method.toUpperCase() == 'DELETE') {
-      response = await http.delete(uri);
-    }
-    else {
+      response = await http.delete(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Access-Token': user!.token
+        },
+      );
+    } else {
       throw Exception('Unsupported HTTP method');
     }
 
-    final Map<String, dynamic> responseBody = json.decode(utf8.decode(response.bodyBytes));
+    final Map<String, dynamic> responseBody =
+        json.decode(utf8.decode(response.bodyBytes));
 
     bool isSuccess = response.statusCode == 200 && responseBody['code'] == 0;
 
     return HttpResponseModel(
       statusCode: response.statusCode,
-      data: isSuccess ? responseBody['data'] : null,
+      data: responseBody['data'],
       message: responseBody['msg'],
       isSuccess: isSuccess, // 设置 isSuccess 字段
     );
@@ -68,4 +84,3 @@ Future<HttpResponseModel> httpClient({
     );
   }
 }
-
