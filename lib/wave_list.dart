@@ -61,7 +61,7 @@ class _WaveListScreenState extends State<WaveListScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: const Icon(Icons.add_box, size: 25),
+                icon: const Icon(Icons.add_box, size: 40),
                 onPressed: () {
                   // 显示对话框
                   showDialog(
@@ -97,7 +97,7 @@ class _WaveListScreenState extends State<WaveListScreen> {
                 onDoubleTap: () => _selectDate(context),
                 child: Row(
                   children: [
-                    const Icon(Icons.calendar_today, size: 25),
+                    const Icon(Icons.calendar_today, size: 40),
                     const SizedBox(
                       width: 10,
                       height: 10,
@@ -110,7 +110,7 @@ class _WaveListScreenState extends State<WaveListScreen> {
               IconButton(
                 icon: const Icon(
                   Icons.refresh,
-                  size: 25,
+                  size: 40,
                 ),
                 onPressed: () {
                   fetchData(); // 重新获取数据
@@ -133,8 +133,8 @@ class _WaveListScreenState extends State<WaveListScreen> {
                     index: index, // 将索引传递给WaveItem
                     key: ValueKey(
                         waves[index].waveId), // 使用waveId作为唯一key，如果waveId是唯一的话
-                    addressCount: waves[index].waveDetail!.totalCount,
-                    totalCount: waves[index].waveDetail!.totalCount,
+                    addressCount: waves[index].orderCount,
+                    totalCount: waves[index].orderCount,
                   );
                 },
               ),
@@ -177,19 +177,12 @@ class _WaveListScreenState extends State<WaveListScreen> {
   }
 
   void _addNewWave() async {
-    User? user = await User.getCurrentUser();
-    // 假设你要创建并传递一个新的Wave对象，你需要根据实际情况来构建它
-
-    // 将Wave对象序列化为JSON
-    final waveJson = {'createMan': user!.actualName};
-
-    print(waveJson);
-
     try {
       // 发送HTTP POST请求，将Wave保存到服务器上
       final response = await httpClient(
-        uri: Uri.parse('$httpHost/app/waveInfo/add'), // 替换为你的API端点
-        body: json.encode(waveJson), method: 'POST',
+        uri: Uri.parse('$httpHost/app/order/wave/create'), // 替换为你的API端点
+        body: {},
+        method: 'POST',
       );
 
       // 检查服务器响应是否成功
@@ -251,7 +244,7 @@ class WaveItemScreenState extends State<WaveItem> {
           ),
 
           subtitle: Text(
-              '地址 ${wave.waveDetail?.addressCount}, 订单 ${wave.waveDetail?.totalCount}\n${wave.createTime}'),
+              '地址 ${wave.addressCount}, 订单 ${wave.orderCount}\n${wave.createTime}'),
           leading: Text(
             '${index + 1}',
             style: Theme.of(context).textTheme.bodyMedium,
@@ -297,6 +290,7 @@ class WaveItemScreenState extends State<WaveItem> {
                       icon: const Icon(
                         Icons.edit,
                         color: Colors.blue,
+                        size: 40,
                       ),
                       onPressed: () async {
                         addItemDialog(wave.waveId);
@@ -306,6 +300,7 @@ class WaveItemScreenState extends State<WaveItem> {
                       icon: const Icon(
                         Icons.add,
                         color: Colors.green,
+                        size: 40,
                       ),
                       onPressed: () async {
                         // 使用Navigator.push方法来跳转到ScanScreen，并传递新的Wave对象
@@ -324,6 +319,7 @@ class WaveItemScreenState extends State<WaveItem> {
                       icon: const Icon(
                         Icons.remove,
                         color: Colors.red,
+                        size: 40,
                       ),
                       onPressed: () async {
                         // 实现减少数量逻辑

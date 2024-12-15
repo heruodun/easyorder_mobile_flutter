@@ -73,7 +73,7 @@ class _ScanPickerState extends ScanScreenState<ScanPickerScreen> {
           ListTile(
             title: Text('波次编号: ${_wave.waveId}'),
             subtitle: Text(
-                '共计${_wave.waveDetail!.addressCount}个地址, ${_wave.waveDetail?.totalCount}个订单\n创建时间: ${_wave.createTime}'),
+                '共计${_wave.addressCount}个地址, ${_wave.orderCount}个订单\n创建时间: ${_wave.createTime}'),
             onTap: () {
               // 点击时导航到波次详情页面
               Navigator.push(
@@ -130,8 +130,6 @@ class _ScanPickerState extends ScanScreenState<ScanPickerScreen> {
       }
       super.scanResultColor = Colors.yellow;
     } else {
-      User? user = await User.getCurrentUser();
-
       try {
         var response = await httpClient(
           uri: Uri.parse('$httpHost/app/order/wave/order/addOrDel'),
@@ -139,9 +137,7 @@ class _ScanPickerState extends ScanScreenState<ScanPickerScreen> {
             'waveId': waveId,
             'waveAlias': widget.wave!.waveAlias,
             'orderId': orderId,
-            'operator': user!.actualName,
             'operation': type,
-            'waveCreateTime': widget.wave!.createTime
           },
           method: "POST",
         );

@@ -83,7 +83,7 @@ class ScanShipperState extends ScanScreenState<ScanShipperScreen> {
 
     try {
       final response = await httpClient(
-          uri: Uri.parse('$httpHost/app/order/wave/queryByOrder/$orderId'),
+          uri: Uri.parse('$httpHost/app/order/wave/queryByOrder/$result'),
           method: "GET");
 
       if (response.isSuccess) {
@@ -133,17 +133,4 @@ void setProcessed(int orderId) async {
 
 String _makeScanKey(int orderId) {
   return '$prefix4shipper$orderId';
-}
-
-// 从服务器获取波次数据的函数
-Future<Wave> fetchWavesByOrderId(int orderId) async {
-  final response = await httpClient(
-      uri: Uri.parse('$httpHost/app/order/wave/queryByOrder/$orderId'),
-      method: "GET");
-
-  if (response.statusCode == 200) {
-    return Wave.fromJson(response.data);
-  } else {
-    throw Exception(response.message);
-  }
 }

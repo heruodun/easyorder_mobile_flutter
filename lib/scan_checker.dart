@@ -56,14 +56,11 @@ class ScanCheckerState extends ScanScreenState<ScanCheckerScreen> {
       super.scanResultText = "已配货扫码\n$orderId";
       super.scanResultColor = Colors.yellow;
     } else {
-      User? user = await User.getCurrentUser();
-
       try {
         var response = await httpClient(
           uri: Uri.parse('$httpHost/app/order/scan'),
           body: {
             'orderIdQr': result,
-            'operator': user!.actualName,
             'operation': peihuoRoleCode,
           },
           method: 'POST',

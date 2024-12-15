@@ -4,11 +4,13 @@ import 'package:http/http.dart' as http;
 
 class HttpResponseModel {
   final int statusCode;
+  final int code;
   final dynamic data;
   final String message;
   final bool isSuccess; // 新增的字段
 
   HttpResponseModel({
+    required this.code,
     required this.statusCode,
     required this.data,
     required this.message,
@@ -72,12 +74,14 @@ Future<HttpResponseModel> httpClient({
       statusCode: response.statusCode,
       data: responseBody['data'],
       message: responseBody['msg'],
+      code: responseBody['code'],
       isSuccess: isSuccess, // 设置 isSuccess 字段
     );
   } catch (e) {
     // 处理网络请求异常
     return HttpResponseModel(
       statusCode: 500,
+      code: -1,
       data: null,
       message: '网络异常',
       isSuccess: false, // 异常时设置为 false

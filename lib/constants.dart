@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 const httpHost = 'http://yangyi.ddns.net:1024';
+// const httpHost = 'http://192.168.1.88:1024';
 
 // 配货
 const prefix4checker = "checker_";
@@ -58,9 +59,14 @@ String formatTimestamp(int timestamp) {
   return formatter.format(date);
 }
 
+String formatDatetime(DateTime dateTime) {
+  final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
+  return formatter.format(dateTime);
+}
+
 // 计算时间差并格式化为 "X小时X分钟" 毫秒时间戳
-String formatTimeDifference(int start, int end) {
-  final Duration diff = Duration(milliseconds: end - start);
+String formatTimeDifference(DateTime start, DateTime end) {
+  final Duration diff = end.difference(start);
   final hours = diff.inHours;
   final minutes = diff.inMinutes % 60;
   return '$hours小时$minutes分钟';
@@ -100,7 +106,7 @@ Icon getIconFromString(String iconName) {
       return const Icon(Icons.access_alarm);
     case 'back_hand':
       return const Icon(Icons.back_hand);
-    case 'camera':
+    case 'cable':
       return const Icon(Icons.cable);
 
     default:

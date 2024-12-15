@@ -41,14 +41,12 @@ class _WaveDetailsShipperScreenState extends WaveDetailsScreenState {
   }
 
   Future<void> _makeHttpRequest(BuildContext context, int waveId) async {
-    User? user = await User.getCurrentUser();
     // 将Wave对象序列化为JSON
-    final waveJson = {'operator': user!.actualName, 'waveId': waveId};
     try {
       // 发送HTTP POST请求，将Wave保存到服务器上
       final response = await httpClient(
         uri: Uri.parse('$httpHost/app/order/wave/ship'),
-        body: json.encode(waveJson),
+        body: {'waveId': waveId},
         method: "POST",
       );
 

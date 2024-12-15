@@ -1,7 +1,3 @@
-// To parse this JSON data, do
-//
-//     final waveList = waveListFromJson(jsonString);
-
 import 'dart:convert';
 
 WaveList waveListFromJson(List<dynamic> json) {
@@ -41,7 +37,9 @@ class Wave {
   dynamic updateTime;
   dynamic firstScanTime;
   dynamic lastScanTime;
-  WaveDetail? waveDetail;
+  List<Address> addressOrders;
+  int addressCount;
+  int orderCount;
   int? status;
   String? shipIds;
   int? shipCount;
@@ -55,7 +53,9 @@ class Wave {
     required this.updateTime,
     required this.firstScanTime,
     required this.lastScanTime,
-    required this.waveDetail,
+    required this.addressOrders,
+    required this.addressCount,
+    required this.orderCount,
     required this.status,
     required this.shipIds,
     required this.shipCount,
@@ -70,9 +70,12 @@ class Wave {
         updateTime: json["updateTime"],
         firstScanTime: json["firstScanTime"],
         lastScanTime: json["lastScanTime"],
-        waveDetail: json["waveDetail"] == null
-            ? null
-            : WaveDetail.fromJson(json["waveDetail"]),
+        addressOrders: json["addressOrders"] == null
+            ? []
+            : List<Address>.from(
+                json["addressOrders"].map((x) => Address.fromJson(x))),
+        addressCount: json["addressCount"],
+        orderCount: json["orderCount"],
         status: json["status"],
         shipIds: json["shipIds"],
         shipCount: json["shipCount"],
@@ -87,7 +90,8 @@ class Wave {
         "updateTime": updateTime.toIso8601String(),
         "firstScanTime": firstScanTime,
         "lastScanTime": lastScanTime,
-        "waveDetail": waveDetail == null ? "" : toJson(),
+        "addressOrders":
+            List<dynamic>.from(addressOrders.map((x) => x.toJson())),
         "status": status,
         "shipIds": shipIds,
         "shipCount": shipCount,
@@ -149,65 +153,102 @@ class Address {
 }
 
 class Order {
-  String curStatus;
-  String address;
-  dynamic printer;
-  dynamic curTime;
-  String content;
-  DateTime updateTime;
-  dynamic curMan;
-  int waveId;
-  dynamic printTime;
-  dynamic syncStatus;
   int id;
   int orderId;
-  dynamic orderTrace;
+  String address;
+  dynamic detail; // 使用 dynamic，建议使用更具体的类型
+  List<TraceEle> trace; // 确保 TraceEle 类已定义
+  String curStatus;
+  DateTime curTime;
+  String curOperator;
+  String creator;
+  int waveId;
+  DateTime createTime;
+  DateTime updateTime;
 
+  // 构造方法
   Order({
-    required this.curStatus,
-    required this.address,
-    required this.printer,
-    required this.curTime,
-    required this.content,
-    required this.updateTime,
-    required this.curMan,
-    required this.waveId,
-    required this.printTime,
-    required this.syncStatus,
     required this.id,
     required this.orderId,
-    required this.orderTrace,
+    required this.address,
+    required this.detail,
+    required this.trace,
+    required this.curStatus,
+    required this.curTime,
+    required this.curOperator,
+    required this.creator,
+    required this.waveId,
+    required this.createTime,
+    required this.updateTime,
   });
 
-  factory Order.fromJson(Map<String, dynamic> json) => Order(
-        curStatus: json["cur_status"],
-        address: json["address"],
-        printer: json["printer"],
-        curTime: json["cur_time"],
-        content: json["content"],
-        updateTime: DateTime.parse(json["update_time"]),
-        curMan: json["cur_man"],
-        waveId: json["wave_id"],
-        printTime: json["print_time"],
-        syncStatus: json["sync_status"],
-        id: json["id"],
-        orderId: json["order_id"],
-        orderTrace: json["order_trace"],
-      );
+  // fromJson 方法
+  factory Order.fromJson(Map<String, dynamic> json) {
+    return Order(
+      id: json['id'],
+      orderId: json['orderId'],
+      address: json['address'],
+      detail: json['detail'], // 这里可以根据需要进行类型转换
+      trace: json['trace'] != null && json['trace'] is List
+          ? (json['trace'] as List).map((i) => TraceEle.fromJson(i)).toList()
+          : [],
+      // trace: (json['trace'] as List).map((i) => TraceEle.fromJson(i)).toList(),
+      curStatus: json['curStatus'],
+      curTime: DateTime.parse(json['curTime']),
+      curOperator: json['curOperator'],
+      creator: json['creator'],
+      waveId: json['waveId'],
+      createTime: DateTime.parse(json['createTime']),
+      updateTime: DateTime.parse(json['updateTime']),
+    );
+  }
 
-  Map<String, dynamic> toJson() => {
-        "cur_status": curStatus,
-        "address": address,
-        "printer": printer,
-        "cur_time": curTime,
-        "content": content,
-        "update_time": updateTime.toIso8601String(),
-        "cur_man": curMan,
-        "wave_id": waveId,
-        "print_time": printTime,
-        "sync_status": syncStatus,
-        "id": id,
-        "order_id": orderId,
-        "order_trace": orderTrace,
-      };
+  // toJson 方法
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'orderId': orderId,
+      'address': address,
+      'detail': detail, // 这里也可以根据需要进行类型转换
+      'trace': trace.map((e) => e.toJson()).toList(),
+      'curStatus': curStatus,
+      'curTime': curTime.toIso8601String(),
+      'curOperator': curOperator,
+      'creator': creator,
+      'waveId': waveId,
+      'createTime': createTime.toIso8601String(),
+      'updateTime': updateTime.toIso8601String(),
+    };
+  }
+}
+
+class TraceEle {
+  String operator;
+  String operation;
+  DateTime time;
+
+  // 构造方法
+  TraceEle({
+    required this.operator,
+    required this.operation,
+    required this.time,
+  });
+
+  // 从JSON构造TraceEle对象
+  factory TraceEle.fromJson(Map<String, dynamic> json) {
+    return TraceEle(
+      operator: json['operator'],
+      operation: json['operation'],
+      time: DateTime.parse(json['time']), // 解析时间字符串为LocalDateTime
+    );
+  }
+
+  // 将TraceEle对象序列化为JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'operator': operator,
+      'operation': operation,
+      'time': time.toIso8601String(), // 转换为字符串
+    };
+  }
 }

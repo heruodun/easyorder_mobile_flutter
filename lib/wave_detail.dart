@@ -103,7 +103,7 @@ abstract class WaveDetailsScreenState extends State<WaveDetailsScreen> {
     int? shipCount = widget.wave.shipCount;
 
     String showWaveInfo =
-        "波次编号: ${_wave.waveId}，共计: ${_wave.waveDetail!.addressCount}个地址，共计：${_wave.waveDetail!.totalCount}个订单\n时间：${_wave.createTime}\n送货单数量：$shipCount";
+        "波次编号: ${_wave.waveId}，共计: ${_wave.addressCount}个地址，共计：${_wave.orderCount}个订单\n时间：${_wave.createTime}\n送货单数量：$shipCount";
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -122,7 +122,7 @@ abstract class WaveDetailsScreenState extends State<WaveDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                ..._wave.waveDetail!.addresses.map(
+                ..._wave.addressOrders.map(
                   (addressSummary) {
                     return Card(
                       margin: const EdgeInsets.symmetric(
@@ -148,12 +148,14 @@ abstract class WaveDetailsScreenState extends State<WaveDetailsScreen> {
                               : Colors.white; // 偶数索引使用浅灰色, 奇数索引使用白色
 
                           String printTimeStr =
-                              formatTimestamp(orderDetail.printTime);
+                              formatDatetime(orderDetail.createTime);
                           String curTimeStr =
-                              formatTimestamp(orderDetail.curTime);
+                              formatDatetime(orderDetail.curTime);
+                          String differenceTimeStr = formatTimeDifference(
+                              orderDetail.createTime, orderDetail.curTime);
 
                           String content =
-                              parseOrderContent(orderDetail.content);
+                              parseOrderContent(orderDetail.detail);
 
                           String orderIdStr = orderDetail.orderId.toString();
 
@@ -175,14 +177,8 @@ abstract class WaveDetailsScreenState extends State<WaveDetailsScreen> {
                                     Row(
                                       children: [
                                         const Icon(Icons.hourglass_bottom,
-                                            size: 14, color: Colors.blue),
-                                        Text(
-                                            formatTimeDifference(
-                                                orderDetail.printTime,
-                                                orderDetail.curTime),
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleSmall)
+                                            size: 20, color: Colors.blue),
+                                        Text(differenceTimeStr),
                                       ],
                                     )
                                   ],
@@ -190,22 +186,21 @@ abstract class WaveDetailsScreenState extends State<WaveDetailsScreen> {
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('地址: ${orderDetail.address}'),
-                                    Text('处理时间: $curTimeStr'),
+                                    Text('当前处理: $curTimeStr'),
                                     Text('打单时间: $printTimeStr'),
                                     const Center(
                                       child: Icon(Icons.shopping_bag,
-                                          size: 14, color: Colors.blue),
+                                          size: 20, color: Colors.blue),
                                     ),
                                     Text(content),
-                                    const Center(
-                                      child: Icon(Icons.linear_scale_sharp,
-                                          size: 14, color: Colors.blue),
-                                    ),
-                                    TimelineWidget(
-                                      timelines:
-                                          parseTimeLine(orderDetail.orderTrace),
-                                    ),
+                                    // const Center(
+                                    //   child: Icon(Icons.linear_scale_sharp,
+                                    //       size: 14, color: Colors.blue),
+                                    // ),
+                                    // TimelineWidget(
+                                    //   timelines:
+                                    //       parseTimeLine(orderDetail.trace),
+                                    // ),
                                   ],
                                 ),
                                 isThreeLine: true,
