@@ -4,7 +4,6 @@ import 'package:easyorder_mobile/scan.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'constants.dart';
-import 'user_data.dart';
 import 'wave_data.dart';
 import 'package:vibration/vibration.dart';
 

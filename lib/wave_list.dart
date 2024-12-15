@@ -4,7 +4,6 @@ import 'package:easyorder_mobile/scan_picker.dart';
 import 'package:easyorder_mobile/wave_detail_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // 用于格式化日期
-import 'dart:convert';
 import 'constants.dart';
 import 'user_data.dart';
 import 'wave_data.dart';

@@ -1,10 +1,8 @@
-import 'dart:convert';
 import 'package:easyorder_mobile/http_client.dart';
 import 'package:easyorder_mobile/wave_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:vibration/vibration.dart';
 import 'constants.dart';
-import 'user_data.dart';
 
 class WaveDetailsShipperScreen extends WaveDetailsScreen {
   // 构造函数：接收一个 Wave 对象并将其传递给父类构造函数
