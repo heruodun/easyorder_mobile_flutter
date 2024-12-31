@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:easyorder_mobile/user_data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_scankit/flutter_scankit.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 import 'bottom_nav_bar.dart';
@@ -9,14 +10,7 @@ import 'scanner_button_widgets.dart';
 import 'scanner_error_widget.dart';
 import 'package:beep_player/beep_player.dart';
 
-MobileScannerController controller = MobileScannerController(
-  torchEnabled: false, useNewCameraSelector: true,
-  // formats: [BarcodeFormat.qrCode]
-  // facing: CameraFacing.front,
-  // detectionSpeed: DetectionSpeed.normal
-  // detectionTimeoutMs: 1000,
-  returnImage: true,
-);
+const boxSize = 200.0;
 
 abstract class ScanScreenStateful extends StatefulWidget {
   const ScanScreenStateful({super.key});
@@ -27,8 +21,10 @@ abstract class ScanScreenStateful extends StatefulWidget {
 
 abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
     with RouteAware, WidgetsBindingObserver {
-  Barcode? _barcode;
-  StreamSubscription<Object?>? _subscription;
+  final ScanKitController _controller = ScanKitController();
+
+  ScanResult? _barcode;
+
   bool _isProcessing = false;
   bool _isResultDisplayed = false; // 控制处理结果的显示与隐藏
   late String scanResultText = "扫码中...";
@@ -40,48 +36,77 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
   void initState() {
     super.initState();
     // WidgetsBinding.instance.addObserver(this);
-    _subscription = controller.barcodes.listen(_handleBarcode);
 
-    controller.start();
+    _controller.onResult.listen(_handleBarcode);
 
     BeepPlayer.load(_beepFile);
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!controller.value.isInitialized) {
-      return;
-    }
-
-    switch (state) {
-      case AppLifecycleState.detached:
-      case AppLifecycleState.hidden:
-      case AppLifecycleState.paused:
-        // unawaited(controller.stop());
-        return;
-      case AppLifecycleState.resumed:
-        _subscription = controller.barcodes.listen(_handleBarcode);
-        unawaited(controller.start());
-        break;
-      case AppLifecycleState.inactive:
-        unawaited(_subscription?.cancel());
-        _subscription = null;
-        unawaited(controller.stop());
-    }
-  }
-
   Widget buildScanScreen(BuildContext context) {
+    var screenWidth = MediaQuery.of(context).size.width;
+    var screenHeight = MediaQuery.of(context).size.height;
+    var left = screenWidth / 2 - boxSize / 2;
+    var top = screenHeight / 2 - boxSize / 2;
+    var rect = Rect.fromLTWH(left, top, boxSize, boxSize);
     return Stack(
       children: [
-        MobileScanner(
-          controller: controller,
-          errorBuilder: (context, error, child) {
-            return ScannerErrorWidget(error: error);
-          },
-          // fit: BoxFit.contain,
+        ScanKitWidget(
+            controller: _controller,
+            continuouslyScan: false,
+            boundingBox: rect),
+
+        Align(
+          alignment: Alignment.topCenter,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                    size: 28,
+                  )),
+              IconButton(
+                  onPressed: () {
+                    _controller.switchLight();
+                  },
+                  icon: const Icon(
+                    Icons.lightbulb_outline_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  )),
+              IconButton(
+                  onPressed: () {
+                    _controller.pickPhoto();
+                  },
+                  icon: const Icon(
+                    Icons.picture_in_picture_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ))
+            ],
+          ),
         ),
 
         _buildResultLayer(), // 处理结果
+
+        Align(
+          alignment: Alignment.center,
+          child: Container(
+            width: boxSize,
+            height: boxSize,
+            decoration: const BoxDecoration(
+              border: Border(
+                  left: BorderSide(color: Colors.orangeAccent, width: 2),
+                  right: BorderSide(color: Colors.orangeAccent, width: 2),
+                  top: BorderSide(color: Colors.orangeAccent, width: 2),
+                  bottom: BorderSide(color: Colors.orangeAccent, width: 2)),
+            ),
+          ),
+        ),
 
         Align(
           alignment: Alignment.bottomCenter,
@@ -92,11 +117,7 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ToggleFlashlightButton(controller: controller),
-                // StartStopMobileScannerButton(controller: controller),
                 Expanded(child: Center(child: _buildBarcode(_barcode))),
-                SwitchCameraButton(controller: controller),
-                AnalyzeImageFromGalleryButton(controller: controller),
               ],
             ),
           ),
@@ -130,7 +151,9 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
     );
   }
 
-  void _handleBarcode(BarcodeCapture barcodes) {
+  void _handleBarcode(ScanResult barcode) {
+    debugPrint(
+        "scanning result:value=${barcode.originalValue} scanType=${barcode.scanType}");
     final provider =
         Provider.of<BottomNavigationBarProvider>(context, listen: false);
     if (mounted && canProcess(provider.currentLabel)) {
@@ -140,9 +163,9 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
       if (!_isProcessing) {
         setState(() {
           _isProcessing = true;
-          _barcode = barcodes.barcodes.firstOrNull;
+          _barcode = barcode;
           if (_barcode != null) {
-            _processScanResult(_barcode!.displayValue); // 处理扫描结果
+            _processScanResult(_barcode!.originalValue); // 处理扫描结果
           } else {
             print("null");
           }
@@ -151,7 +174,7 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
     }
   }
 
-  Widget _buildBarcode(Barcode? value) {
+  Widget _buildBarcode(ScanResult? value) {
     if (value == null) {
       return const Text(
         '请扫码!',
@@ -161,7 +184,7 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
     }
 
     return Text(
-      value.displayValue ?? '无扫码结果',
+      value.originalValue ?? '无扫码结果',
       overflow: TextOverflow.fade,
       style: const TextStyle(color: Colors.white),
     );
@@ -210,10 +233,8 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
   Future<void> dispose() async {
     routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
-    unawaited(_subscription?.cancel());
-    _subscription = null;
+    _controller.dispose();
     super.dispose();
-    // await controller.dispose();
     BeepPlayer.unload(_beepFile);
   }
 
@@ -223,27 +244,27 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
     routeObserver.subscribe(this, ModalRoute.of(context)!);
   }
 
-  @override
-  void didPush() {
-    // 当前页面推入时
-    controller.start();
-  }
+  // @override
+  // void didPush() {
+  //   // 当前页面推入时
+  //   controller.start();
+  // }
 
-  @override
-  void didPopNext() {
-    // 当从其他页面返回到当前页面时
-    controller.start();
-  }
+  // @override
+  // void didPopNext() {
+  //   // 当从其他页面返回到当前页面时
+  //   controller.start();
+  // }
 
-  @override
-  void didPop() {
-    // 当前页面被弹出时
-    controller.stop();
-  }
+  // @override
+  // void didPop() {
+  //   // 当前页面被弹出时
+  //   controller.stop();
+  // }
 
-  @override
-  void didPushNext() {
-    // 当前页面推入其他页面时
-    controller.stop();
-  }
+  // @override
+  // void didPushNext() {
+  //   // 当前页面推入其他页面时
+  //   controller.stop();
+  // }
 }

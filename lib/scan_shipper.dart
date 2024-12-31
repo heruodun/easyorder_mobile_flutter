@@ -51,7 +51,7 @@ class ScanShipperState extends ScanScreenState<ScanShipperScreen> {
   }
 
   void _navigateToScreen(Wave wave) {
-    controller.stop(); // 暂停扫描
+    // controller.stop(); // 暂停扫描
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -61,7 +61,7 @@ class ScanShipperState extends ScanScreenState<ScanShipperScreen> {
     ).then((_) {
       // 当从ScreenX返回时，这里的代码被执行
       if (mounted) {
-        controller.start(); // 恢复扫描
+        // controller.start(); // 恢复扫描
       }
     });
   }

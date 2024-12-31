@@ -72,9 +72,9 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
         item.label == '对接' ||
         item.label == '送货' ||
         (roles.any((role) => role.roleName == item.label))) {
-      controller.start();
+      // controller.start();
     } else {
-      controller.stop();
+      // controller.stop();
     }
     setState(() {
       _currentIndex = index;

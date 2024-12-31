@@ -3,6 +3,7 @@ allprojects {
         google()
         mavenCentral()
         maven { url 'https://mirrors.tuna.tsinghua.edu.cn/flutter/download.flutter.io' }
+        maven {url 'https://developer.huawei.com/repo/'}
     }
 }
 
