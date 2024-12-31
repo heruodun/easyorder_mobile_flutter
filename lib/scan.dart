@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:easyorder_mobile/user_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_scankit/flutter_scankit.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 import 'bottom_nav_bar.dart';
 import 'main.dart';
@@ -10,7 +9,8 @@ import 'scanner_button_widgets.dart';
 import 'scanner_error_widget.dart';
 import 'package:beep_player/beep_player.dart';
 
-const boxSize = 200.0;
+const boxSize = 400.0;
+final ScanKitController _controller = ScanKitController();
 
 abstract class ScanScreenStateful extends StatefulWidget {
   const ScanScreenStateful({super.key});
@@ -21,8 +21,6 @@ abstract class ScanScreenStateful extends StatefulWidget {
 
 abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
     with RouteAware, WidgetsBindingObserver {
-  final ScanKitController _controller = ScanKitController();
-
   ScanResult? _barcode;
 
   bool _isProcessing = false;
@@ -45,15 +43,14 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
   Widget buildScanScreen(BuildContext context) {
     var screenWidth = MediaQuery.of(context).size.width;
     var screenHeight = MediaQuery.of(context).size.height;
-    var left = screenWidth / 2 - boxSize / 2;
-    var top = screenHeight / 2 - boxSize / 2;
+    var left = screenWidth - boxSize;
+    var top = screenHeight - boxSize;
     var rect = Rect.fromLTWH(left, top, boxSize, boxSize);
-    return Stack(
+    return SafeArea(
+        child: Stack(
       children: [
         ScanKitWidget(
-            controller: _controller,
-            continuouslyScan: false,
-            boundingBox: rect),
+            controller: _controller, continuouslyScan: true, boundingBox: rect),
 
         Align(
           alignment: Alignment.topCenter,
@@ -123,7 +120,7 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
           ),
         ),
       ],
-    );
+    ));
   }
 
   @override

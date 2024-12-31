@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-const httpHost = 'http://yangyi.ddns.net:1024';
-// const httpHost = 'http://192.168.1.88:1024';
+// const httpHost = 'http://yangyi.ddns.net:1024';
+const httpHost = 'http://192.168.1.88:1024';
 
 // 配货
 const prefix4checker = "checker_";

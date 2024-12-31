@@ -38,31 +38,31 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
       _screens.add(checkerScreen);
     }
 
-    if (roles.any((role) => role.roleCode == duijieRoleCode)) {
-      ScanMakerScreen makerScreen = const ScanMakerScreen();
-      _screens.add(makerScreen);
-    }
+    // if (roles.any((role) => role.roleCode == duijieRoleCode)) {
+    //   ScanMakerScreen makerScreen = const ScanMakerScreen();
+    //   _screens.add(makerScreen);
+    // }
 
-    if (roles.any((role) => role.roleCode == jianhuoRoleCode)) {
-      _screens.add(WaveListScreen(user: widget.user));
-    }
+    // if (roles.any((role) => role.roleCode == jianhuoRoleCode)) {
+    //   _screens.add(WaveListScreen(user: widget.user));
+    // }
 
-    if (roles.any((role) => role.roleCode == songhuoRoleCode)) {
-      ScanShipperScreen shipperScreen = const ScanShipperScreen();
-      _screens.add(shipperScreen);
-    }
+    // if (roles.any((role) => role.roleCode == songhuoRoleCode)) {
+    //   ScanShipperScreen shipperScreen = const ScanShipperScreen();
+    //   _screens.add(shipperScreen);
+    // }
 
-    //获取扫码类型角色
-    filteredRoles = roles.where((role) => role.roleType == 1).toList();
+    // //获取扫码类型角色
+    // filteredRoles = roles.where((role) => role.roleType == 1).toList();
 
-    // 循环处理其他角色
-    for (Role role in filteredRoles) {
-      if (!inList(role.roleCode)) {
-        // 如果角色代码不在常量列表中，则生成 ScanGeneralScreen
-        ScanGeneralScreen otherScreen = ScanGeneralScreen(role: role);
-        _screens.add(otherScreen);
-      }
-    }
+    // // 循环处理其他角色
+    // for (Role role in filteredRoles) {
+    //   if (!inList(role.roleCode)) {
+    //     // 如果角色代码不在常量列表中，则生成 ScanGeneralScreen
+    //     ScanGeneralScreen otherScreen = ScanGeneralScreen(role: role);
+    //     _screens.add(otherScreen);
+    //   }
+    // }
     _screens.add(MyScreen(user: widget.user));
   }
 
