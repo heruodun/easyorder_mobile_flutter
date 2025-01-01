@@ -11,19 +11,22 @@ import 'package:vibration/vibration.dart';
 
 // 通用
 class ScanGeneralScreen extends ScanScreenStateful {
-  final Role role;
-  const ScanGeneralScreen({super.key, required this.role}) : super();
+  const ScanGeneralScreen({super.key}) : super();
 
   @override
   ScanGeneralState createState() => ScanGeneralState();
 }
 
 class ScanGeneralState extends ScanScreenState<ScanGeneralScreen> {
+  late Role role;
   @override
   Widget build(BuildContext context) {
-    Provider.of<BottomNavigationBarProvider>(context, listen: false);
+    BottomNavigationBarProvider provider =
+        Provider.of<BottomNavigationBarProvider>(context, listen: false);
 
-    String operation = widget.role.roleName;
+    role = provider.currentRole;
+
+    String operation = role.roleName;
 
     String appBarStr = "$operation扫码";
 
@@ -37,7 +40,6 @@ class ScanGeneralState extends ScanScreenState<ScanGeneralScreen> {
 
   @override
   void doProcess(String result) async {
-    final Role role = widget.role;
     String operation = role.roleName;
     String operationCode = role.roleCode;
 
@@ -116,6 +118,6 @@ class ScanGeneralState extends ScanScreenState<ScanGeneralScreen> {
 
   @override
   bool canProcess(String currentLabel) {
-    return currentLabel == widget.role.roleName;
+    return currentLabel == role.roleName;
   }
 }

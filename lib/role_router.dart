@@ -33,10 +33,10 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
     roles = widget.user.roleInfoList!.cast<Role>();
     _screens = [];
 
-    if (roles.any((role) => role.roleCode == peihuoRoleCode)) {
-      ScanCheckerScreen checkerScreen = const ScanCheckerScreen();
-      _screens.add(checkerScreen);
-    }
+    // if (roles.any((role) => role.roleCode == peihuoRoleCode)) {
+    //   ScanCheckerScreen checkerScreen = const ScanCheckerScreen();
+    //   _screens.add(checkerScreen);
+    // }
 
     // if (roles.any((role) => role.roleCode == duijieRoleCode)) {
     //   ScanMakerScreen makerScreen = const ScanMakerScreen();
@@ -53,16 +53,15 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
     // }
 
     // //获取扫码类型角色
-    // filteredRoles = roles.where((role) => role.roleType == 1).toList();
+    filteredRoles = roles.where((role) => role.roleType == 1).toList();
 
-    // // 循环处理其他角色
-    // for (Role role in filteredRoles) {
-    //   if (!inList(role.roleCode)) {
-    //     // 如果角色代码不在常量列表中，则生成 ScanGeneralScreen
-    //     ScanGeneralScreen otherScreen = ScanGeneralScreen(role: role);
-    //     _screens.add(otherScreen);
-    //   }
-    // }
+    // 循环处理其他角色
+    ScanGeneralScreen otherScreen = const ScanGeneralScreen();
+    for (Role role in filteredRoles) {
+      if (!inList(role.roleCode)) {
+        _screens.add(otherScreen);
+      }
+    }
     _screens.add(MyScreen(user: widget.user));
   }
 
@@ -85,13 +84,15 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
   Widget build(BuildContext context) {
     List<Role> roles = widget.user.roleInfoList!.cast<Role>();
     // 动态创建 BottomNavigationBarItem 列表
-    List<BottomNavigationBarItem> additionalItems = [];
+    List<RoleBottomNavigationBarItem> additionalItems = [];
     for (Role role in roles) {
       // 根据角色添加 BottomNavigationBarItem
       if (!inList(role.roleCode) && role.roleType == 1) {
         additionalItems.add(
-          BottomNavigationBarItem(
-              icon: getIconFromString(role.menuIcon), label: role.roleName),
+          RoleBottomNavigationBarItem(
+              role: role,
+              icon: getIconFromString(role.menuIcon),
+              label: role.roleName),
         );
       }
     }
@@ -103,19 +104,19 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
       ),
       bottomNavigationBar: RoleBasedNavBar(
         roles: roles,
-        itemsCheck: const [
-          BottomNavigationBarItem(icon: Icon(Icons.checklist), label: '配货'),
-        ],
-        itemsMake: const [
-          BottomNavigationBarItem(icon: Icon(Icons.construction), label: '对接'),
-        ],
-        itemsPick: const [
-          BottomNavigationBarItem(icon: Icon(Icons.assignment), label: '拣货'),
-        ],
-        itemsShip: const [
-          BottomNavigationBarItem(
-              icon: Icon(Icons.local_shipping), label: '送货'),
-        ],
+        // itemsCheck: const [
+        //   RoleBottomNavigationBarItem(icon: Icon(Icons.checklist), label: '配货'),
+        // ],
+        // itemsMake: const [
+        //   BottomNavigationBarItem(icon: Icon(Icons.construction), label: '对接'),
+        // ],
+        // itemsPick: const [
+        //   BottomNavigationBarItem(icon: Icon(Icons.assignment), label: '拣货'),
+        // ],
+        // itemsShip: const [
+        //   BottomNavigationBarItem(
+        //       icon: Icon(Icons.local_shipping), label: '送货'),
+        // ],
         itemsAdditional: additionalItems,
         itemsMy: const [
           BottomNavigationBarItem(icon: Icon(Icons.person), label: '我的'),

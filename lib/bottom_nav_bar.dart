@@ -5,21 +5,21 @@ import 'package:provider/provider.dart';
 
 class RoleBasedNavBar extends StatefulWidget {
   final List<Role> roles;
-  final List<BottomNavigationBarItem> itemsCheck;
-  final List<BottomNavigationBarItem> itemsMake;
-  final List<BottomNavigationBarItem> itemsPick;
-  final List<BottomNavigationBarItem> itemsShip;
+  // final List<RoleBottomNavigationBarItem> itemsCheck;
+  // final List<RoleBottomNavigationBarItem> itemsMake;
+  // final List<RoleBottomNavigationBarItem> itemsPick;
+  // final List<RoleBottomNavigationBarItem> itemsShip;
   final List<BottomNavigationBarItem> itemsMy;
-  final List<BottomNavigationBarItem> itemsAdditional;
+  final List<RoleBottomNavigationBarItem> itemsAdditional;
   final Function(int, BottomNavigationBarItem) onSelect;
 
   const RoleBasedNavBar({
     super.key,
     required this.roles,
-    required this.itemsCheck,
-    required this.itemsMake,
-    required this.itemsPick,
-    required this.itemsShip,
+    // required this.itemsCheck,
+    // required this.itemsMake,
+    // required this.itemsPick,
+    // required this.itemsShip,
     required this.itemsMy,
     required this.itemsAdditional,
     required this.onSelect,
@@ -39,20 +39,20 @@ class _RoleBasedNavBarState extends State<RoleBasedNavBar> {
     super.initState();
     // 假设你在这里构建了`navBarItems`列表
 
-    if (widget.roles.any((role) => role.roleCode == peihuoRoleCode)) {
-      navBarItems.addAll(widget.itemsCheck);
-    }
-    if (widget.roles.any((role) => role.roleCode == duijieRoleCode)) {
-      navBarItems.addAll(widget.itemsMake);
-    }
+    // if (widget.roles.any((role) => role.roleCode == peihuoRoleCode)) {
+    //   navBarItems.addAll(widget.itemsCheck);
+    // }
+    // if (widget.roles.any((role) => role.roleCode == duijieRoleCode)) {
+    //   navBarItems.addAll(widget.itemsMake);
+    // }
 
-    if (widget.roles.any((role) => role.roleCode == jianhuoRoleCode)) {
-      navBarItems.addAll(widget.itemsPick);
-    }
+    // if (widget.roles.any((role) => role.roleCode == jianhuoRoleCode)) {
+    //   navBarItems.addAll(widget.itemsPick);
+    // }
 
-    if (widget.roles.any((role) => role.roleCode == songhuoRoleCode)) {
-      navBarItems.addAll(widget.itemsShip);
-    }
+    // if (widget.roles.any((role) => role.roleCode == songhuoRoleCode)) {
+    //   navBarItems.addAll(widget.itemsShip);
+    // }
 
     navBarItems.addAll(widget.itemsAdditional);
 
@@ -63,6 +63,11 @@ class _RoleBasedNavBarState extends State<RoleBasedNavBar> {
         Provider.of<BottomNavigationBarProvider>(context, listen: false);
     provider.currentIndex = 0; // 或根据需要设置
     provider.currentLabel = navBarItems[provider.currentIndex].label!;
+    BottomNavigationBarItem item = navBarItems[provider.currentIndex];
+
+    if (item is RoleBottomNavigationBarItem) {
+      provider.currentRole = item.role;
+    }
   }
 
   @override
@@ -87,8 +92,12 @@ class _RoleBasedNavBarState extends State<RoleBasedNavBar> {
       onTap: (index) {
         provider.currentIndex = index;
         provider.currentLabel = navBarItems[index].label!;
+        BottomNavigationBarItem item = navBarItems[provider.currentIndex];
+        if (item is RoleBottomNavigationBarItem) {
+          provider.currentRole = item.role;
+        }
 
-        print("provider " + provider.currentLabel);
+        print("provider " + provider.currentRole.roleCode);
 
         setState(() {
           _selectedIndex = index;
@@ -103,6 +112,14 @@ class _RoleBasedNavBarState extends State<RoleBasedNavBar> {
 class BottomNavigationBarProvider with ChangeNotifier {
   int _currentIndex = 0;
   String _currentLabel = "";
+  late Role _currentRole;
+
+  Role get currentRole => _currentRole;
+
+  set currentRole(Role role) {
+    _currentRole = role;
+    notifyListeners();
+  }
 
   int get currentIndex => _currentIndex;
 
@@ -117,4 +134,11 @@ class BottomNavigationBarProvider with ChangeNotifier {
     _currentLabel = label;
     notifyListeners();
   }
+}
+
+class RoleBottomNavigationBarItem extends BottomNavigationBarItem {
+  final Role role;
+
+  RoleBottomNavigationBarItem(
+      {required this.role, required super.icon, required super.label});
 }
