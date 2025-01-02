@@ -5,12 +5,9 @@ import 'package:flutter_scankit/flutter_scankit.dart';
 import 'package:provider/provider.dart';
 import 'bottom_nav_bar.dart';
 import 'main.dart';
-import 'scanner_button_widgets.dart';
-import 'scanner_error_widget.dart';
 import 'package:beep_player/beep_player.dart';
 
 const boxSize = 400.0;
-final ScanKitController _controller = ScanKitController();
 
 abstract class ScanScreenStateful extends StatefulWidget {
   const ScanScreenStateful({super.key});
@@ -22,11 +19,14 @@ abstract class ScanScreenStateful extends StatefulWidget {
 abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
     with RouteAware, WidgetsBindingObserver {
   ScanResult? _barcode;
+  final ScanKitController _controller = ScanKitController();
 
+  StreamSubscription<Object?>? _subscription;
   bool _isProcessing = false;
   bool _isResultDisplayed = false; // 控制处理结果的显示与隐藏
-  late String scanResultText = "扫码中...";
-  late Color scanResultColor = Colors.grey;
+  String scanResultText = "扫码中...";
+  String scanInfoText = "请扫码！";
+  Color scanResultColor = Colors.grey;
 
   static const BeepFile _beepFile = BeepFile('assets/audios/beep.ogg');
 
@@ -35,9 +35,26 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
     super.initState();
     // WidgetsBinding.instance.addObserver(this);
 
-    _controller.onResult.listen(_handleBarcode);
+    _subscription = _controller.onResult.listen(_handleBarcode);
 
     BeepPlayer.load(_beepFile);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+        return;
+      case AppLifecycleState.resumed:
+        _subscription = _controller.onResult.listen(_handleBarcode);
+
+        break;
+      case AppLifecycleState.inactive:
+        unawaited(_subscription?.cancel());
+        _subscription = null;
+    }
   }
 
   Widget buildScanScreen(BuildContext context) {
@@ -46,12 +63,13 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
     var left = screenWidth - boxSize;
     var top = screenHeight - boxSize;
     var rect = Rect.fromLTWH(left, top, boxSize, boxSize);
+    final ScanKitWidget scanKitWidget = ScanKitWidget(
+        controller: _controller, continuouslyScan: true, boundingBox: rect);
+
     return SafeArea(
         child: Stack(
       children: [
-        ScanKitWidget(
-            controller: _controller, continuouslyScan: true, boundingBox: rect),
-
+        scanKitWidget,
         Align(
           alignment: Alignment.topCenter,
           child: Row(
@@ -59,19 +77,10 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
             children: [
               IconButton(
                   onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: Colors.white,
-                    size: 28,
-                  )),
-              IconButton(
-                  onPressed: () {
                     _controller.switchLight();
                   },
                   icon: const Icon(
-                    Icons.lightbulb_outline_rounded,
+                    Icons.flash_on_rounded,
                     color: Colors.white,
                     size: 28,
                   )),
@@ -80,7 +89,7 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
                     _controller.pickPhoto();
                   },
                   icon: const Icon(
-                    Icons.picture_in_picture_rounded,
+                    Icons.image,
                     color: Colors.white,
                     size: 28,
                   ))
@@ -97,10 +106,10 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
             height: boxSize,
             decoration: const BoxDecoration(
               border: Border(
-                  left: BorderSide(color: Colors.orangeAccent, width: 2),
-                  right: BorderSide(color: Colors.orangeAccent, width: 2),
-                  top: BorderSide(color: Colors.orangeAccent, width: 2),
-                  bottom: BorderSide(color: Colors.orangeAccent, width: 2)),
+                  left: BorderSide(color: Colors.blue, width: 1),
+                  right: BorderSide(color: Colors.blue, width: 1),
+                  top: BorderSide(color: Colors.blue, width: 1),
+                  bottom: BorderSide(color: Colors.blue, width: 1)),
             ),
           ),
         ),
@@ -141,7 +150,10 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
         children: [
           Text(
             scanResultText,
-            style: TextStyle(color: scanResultColor, fontSize: 24),
+            style: TextStyle(
+                color: scanResultColor,
+                fontSize: 24,
+                fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -154,7 +166,7 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
     final provider =
         Provider.of<BottomNavigationBarProvider>(context, listen: false);
     if (mounted && canProcess(provider.currentLabel)) {
-      print(
+      debugPrint(
           "cur run wiget ${widget.runtimeType.toString()}  ${provider.currentLabel}");
 
       if (!_isProcessing) {
@@ -164,7 +176,7 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
           if (_barcode != null) {
             _processScanResult(_barcode!.originalValue); // 处理扫描结果
           } else {
-            print("null");
+            debugPrint("_barcode is null");
           }
         });
       }
@@ -172,18 +184,18 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
   }
 
   Widget _buildBarcode(ScanResult? value) {
-    if (value == null) {
-      return const Text(
-        '请扫码!',
-        overflow: TextOverflow.fade,
-        style: TextStyle(color: Colors.white),
-      );
+    if (!_isResultDisplayed) {
+      scanInfoText = "请扫码！";
+    } else {
+      if (value != null) {
+        scanInfoText = value.originalValue;
+      }
     }
 
     return Text(
-      value.originalValue ?? '无扫码结果',
+      scanInfoText,
       overflow: TextOverflow.fade,
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(color: Colors.white, fontSize: 13),
     );
   }
 
@@ -213,12 +225,14 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
     setState(() {
       _isResultDisplayed = true;
     });
-
     await Future.delayed(const Duration(seconds: 1));
 
     setState(() {
       _isResultDisplayed = false;
       _isProcessing = false;
+      scanResultText = "扫码中...";
+      scanResultColor = Colors.grey;
+      scanInfoText = "请扫码！";
     });
   }
 
@@ -230,7 +244,9 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
   Future<void> dispose() async {
     routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
-    _controller.dispose();
+    unawaited(_subscription?.cancel());
+    _subscription = null;
+    _controller!.dispose();
     super.dispose();
     BeepPlayer.unload(_beepFile);
   }
@@ -240,28 +256,4 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
     super.didChangeDependencies();
     routeObserver.subscribe(this, ModalRoute.of(context)!);
   }
-
-  // @override
-  // void didPush() {
-  //   // 当前页面推入时
-  //   controller.start();
-  // }
-
-  // @override
-  // void didPopNext() {
-  //   // 当从其他页面返回到当前页面时
-  //   controller.start();
-  // }
-
-  // @override
-  // void didPop() {
-  //   // 当前页面被弹出时
-  //   controller.stop();
-  // }
-
-  // @override
-  // void didPushNext() {
-  //   // 当前页面推入其他页面时
-  //   controller.stop();
-  // }
 }

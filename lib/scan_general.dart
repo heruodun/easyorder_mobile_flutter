@@ -3,29 +3,26 @@ import 'package:easyorder_mobile/http_client.dart';
 import 'package:easyorder_mobile/scan.dart';
 import 'package:easyorder_mobile/user_role.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'bottom_nav_bar.dart';
 import 'constants.dart';
 import 'package:vibration/vibration.dart';
 
 // 通用
 class ScanGeneralScreen extends ScanScreenStateful {
-  const ScanGeneralScreen({super.key}) : super();
+  final Role role;
+  const ScanGeneralScreen({super.key, required this.role}) : super();
 
   @override
   ScanGeneralState createState() => ScanGeneralState();
 }
 
 class ScanGeneralState extends ScanScreenState<ScanGeneralScreen> {
-  late Role role;
   @override
   Widget build(BuildContext context) {
-    BottomNavigationBarProvider provider =
-        Provider.of<BottomNavigationBarProvider>(context, listen: false);
+    // BottomNavigationBarProvider provider =
+    //     Provider.of<BottomNavigationBarProvider>(context, listen: false);
 
-    role = provider.currentRole;
-
+    Role role = widget.role;
     String operation = role.roleName;
 
     String appBarStr = "$operation扫码";
@@ -40,6 +37,7 @@ class ScanGeneralState extends ScanScreenState<ScanGeneralScreen> {
 
   @override
   void doProcess(String result) async {
+    final Role role = widget.role;
     String operation = role.roleName;
     String operationCode = role.roleCode;
 
@@ -73,7 +71,7 @@ class ScanGeneralState extends ScanScreenState<ScanGeneralScreen> {
           Vibration.vibrate();
           setState(() {
             super.scanResultText = "$operation扫码成功\n$orderId";
-            super.scanResultColor = Colors.blue;
+            super.scanResultColor = Colors.green;
           });
           setProcessed(operationCode, orderId);
         } else {
@@ -118,6 +116,6 @@ class ScanGeneralState extends ScanScreenState<ScanGeneralScreen> {
 
   @override
   bool canProcess(String currentLabel) {
-    return currentLabel == role.roleName;
+    return currentLabel == widget.role.roleName;
   }
 }
