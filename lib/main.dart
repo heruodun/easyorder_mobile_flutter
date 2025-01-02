@@ -1,3 +1,4 @@
+import 'package:easyorder_mobile/home_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'bottom_nav_bar.dart';
@@ -17,7 +18,7 @@ Future<void> main() async {
 
   Widget home = const LoginScreen();
   if (user != null) {
-    home = MultiRoleScreen(user: user);
+    home = HomePage(user: user);
   }
 
   runApp(

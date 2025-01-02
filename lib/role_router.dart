@@ -1,5 +1,6 @@
 import 'package:easyorder_mobile/constants.dart';
 import 'package:easyorder_mobile/my.dart';
+import 'package:easyorder_mobile/scan.dart';
 import 'package:easyorder_mobile/scan_general.dart';
 import 'package:easyorder_mobile/scan_shipper.dart';
 import 'package:easyorder_mobile/user_role.dart';
@@ -28,6 +29,8 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
     super.initState();
     List<Role> roles = widget.user.roleInfoList!.cast<Role>();
 
+    bool hasSonghuo = false;
+
     _screens = [];
 
     for (Role role in roles) {
@@ -39,6 +42,7 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
       if (role.roleCode == songhuoRoleCode) {
         _screens.add(const ScanShipperScreen());
         itemRoles.add(role);
+        hasSonghuo = true;
       }
     }
 
@@ -48,14 +52,11 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
 // 循环处理其他角色
     for (int i = 0; i < filteredRoles.length; i++) {
       Role role = filteredRoles[i];
-      if (!inList(role.roleCode)) {
-        if (i == 0) {
-          // 如果角色代码不在常量列表中，则生成 ScanGeneralScreen
-          ScanGeneralScreen otherScreen = ScanGeneralScreen(role: role);
-          _screens.add(otherScreen);
-        } else {
-          _screens.add(const SizedBox.shrink());
-        }
+      if (!inList(role.roleCode) && !hasSonghuo) {
+        // 如果角色代码不在常量列表中，则生成 ScanGeneralScreen
+        ScanGeneralScreen otherScreen = ScanGeneralScreen(role: role);
+        _screens.add(otherScreen);
+        break;
       }
     }
 
@@ -68,22 +69,6 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
     setState(() {
       _currentIndex = index;
     });
-
-    if (item.label == "送货") {
-      _screens[index] = ScanShipperScreen(
-        key: UniqueKey(),
-      );
-      return;
-    }
-
-    if (item.label == "拣货") {
-      return;
-    }
-
-    _screens[index] = ScanGeneralScreen(
-      key: UniqueKey(),
-      role: itemRoles[index],
-    );
   }
 
   @override
@@ -99,6 +84,7 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
           BottomNavigationBarItem(
               icon: getIconFromString(role.menuIcon), label: role.roleName),
         );
+        break;
       }
     }
     // 使用RoleBasedNavBar组件作为底部导航

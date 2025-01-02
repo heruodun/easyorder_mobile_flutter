@@ -1,4 +1,5 @@
 import 'package:easyorder_mobile/constants.dart';
+import 'package:easyorder_mobile/scan_general.dart';
 import 'package:easyorder_mobile/user_role.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -37,21 +38,13 @@ class _RoleBasedNavBarState extends State<RoleBasedNavBar> {
   @override
   void initState() {
     super.initState();
-    // 假设你在这里构建了`navBarItems`列表
-
-    // if (widget.roles.any((role) => role.roleCode == peihuoRoleCode)) {
-    //   navBarItems.addAll(widget.itemsCheck);
-    // }
-    // if (widget.roles.any((role) => role.roleCode == duijieRoleCode)) {
-    //   navBarItems.addAll(widget.itemsMake);
-    // }
-
-    if (widget.roles.any((role) => role.roleCode == jianhuoRoleCode)) {
-      navBarItems.add(widget.itemsPick);
-    }
 
     if (widget.roles.any((role) => role.roleCode == songhuoRoleCode)) {
       navBarItems.add(widget.itemsShip);
+    }
+
+    if (widget.roles.any((role) => role.roleCode == jianhuoRoleCode)) {
+      navBarItems.add(widget.itemsPick);
     }
 
     navBarItems.addAll(widget.itemsAdditional);
@@ -87,7 +80,6 @@ class _RoleBasedNavBarState extends State<RoleBasedNavBar> {
       onTap: (index) {
         provider.currentIndex = index;
         provider.currentLabel = navBarItems[index].label!;
-        BottomNavigationBarItem item = navBarItems[provider.currentIndex];
 
         setState(() {
           _selectedIndex = index;

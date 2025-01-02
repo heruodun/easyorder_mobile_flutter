@@ -246,7 +246,7 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
     WidgetsBinding.instance.removeObserver(this);
     unawaited(_subscription?.cancel());
     _subscription = null;
-    _controller!.dispose();
+    _controller.dispose();
     super.dispose();
     BeepPlayer.unload(_beepFile);
   }
