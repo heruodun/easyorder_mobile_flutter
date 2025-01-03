@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:easyorder_mobile/home2.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -71,7 +72,7 @@ class LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => MultiRoleScreen(
+              builder: (context) => Home2Page(
                     user: user,
                   )),
         );

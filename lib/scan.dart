@@ -163,11 +163,10 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
   void _handleBarcode(ScanResult barcode) {
     debugPrint(
         "scanning result:value=${barcode.originalValue} scanType=${barcode.scanType}");
-    final provider =
-        Provider.of<BottomNavigationBarProvider>(context, listen: false);
-    if (mounted && canProcess(provider.currentLabel)) {
-      debugPrint(
-          "cur run wiget ${widget.runtimeType.toString()}  ${provider.currentLabel}");
+    // final provider =
+    //     Provider.of<BottomNavigationBarProvider>(context, listen: false);
+    if (mounted) {
+      debugPrint("cur run wiget ${widget.runtimeType.toString()} ");
 
       if (!_isProcessing) {
         setState(() {

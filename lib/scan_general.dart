@@ -1,43 +1,39 @@
 import 'dart:async';
+import 'package:easyorder_mobile/home2.dart';
 import 'package:easyorder_mobile/http_client.dart';
 import 'package:easyorder_mobile/scan.dart';
 import 'package:easyorder_mobile/user_role.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'constants.dart';
 import 'package:vibration/vibration.dart';
 
 // 通用
 class ScanGeneralScreen extends ScanScreenStateful {
-  final Role role;
-  const ScanGeneralScreen({super.key, required this.role}) : super();
+  const ScanGeneralScreen({super.key}) : super();
 
   @override
   ScanGeneralState createState() => ScanGeneralState();
 }
 
 class ScanGeneralState extends ScanScreenState<ScanGeneralScreen> {
+  late Role role;
   @override
   Widget build(BuildContext context) {
     // BottomNavigationBarProvider provider =
     //     Provider.of<BottomNavigationBarProvider>(context, listen: false);
 
-    Role role = widget.role;
+    role = Provider.of<RoleManager>(context, listen: false).role;
     String operation = role.roleName;
 
     String appBarStr = "$operation扫码";
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(appBarStr),
-      ),
-      body: super.buildScanScreen(context),
-    );
+    return super.buildScanScreen(context);
   }
 
   @override
   void doProcess(String result) async {
-    final Role role = widget.role;
     String operation = role.roleName;
     String operationCode = role.roleCode;
 
@@ -116,6 +112,7 @@ class ScanGeneralState extends ScanScreenState<ScanGeneralScreen> {
 
   @override
   bool canProcess(String currentLabel) {
-    return currentLabel == widget.role.roleName;
+    return true;
+    // return currentLabel == role.roleName;
   }
 }

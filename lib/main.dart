@@ -1,3 +1,4 @@
+import 'package:easyorder_mobile/home2.dart';
 import 'package:easyorder_mobile/home_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -18,12 +19,12 @@ Future<void> main() async {
 
   Widget home = const LoginScreen();
   if (user != null) {
-    home = HomePage(user: user);
+    home = Home2Page(user: user);
   }
 
   runApp(
     ChangeNotifierProvider(
-        create: (context) => BottomNavigationBarProvider(),
+        create: (_) => RoleManager(user!.roleInfoList![0]!),
         child: MyApp(home: home)),
   );
 }
