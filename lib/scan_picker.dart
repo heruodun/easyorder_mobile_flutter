@@ -154,7 +154,7 @@ class _ScanPickerState extends ScanScreenState<ScanPickerScreen> {
               super.scanResultText = "撤出波次成功\n$orderId";
               fetchData();
             }
-            super.scanResultColor = Colors.blue;
+            super.scanResultColor = Colors.green;
           });
 
           setProcessed(orderIdStr, waveId, type);

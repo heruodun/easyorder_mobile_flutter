@@ -69,9 +69,10 @@ class ScanGeneralState extends ScanScreenState<ScanGeneralScreen> {
         );
         if (response.isSuccess) {
           Vibration.vibrate();
+
           setState(() {
             super.scanResultText = "$operation扫码成功\n$orderId";
-            super.scanResultColor = Colors.blue;
+            super.scanResultColor = Colors.green;
           });
           setProcessed(operationCode, orderId);
         } else {

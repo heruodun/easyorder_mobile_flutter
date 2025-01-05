@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:easyorder_mobile/user_data.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
@@ -7,7 +8,6 @@ import 'bottom_nav_bar.dart';
 import 'main.dart';
 import 'scanner_button_widgets.dart';
 import 'scanner_error_widget.dart';
-import 'package:beep_player/beep_player.dart';
 
 MobileScannerController controller = MobileScannerController(
   torchEnabled: false, useNewCameraSelector: true,
@@ -33,8 +33,7 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
   bool _isResultDisplayed = false; // 控制处理结果的显示与隐藏
   late String scanResultText = "扫码中...";
   late Color scanResultColor = Colors.grey;
-
-  static const BeepFile _beepFile = BeepFile('assets/audios/beep.ogg');
+  String scanInfoText = "请扫码！";
 
   @override
   void initState() {
@@ -43,8 +42,6 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
     _subscription = controller.barcodes.listen(_handleBarcode);
 
     controller.start();
-
-    BeepPlayer.load(_beepFile);
   }
 
   @override
@@ -70,6 +67,53 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
     }
   }
 
+  double _zoomFactor = 0.0;
+
+  Widget _buildZoomScaleSlider() {
+    return ValueListenableBuilder(
+      valueListenable: controller,
+      builder: (context, state, child) {
+        if (!state.isInitialized || !state.isRunning) {
+          return const SizedBox.shrink();
+        }
+
+        final TextStyle labelStyle = Theme.of(context)
+            .textTheme
+            .headlineMedium!
+            .copyWith(color: Colors.white);
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Row(
+            children: [
+              Text(
+                '0%',
+                overflow: TextOverflow.fade,
+                style: labelStyle,
+              ),
+              Expanded(
+                child: Slider(
+                  value: _zoomFactor,
+                  onChanged: (value) {
+                    setState(() {
+                      _zoomFactor = value;
+                      controller.setZoomScale(value);
+                    });
+                  },
+                ),
+              ),
+              Text(
+                '100%',
+                overflow: TextOverflow.fade,
+                style: labelStyle,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget buildScanScreen(BuildContext context) {
     return Stack(
       children: [
@@ -89,14 +133,19 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
             alignment: Alignment.bottomCenter,
             height: 100,
             color: Colors.black.withOpacity(0.4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            child: Column(
               children: [
-                ToggleFlashlightButton(controller: controller),
-                // StartStopMobileScannerButton(controller: controller),
-                Expanded(child: Center(child: _buildBarcode(_barcode))),
-                SwitchCameraButton(controller: controller),
-                AnalyzeImageFromGalleryButton(controller: controller),
+                if (!kIsWeb) _buildZoomScaleSlider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ToggleFlashlightButton(controller: controller),
+                    // StartStopMobileScannerButton(controller: controller),
+                    Expanded(child: Center(child: _buildBarcode(_barcode))),
+                    // SwitchCameraButton(controller: controller),
+                    AnalyzeImageFromGalleryButton(controller: controller),
+                  ],
+                ),
               ],
             ),
           ),
@@ -123,7 +172,10 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
         children: [
           Text(
             scanResultText,
-            style: TextStyle(color: scanResultColor, fontSize: 24),
+            style: TextStyle(
+                color: scanResultColor,
+                fontSize: 24,
+                fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -134,7 +186,7 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
     final provider =
         Provider.of<BottomNavigationBarProvider>(context, listen: false);
     if (mounted && canProcess(provider.currentLabel)) {
-      print(
+      debugPrint(
           "cur run wiget ${widget.runtimeType.toString()}  ${provider.currentLabel}");
 
       if (!_isProcessing) {
@@ -152,18 +204,18 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
   }
 
   Widget _buildBarcode(Barcode? value) {
-    if (value == null) {
-      return const Text(
-        '请扫码!',
-        overflow: TextOverflow.fade,
-        style: TextStyle(color: Colors.white),
-      );
+    if (!_isResultDisplayed) {
+      scanInfoText = "请扫码！";
+    } else {
+      if (value != null) {
+        scanInfoText = value.rawValue!;
+      }
     }
 
     return Text(
-      value.displayValue ?? '无扫码结果',
+      scanInfoText,
       overflow: TextOverflow.fade,
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(color: Colors.white, fontSize: 15),
     );
   }
 
@@ -199,6 +251,9 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
     setState(() {
       _isResultDisplayed = false;
       _isProcessing = false;
+      scanResultText = "扫码中...";
+      scanResultColor = Colors.grey;
+      scanInfoText = "请扫码！";
     });
   }
 
@@ -214,7 +269,6 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
     _subscription = null;
     super.dispose();
     // await controller.dispose();
-    BeepPlayer.unload(_beepFile);
   }
 
   @override

@@ -69,7 +69,7 @@ class ScanCheckerState extends ScanScreenState<ScanCheckerScreen> {
           Vibration.vibrate();
           setState(() {
             super.scanResultText = "配货扫码成功\n$orderId";
-            super.scanResultColor = Colors.blue;
+            super.scanResultColor = Colors.green;
           });
           setProcessed(orderId);
         } else {

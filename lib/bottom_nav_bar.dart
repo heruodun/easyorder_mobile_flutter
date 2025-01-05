@@ -88,7 +88,7 @@ class _RoleBasedNavBarState extends State<RoleBasedNavBar> {
         provider.currentIndex = index;
         provider.currentLabel = navBarItems[index].label!;
 
-        print("provider " + provider.currentLabel);
+        debugPrint("provider " + provider.currentLabel);
 
         setState(() {
           _selectedIndex = index;

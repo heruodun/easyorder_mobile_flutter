@@ -225,7 +225,7 @@ class WaveItemScreenState extends State<WaveItem> {
     int index = widget.index;
     String shipManText = wave.shipMan ?? '';
 
-    print("wave ${wave.waveId} ${wave.status}");
+    debugPrint("wave ${wave.waveId} ${wave.status}");
     return InkWell(
         onTap: () {
           // 点击时导航到波次详情页面

@@ -63,7 +63,7 @@ class _ScanMakerState extends ScanScreenState<ScanMakerScreen> {
           Vibration.vibrate();
           setState(() {
             super.scanResultText = "对接扫码成功\n$orderId";
-            super.scanResultColor = Colors.blue;
+            super.scanResultColor = Colors.green;
           });
           setProcessed(orderId);
         } else {
