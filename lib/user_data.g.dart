@@ -14,7 +14,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       roleInfoList: (json['roleInfoList'] as List<dynamic>?)
           ?.map((e) =>
               e == null ? null : Role.fromJson(e as Map<String, dynamic>))
-          .toList(), // Updated line,
+          .toList(),
       scanRuleList: (json['scanRuleList'] as List<dynamic>?)
           ?.map((e) => e as String?)
           .toList(),
@@ -25,8 +25,6 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'actualName': instance.actualName,
       'phone': instance.phone,
       'token': instance.token,
-      'roleInfoList': instance.roleInfoList
-          ?.map((e) => e?.toJson())
-          .toList(), // Updated line
+      'roleInfoList': instance.roleInfoList,
       'scanRuleList': instance.scanRuleList,
     };

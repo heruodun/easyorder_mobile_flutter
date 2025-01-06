@@ -1,5 +1,6 @@
 import 'package:easyorder_mobile/constants.dart';
 import 'package:easyorder_mobile/my.dart';
+import 'package:easyorder_mobile/order_task.dart';
 import 'package:easyorder_mobile/scan.dart';
 import 'package:easyorder_mobile/scan_general.dart';
 import 'package:easyorder_mobile/user_role.dart';
@@ -39,7 +40,9 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
     }
 
     if (roles.any((role) => role.roleCode == duijieRoleCode)) {
-      ScanMakerScreen makerScreen = const ScanMakerScreen();
+      OrderPage makerScreen = const OrderPage(
+        orderId: '1',
+      );
       _screens.add(makerScreen);
     }
 
