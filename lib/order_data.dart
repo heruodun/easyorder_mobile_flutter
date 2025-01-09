@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'order.g.dart';
+part 'order_data.g.dart';
 
 @JsonSerializable()
 class Order {
@@ -10,7 +10,7 @@ class Order {
   final int? addressId;
   final List<Guige> guiges;
   final String? remark;
-  final String detail;
+  final String? detail;
   final List<Trace>? trace;
   final String curStatus;
   final DateTime curTime;
@@ -30,7 +30,7 @@ class Order {
     this.addressId,
     required this.guiges,
     this.remark,
-    required this.detail,
+    this.detail,
     this.trace,
     required this.curStatus,
     required this.curTime,

@@ -18,7 +18,7 @@ class ScannerErrorWidget extends StatelessWidget {
       case MobileScannerErrorCode.unsupported:
         errorMessage = 'Scanning is unsupported on this device';
       default:
-        errorMessage = 'Generic Error';
+        errorMessage = '退出APP，重新打开';
         break;
     }
 
@@ -46,4 +46,3 @@ class ScannerErrorWidget extends StatelessWidget {
     );
   }
 }
-

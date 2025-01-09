@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'order.dart';
+part of 'order_data.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
@@ -15,7 +15,7 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order(
           .map((e) => Guige.fromJson(e as Map<String, dynamic>))
           .toList(),
       remark: json['remark'] as String?,
-      detail: json['detail'] as String,
+      detail: json['detail'] as String?,
       trace: (json['trace'] as List<dynamic>?)
           ?.map((e) => Trace.fromJson(e as Map<String, dynamic>))
           .toList(),

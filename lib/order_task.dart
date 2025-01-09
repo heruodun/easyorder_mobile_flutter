@@ -1,14 +1,17 @@
-import 'package:easyorder_mobile/mock.dart';
-import 'package:easyorder_mobile/order.dart';
+import 'package:easyorder_mobile/constants.dart';
+import 'package:easyorder_mobile/http_client.dart';
+import 'package:easyorder_mobile/order_data.dart';
+import 'package:easyorder_mobile/order_task_item.dart';
+import 'package:easyorder_mobile/order_task_list.dart';
+import 'package:easyorder_mobile/task_data.dart';
 import 'package:easyorder_mobile/user_data.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class OrderPage extends StatefulWidget {
-  final String orderId;
+  final String orderIdQr;
 
-  const OrderPage({super.key, required this.orderId});
+  const OrderPage({super.key, required this.orderIdQr});
 
   @override
   _OrderPageState createState() => _OrderPageState();
@@ -16,417 +19,388 @@ class OrderPage extends StatefulWidget {
 
 class _OrderPageState extends State<OrderPage> {
   Order? _order;
-  late List<User> allUsers;
-  bool _isPartial = false;
+  Task? _task;
+  List<User> allUsers = [];
   int _makeCount = 0;
-  List<int> _doCounts = [];
+  Map<String, int> _doCountsMap = {};
+  Map<String, List<SubTask>> orderSubTaskMap = {};
+  bool _isCompleted = false;
+  bool _isSwitched = false; // Switch的状态
 
   @override
   void initState() {
+    fetchData();
     super.initState();
-    _fetchAllUsers();
-    _fetchOrder();
   }
 
-  Future<void> _fetchAllUsers() async {
-    allUsers = getUsers();
-  }
+  Future<void> fetchData() async {
+    setState(() {});
 
-  Future<void> _fetchOrder() async {
+    _isCompleted = false;
+
+    allUsers = await getAllMakers();
+    OrderTask orderTask = await fetchTaskByOrderIdQr(widget.orderIdQr);
+
     setState(() {
-      _order = get();
-      _doCounts = List.filled(_order!.guiges[0].tiaos!.length, 0);
+      _order = orderTask.order;
+      _task = orderTask.task;
+      orderSubTaskMap = buildOrderSubTaskMap(orderTask);
+      _doCountsMap = buildDoCountsMap(orderSubTaskMap);
+      _makeCount = totalCount(_doCountsMap);
+      // _index = orderTask.task?.type == 1 ? 0 : 1;
     });
+    _isCompleted = true;
+  }
+
+  int totalCount(Map<String, int> doCountsMap) {
+    int count = 0;
+    doCountsMap.forEach((mark, value) {
+      count += value;
+    });
+    return count;
+  }
+
+  void _toggleSwitch(bool value) {
+    String tip = value ? '切换到绑定成功' : '切换到不绑定成功';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+          content: Text(
+            tip,
+          ),
+          backgroundColor: Colors.green),
+    );
+    setState(() {
+      _isSwitched = value; // 更新状态
+    });
+  }
+
+  Map<String, int> buildDoCountsMap(
+      Map<String, List<SubTask>> orderSubTaskMap) {
+    Map<String, int> doCountsMap = {};
+
+    // 遍历 orderSubTaskMap 的每个键值对
+    orderSubTaskMap.forEach((orderId, subTasks) {
+      int totalCount = 0;
+
+      // 如果 subTasks 不是空，计算 count 的总和
+      if (subTasks.isNotEmpty) {
+        for (var subTask in subTasks) {
+          totalCount += subTask.count;
+        }
+      }
+
+      // 将计算的总和添加至 doCountsMap
+      doCountsMap[orderId] = totalCount;
+    });
+
+    return doCountsMap;
+  }
+
+  Map<String, List<SubTask>> buildOrderSubTaskMap(OrderTask orderTask) {
+    // 创建一个空的 Map 用于存放分组结果
+    Map<String, List<SubTask>> orderSubTaskMap = {};
+
+    // 获取与订单相关的任务
+    Task? task = orderTask.task;
+
+    // 检查task是否存在以及task的subTasks是否存在
+    if (task != null && task.subTasks != null) {
+      for (SubTask subTask in task.subTasks!) {
+        // 检查mark字段是否不为空和不为空字符串
+        if (subTask.mark.isNotEmpty) {
+          // 如果map中已经存在该mark，则添加subTask到对应的列表中
+          if (!orderSubTaskMap.containsKey(subTask.mark)) {
+            orderSubTaskMap[subTask.mark] = [];
+          }
+          orderSubTaskMap[subTask.mark]!.add(subTask);
+        }
+      }
+    }
+
+    // 返回构建好的map
+    return orderSubTaskMap;
   }
 
   void _calculateMakeCount() {
-    if (_isPartial) {
-      _makeCount = _doCounts.reduce((a, b) => a + b);
-    } else {
-      _makeCount = _order!.guiges[0].count;
-    }
+    _makeCount = _doCountsMap.values.fold(0, (a, b) => a + b);
   }
 
-  void _submitOrder() async {
-    if (_order == null) return;
+  Widget _buildResultLayer() {
+    if (_isCompleted) {
+      return const SizedBox.shrink(); // 如果不需要显示结果，返回一个空的小部件
+    }
 
-    final response = await http.post(
-      Uri.parse('https://yourapi.com/orders/submit'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, dynamic>{
-        'order_id': _order!.orderId,
-        'type': _isPartial ? 1 : 0,
-        'address': _order!.address,
-        'guige': _order!.guiges[0].guige,
-        'make_count': _makeCount,
-        'all_count': _order!.guiges[0].count,
-        'sub_tasks': _getSubTasks(),
-      }),
+    return Center(
+        child: LoadingAnimationWidget.horizontalRotatingDots(
+      color: Colors.grey,
+      size: 100,
+    ));
+  }
+
+  Widget _buildTaskLayer(BuildContext context) {
+    return Column(
+      children: [
+        if (_order != null) ...[
+          Text(_order!.address,
+              style:
+                  const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          Text('${_order!.orderId}', style: const TextStyle(fontSize: 14)),
+          RichText(
+            text: TextSpan(
+              style: const TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black),
+              children: [
+                TextSpan(text: '${_order!.guiges[0].guige} '),
+                TextSpan(
+                    text: '${_order!.guiges[0].count} ',
+                    style: const TextStyle(color: Colors.blue)),
+                TextSpan(text: _order!.guiges[0].danwei),
+              ],
+            ),
+          ),
+          DefaultTabController(
+            length: 2,
+            child: Column(
+              children: [
+                TabBar(
+                  tabs: const [
+                    Tab(
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                          Icon(Icons.circle),
+                          SizedBox(width: 4),
+                          Text('全部做货')
+                        ])),
+                    Tab(
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                          Text('部分做货'),
+                          SizedBox(width: 4),
+                          Icon(Icons.pie_chart)
+                        ])),
+                  ],
+                  labelColor: Colors.green,
+                  unselectedLabelColor: Colors.blueGrey,
+                  onTap: (index) async {
+                    fetchData();
+                    setState(() {
+                      _calculateMakeCount();
+                    });
+                  },
+                ),
+                SizedBox(
+                  height: 350,
+                  child: TabBarView(children: [
+                    ListView.builder(
+                      itemCount: 1,
+                      itemBuilder: (context, index) {
+                        return Container(
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 2.0), // 为每个元素添加上下间距
+                            decoration: BoxDecoration(
+                                // color: Colors.white, // 元素背景色
+                                borderRadius: BorderRadius.circular(8.0), // 圆角
+                                border: Border.all(
+                                    color: const Color.fromARGB(
+                                        255, 245, 241, 241))),
+                            child: ItemWidget(
+                              task: _task,
+                              type: 1,
+                              orderId: _order!.orderId,
+                              allUsers: allUsers,
+                              count: _order!.guiges[0].count,
+                              mark: _order!.guiges[0].guige,
+                              orderSubTasks:
+                                  orderSubTaskMap[_order!.guiges[0].guige] ??
+                                      [],
+                              index: index,
+                              // Pass the order data here
+                              onCountChanged: (count) {
+                                fetchData();
+                                setState(() {
+                                  _doCountsMap[_order!.guiges[0].guige] = count;
+                                  _calculateMakeCount();
+                                });
+                              },
+                              doCount: _doCountsMap[
+                                  _order!.guiges[0].guige], // 传递当前计数
+                            ));
+                      },
+                    ),
+                    ListView.builder(
+                      itemCount: _order!.guiges[0].tiaos!.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 2.0), // 为每个元素添加上下间距
+                            decoration: BoxDecoration(
+                                // color: Colors.white, // 元素背景色
+                                borderRadius: BorderRadius.circular(8.0), // 圆角
+                                border: Border.all(
+                                    color: const Color.fromARGB(
+                                        255, 245, 241, 241))),
+                            child: ItemWidget(
+                              task: _task,
+                              type: 0,
+                              orderId: _order!.orderId,
+                              allUsers: allUsers,
+                              count: _order!.guiges[0].tiaos![index].count,
+                              mark: _order!.guiges[0].tiaos![index].length,
+                              orderSubTasks: orderSubTaskMap[
+                                      _order!.guiges[0].tiaos![index].length] ??
+                                  [],
+                              index: index,
+                              // Pass the order data here
+                              onCountChanged: (count) {
+                                fetchData();
+                                setState(() {
+                                  _doCountsMap[_order!
+                                      .guiges[0].tiaos![index].length] = count;
+                                  _calculateMakeCount();
+                                });
+                              },
+                              doCount: _doCountsMap[_order!
+                                  .guiges[0].tiaos![index].length], // 传递当前计数
+                            ));
+                      },
+                    ),
+                  ]),
+                ),
+              ],
+            ),
+          ),
+          Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Switch(
+                  value: _isSwitched, // 当前状态
+                  onChanged: _toggleSwitch, // 状态改变时的回调
+                  activeColor: Colors.green, // Switch被激活时的颜色
+                ),
+                const SizedBox(width: 10), // 用于调整Switch与文本之间的间距
+                Text(_isSwitched ? '已绑定' : '未绑定',
+                    style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold)), // 文本显示状态
+              ],
+            ),
+          ),
+          RichText(
+            text: TextSpan(
+              style: const TextStyle(fontSize: 25, color: Colors.black),
+              children: [
+                const TextSpan(text: '总计做货：'),
+                TextSpan(
+                    text: '$_makeCount ',
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    )),
+                TextSpan(text: _order!.guiges[0].danwei),
+                TextSpan(
+                    text: _getStatusText(_task),
+                    style: const TextStyle(
+                      color: Colors.blue, // 根据需要设置颜色
+                      fontStyle: FontStyle.italic, // 根据需要设置样式
+                    )),
+              ],
+            ),
+          ),
+        ],
+      ],
     );
-
-    if (response.statusCode == 200) {
-      // Handle success
-    } else {
-      // Handle error
-    }
   }
 
-  List<Map<String, dynamic>> _getSubTasks() {
-    return List.generate(_order!.guiges[0].tiaos!.length, (i) {
-      return {
-        // 'length': _order!.guiges[0].tiaos![i].length,
-        // 'count': _doCounts[i],
-        // 'user_id': _userIds.length > i ? _userIds[i] : null,
-        // 'user_name': _username,
-      };
-    });
+  // 定义一个方法来返回状态文本
+  String _getStatusText(Task? task) {
+    if (task == null) {
+      return '（未开始）'; // 根据情况添加自定义文本
+    }
+    if (task.status == 0) {
+      return '（未开始）'; // 根据情况添加自定义文本
+    } else if (task.status == 10) {
+      return '（部分完成）';
+    } else if (task.status == 100) {
+      return '（已完成）';
+    } else {
+      return '（未分配）';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('做货分配')),
+      appBar: AppBar(
+        title: const Text('做货分配'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.list),
+            onPressed: () {
+              // 点击按钮时导航到 ListPage
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TaskListScreen()),
+              );
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
+        child: Stack(
           children: [
-            if (_order != null) ...[
-              Text(_order!.address,
-                  style: const TextStyle(
-                      fontSize: 24, fontWeight: FontWeight.bold)),
-              Text('${_order!.orderId}', style: const TextStyle(fontSize: 14)),
-              RichText(
-                text: TextSpan(
-                  style: const TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
-                  children: [
-                    TextSpan(text: '${_order!.guiges[0].guige} '),
-                    TextSpan(
-                        text: '${_order!.guiges[0].count} ',
-                        style: const TextStyle(color: Colors.red)),
-                    TextSpan(text: _order!.guiges[0].danwei),
-                  ],
-                ),
-              ),
-              DefaultTabController(
-                length: 2,
-                child: Column(
-                  children: [
-                    TabBar(
-                      tabs: const [
-                        Tab(
-                            child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                              Icon(Icons.all_inclusive),
-                              SizedBox(width: 4),
-                              Text('全部做货')
-                            ])),
-                        Tab(
-                            child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                              Text('部分做货'),
-                              SizedBox(width: 4),
-                              Icon(Icons.party_mode)
-                            ])),
-                      ],
-                      labelColor: Colors.green,
-                      unselectedLabelColor: Colors.grey,
-                      onTap: (index) {
-                        setState(() {
-                          _isPartial = index == 1;
-                          _calculateMakeCount();
-                        });
-                      },
-                    ),
-                    SizedBox(
-                      height: 350,
-                      child: TabBarView(children: [
-                        ListView.builder(
-                          itemCount: _order!.guiges[0].tiaos!.length,
-                          itemBuilder: (context, index) {
-                            return _buildPartialView(index);
-                          },
-                        ),
-                        ListView.builder(
-                          itemCount: _order!.guiges[0].tiaos!.length,
-                          itemBuilder: (context, index) {
-                            return ItemWidget(
-                              allUsers: allUsers,
-                              count: _order!.guiges[0].tiaos![index].count,
-                              length: _order!.guiges[0].tiaos![index].length,
-                              index: index,
-                              // Pass the order data here
-                              onCountChanged: (count) {
-                                setState(() {
-                                  _doCounts[index] = count;
-                                  _calculateMakeCount();
-                                });
-                              },
-                              doCount: null,
-                              doUsers: const [],
-                            );
-                          },
-                        ),
-                      ]),
-                    ),
-                  ],
-                ),
-              ),
-              Text('总计做货: $_makeCount ${_order!.guiges[0].danwei}'),
-              const SizedBox(height: 8),
-              ElevatedButton.icon(
-                onPressed: _submitOrder,
-                icon: const Icon(Icons.assignment),
-                label: const Text('分配任务', style: TextStyle(fontSize: 18)),
-              ),
-            ],
+            _buildTaskLayer(context),
+            _buildResultLayer(), // Add the loading layer on top
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildPartialView(int index) {
-    return Column(
-      children: [
-        Text(
-            '${_order!.guiges[0].tiaos![index].length}, ${_order!.guiges[0].tiaos![index].count}'),
-        TextField(
-          decoration: const InputDecoration(labelText: 'Do Count'),
-          keyboardType: TextInputType.number,
-          onChanged: (value) {
-            setState(() {
-              _doCounts[index] = int.tryParse(value) ?? 0;
-              _calculateMakeCount();
-            });
-          },
-        ),
-      ],
-    );
+//------------------------------http-------------------------------
+Future<OrderTask> fetchTaskByOrderIdQr(String orderIdQr) async {
+  final response = await httpClient(
+      uri: Uri.parse('$httpHost/app/order/task?orderIdQr=$orderIdQr'),
+      method: "GET");
+
+  if (response.isSuccess) {
+    return OrderTask.fromJson(response.data);
+  } else {
+    throw Exception(response.message);
   }
 }
 
-class ItemWidget extends StatefulWidget {
-  final int count;
-  final int? doCount;
-  final String length;
-  final int index;
-  final List<User>? doUsers;
-  final List<User> allUsers; //所有做货工人
-  final ValueChanged<int> onCountChanged;
+Future<void> deleteSubTasks(String orderIdQr, int type) async {
+  final response = await httpClient(
+    uri: Uri.parse(
+        '$httpHost/app/order/task/delete?orderIdQr=$orderIdQr&type=$type'),
+    method: "GET",
+  );
 
-  const ItemWidget({
-    super.key,
-    required this.count,
-    required this.length,
-    required this.index,
-    required this.onCountChanged,
-    required this.allUsers,
-    required this.doCount,
-    required this.doUsers,
-  });
-
-  @override
-  State<StatefulWidget> createState() => _ItemWidgetState();
+  if (response.isSuccess) {}
 }
 
-class _ItemWidgetState extends State<ItemWidget> {
-  final TextEditingController _controller = TextEditingController();
+Future<List<User>> getAllMakers() async {
+  final response = await httpClient(
+    uri: Uri.parse(
+        '$httpHost/app/role/employee/getAllEmployeeByRoleCode/duijie'),
+    method: "GET",
+  );
 
-  int doCount = 0;
-  List<User> doUsers = [];
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.doCount == null) {
-      doCount = 0;
-    } else {
-      doCount = widget.doCount!;
-    }
-    doUsers = widget.doUsers!;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment:
-          MainAxisAlignment.spaceBetween, // 使用 spaceBetween 将内容均匀分布
-      children: [
-        Expanded(
-          // 使用 Expanded 可以让内容占用剩余空间
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center, // 文本和用户列表居中对齐
-            children: [
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: '${widget.length} X ${widget.count}条 ',
-                      style: const TextStyle(
-                        fontSize: 18, // 字体大小放大
-                        color: Colors.black, // 确保文本颜色
-                      ),
-                    ),
-                    TextSpan(
-                      text: '$doCount',
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontSize: 18, // 字体大小放大
-                      ),
-                    ),
-                    const TextSpan(
-                      text: '条',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18, // 字体大小放大
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // 用户列表
-              Container(
-                padding: const EdgeInsets.all(5.0), // 内边距
-                child: Row(
-                  children: doUsers
-                      .map((user) => Container(
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 5.0), // 用户间的间隔
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10.0, vertical: 5.0), // 每个用户的框的内边距
-                            decoration: BoxDecoration(
-                              border:
-                                  Border.all(color: Colors.grey), // 用户框的边框颜色
-                              borderRadius:
-                                  BorderRadius.circular(4.0), // 每个框的圆角
-                            ),
-                            child: Text(user.actualName), // 用户名
-                          ))
-                      .toList(),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () {
-                _showEditDialog(widget.index);
-              },
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  List<bool> getChecks(List<User> doUsers) {
-    List<User> allUsers = widget.allUsers;
-    return allUsers.map((allUser) {
-      return doUsers.any((doUser) => doUser.loginName == allUser.loginName);
-    }).toList();
-  }
-
-  List<User> getUsers(List<bool> checkList) {
-    // 确保checkList的长度与allUsers的长度一致
-    if (checkList.length != widget.allUsers.length) {
-      throw ArgumentError('checkList must have the same length as allUsers');
-    }
-    List<User> selectedUsers = [];
-    // 遍历checkList，收集被选中的用户
-    for (int i = 0; i < checkList.length; i++) {
-      if (checkList[i]) {
-        selectedUsers.add(widget.allUsers[i]);
-      }
-    }
-    return selectedUsers;
-  }
-
-  Future<void> _showEditDialog(int index) async {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        List<bool> tempCheckList =
-            getChecks(doUsers); // Make a copy for the dialog
-        return StatefulBuilder(
-            builder: (context, setState) => AlertDialog(
-                  title: Text('做货分配 ${widget.length} X ${widget.count}条'),
-                  content: SingleChildScrollView(
-                    child: ListBody(
-                      children: <Widget>[
-                        TextField(
-                          controller: _controller,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(labelText: '做货数量'),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text('选择工人:'),
-                        Wrap(
-                          spacing: 2.0, // 水平间距
-                          runSpacing: 2.0, // 垂直间距
-                          children: List.generate(widget.allUsers.length, (i) {
-                            return SizedBox(
-                              width: 80, // 设置每个 checkbox 的宽度，以控制每行放多少个
-                              child: CheckboxListTile(
-                                title: SizedBox(
-                                  width: 40, // 这里可以根据需要调整宽度
-                                  child: Text(widget.allUsers[i].actualName),
-                                ),
-                                value: tempCheckList[i], // 使用副本
-                                onChanged: (bool? value) {
-                                  setState(() {
-                                    tempCheckList[i] =
-                                        value ?? false; // 更新副本并调用 setState
-                                  });
-                                },
-                              ),
-                            );
-                          }),
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('取消'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        int count = int.tryParse(_controller.text) ?? 0;
-                        List<User> users = getUsers(tempCheckList);
-                        setState(() {
-                          _updateDoCountAndUsers(
-                              count, users); // use updated checkList
-                          widget.onCountChanged(count);
-                        });
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('确认'),
-                    ),
-                  ],
-                ));
-      },
-    );
-  }
-
-  void _updateDoCountAndUsers(int count, List<User> users) {
-    setState(() {
-      doUsers = users;
-      doCount = count;
-    });
+  if (response.isSuccess) {
+    // Assuming response.data is a List
+    List<dynamic> userList = response.data; // Retrieve the list
+    return userList
+        .map((userJson) => User.fromJson(userJson))
+        .toList(); // Parse each user and return a list
+  } else {
+    throw Exception(response.message);
   }
 }

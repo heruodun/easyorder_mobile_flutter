@@ -1,131 +1,153 @@
-class OrderSubTask {
+import 'package:easyorder_mobile/order_data.dart';
+
+class Task {
+  int id;
+  int orderId;
+  int status;
+  int type;
+  String address;
+  String guige;
+  int makeCount;
+  int allCount;
+  DateTime createTime;
+  DateTime updateTime;
+  bool deletedFlag;
+  List<SubTask>? subTasks;
+
+  Task({
+    required this.id,
+    required this.orderId,
+    required this.status,
+    required this.type,
+    required this.address,
+    required this.guige,
+    required this.makeCount,
+    required this.allCount,
+    required this.createTime,
+    required this.updateTime,
+    required this.deletedFlag,
+    this.subTasks,
+  });
+
+  factory Task.fromJson(Map<String, dynamic> json) {
+    return Task(
+      id: json['id'],
+      orderId: json['orderId'],
+      status: json['status'],
+      type: json['type'],
+      address: json['address'],
+      guige: json['guige'],
+      makeCount: json['makeCount'],
+      allCount: json['allCount'],
+      createTime: DateTime.parse(json['createTime']),
+      updateTime: DateTime.parse(json['updateTime']),
+      deletedFlag: json['deletedFlag'],
+      subTasks: json['subTasks'] != null
+          ? List<SubTask>.from(
+              json['subTasks'].map((subTask) => SubTask.fromJson(subTask)))
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'orderId': orderId,
+      'status': status,
+      'type': type,
+      'address': address,
+      'guige': guige,
+      'makeCount': makeCount,
+      'allCount': allCount,
+      'createTime': createTime.toIso8601String(),
+      'updateTime': updateTime.toIso8601String(),
+      'deletedFlag': deletedFlag,
+      'subTasks': subTasks?.map((subTask) => subTask.toJson()).toList(),
+    };
+  }
+}
+
+class SubTask {
   int id;
   int taskId;
   int userId;
   int orderId;
   String userName;
-  int length;
   int count;
   int status;
-  String? address;
-  String? guige;
+  int type;
+  String mark;
   DateTime createTime;
   DateTime updateTime;
 
-  OrderSubTask({
+  SubTask({
     required this.id,
     required this.taskId,
     required this.userId,
     required this.orderId,
     required this.userName,
-    required this.length,
     required this.count,
     required this.status,
-    this.address,
-    this.guige,
+    required this.type,
+    required this.mark,
     required this.createTime,
     required this.updateTime,
   });
 
-  factory OrderSubTask.fromJson(Map<String, dynamic> json) {
-    return OrderSubTask(
+  factory SubTask.fromJson(Map<String, dynamic> json) {
+    return SubTask(
       id: json['id'],
-      taskId: json['task_id'],
-      userId: json['user_id'],
-      orderId: json['order_id'],
-      userName: json['user_name'],
-      length: json['length'],
+      taskId: json['taskId'],
+      userId: json['userId'],
+      orderId: json['orderId'],
+      userName: json['userName'],
       count: json['count'],
       status: json['status'],
-      address: json['address'],
-      guige: json['guige'],
-      createTime: DateTime.parse(json['create_time']),
-      updateTime: DateTime.parse(json['update_time']),
+      type: json['type'],
+      mark: json['mark'],
+      createTime: DateTime.parse(json['createTime']),
+      updateTime: DateTime.parse(json['updateTime']),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'task_id': taskId,
-      'user_id': userId,
-      'order_id': orderId,
-      'user_name': userName,
-      'length': length,
+      'taskId': taskId,
+      'userId': userId,
+      'orderId': orderId,
+      'userName': userName,
+      'mark': mark,
       'count': count,
       'status': status,
-      'address': address,
-      'guige': guige,
-      'create_time': createTime.toIso8601String(),
-      'update_time': updateTime.toIso8601String(),
+      'type': type,
+      'createTime': createTime.toIso8601String(),
+      'updateTime': updateTime.toIso8601String(),
     };
   }
 }
 
 class OrderTask {
-  int id;
-  int orderId;
-  String? taskName;
-  int status;
-  String? address;
-  String? guige;
-  int? makeCount;
-  int? allCount;
-  DateTime createTime;
-  DateTime updateTime;
-  bool deletedFlag;
-  List<OrderSubTask> subTasks; // 添加 OrderSubTask 列表属性
+  Order order;
+  Task? task;
 
   OrderTask({
-    required this.id,
-    required this.orderId,
-    this.taskName,
-    required this.status,
-    this.address,
-    this.guige,
-    this.makeCount,
-    this.allCount,
-    required this.createTime,
-    required this.updateTime,
-    this.deletedFlag = false,
-    required this.subTasks, // 更新构造函数以接收 subTasks
+    required this.order,
+    this.task,
   });
 
   factory OrderTask.fromJson(Map<String, dynamic> json) {
-    var list = json['sub_tasks'] as List?; // 解析 subTasks
-    List<OrderSubTask> subTasksList = list != null
-        ? list.map((item) => OrderSubTask.fromJson(item)).toList()
-        : [];
-
     return OrderTask(
-      id: json['id'],
-      orderId: json['order_id'],
-      taskName: json['task_name'],
-      status: json['status'],
-      address: json['address'],
-      guige: json['guige'],
-      makeCount: json['make_count'],
-      allCount: json['all_count'],
-      createTime: DateTime.parse(json['create_time']),
-      updateTime: DateTime.parse(json['update_time']),
-      subTasks: subTasksList, // 添加 subTasks 列表
+      order: Order.fromJson(
+          json['order']), // Assuming Order has a fromJson method.
+      task: json['task'] != null ? Task.fromJson(json['task']) : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'order_id': orderId,
-      'task_name': taskName,
-      'status': status,
-      'address': address,
-      'guige': guige,
-      'make_count': makeCount,
-      'all_count': allCount,
-      'create_time': createTime.toIso8601String(),
-      'update_time': updateTime.toIso8601String(),
-      'sub_tasks':
-          subTasks.map((task) => task.toJson()).toList(), // 序列化 subTasks 列表
+      'order': order.toJson(), // Assuming Order has a toJson method.
+      'task': task?.toJson(),
     };
   }
 }

@@ -42,7 +42,7 @@ class _RoleBasedNavBarState extends State<RoleBasedNavBar> {
     if (widget.roles.any((role) => role.roleCode == peihuoRoleCode)) {
       navBarItems.addAll(widget.itemsCheck);
     }
-    if (widget.roles.any((role) => role.roleCode == duijieRoleCode)) {
+    if (widget.roles.any((role) => role.roleCode == fendanRoleCode)) {
       navBarItems.addAll(widget.itemsMake);
     }
 
@@ -61,8 +61,8 @@ class _RoleBasedNavBarState extends State<RoleBasedNavBar> {
     // 只在组件初始化时设置这些值
     final provider =
         Provider.of<BottomNavigationBarProvider>(context, listen: false);
-    provider.currentIndex = 0; // 或根据需要设置
-    provider.currentLabel = navBarItems[provider.currentIndex].label!;
+    provider.setCurrentIndex(0); // 或根据需要设置
+    provider.setCurrentLabel(navBarItems[provider.currentIndex].label!);
   }
 
   @override
@@ -85,8 +85,8 @@ class _RoleBasedNavBarState extends State<RoleBasedNavBar> {
       items: navBarItems,
       currentIndex: _selectedIndex,
       onTap: (index) {
-        provider.currentIndex = index;
-        provider.currentLabel = navBarItems[index].label!;
+        provider.setCurrentIndex(index);
+        provider.setCurrentLabel(navBarItems[index].label!);
 
         debugPrint("provider " + provider.currentLabel);
 
@@ -106,14 +106,14 @@ class BottomNavigationBarProvider with ChangeNotifier {
 
   int get currentIndex => _currentIndex;
 
-  set currentIndex(int index) {
+  void setCurrentIndex(int index) {
     _currentIndex = index;
     notifyListeners();
   }
 
   String get currentLabel => _currentLabel;
 
-  set currentLabel(String label) {
+  void setCurrentLabel(String label) {
     _currentLabel = label;
     notifyListeners();
   }

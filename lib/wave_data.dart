@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:easyorder_mobile/order.dart';
+import 'package:easyorder_mobile/order_data.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 WaveList waveListFromJson(List<dynamic> json) {

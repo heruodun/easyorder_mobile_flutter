@@ -9,6 +9,8 @@ part 'user_data.g.dart';
 
 @JsonSerializable()
 class User {
+  @JsonKey(name: "employeeId")
+  int employeeId;
   @JsonKey(name: "loginName")
   String loginName;
   @JsonKey(name: "actualName")
@@ -23,6 +25,7 @@ class User {
   List<String?>? scanRuleList;
 
   User({
+    required this.employeeId,
     required this.loginName,
     required this.actualName,
     required this.phone,

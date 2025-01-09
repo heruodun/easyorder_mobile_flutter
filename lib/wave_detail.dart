@@ -1,67 +1,7 @@
 import 'package:easyorder_mobile/constants.dart';
+import 'package:easyorder_mobile/timeline.dart';
 import 'package:flutter/material.dart';
 import 'wave_data.dart';
-
-List<TimeLine> parseTimeLine(String data) {
-  List<String> lines = data.split("\n\n");
-  List<TimeLine> timelines = []; // 初始化一个用于存储TimeLine对象的list
-
-  // 循环处理每一段数据
-  for (var line in lines) {
-    List<String> parts = line.split('，');
-    if (parts.length >= 2) {
-      // 确保有足够的数据进行解析
-      try {
-        String person = parts[0].split('：')[1];
-        String time = parts[1].split('：')[1]; // 假设时间戳为整数
-        int type = getTypeFromDescription(line); // 获取类型
-        String wave = getExtraFromDescription(line, parts);
-
-        timelines
-            .add(TimeLine(type: type, person: person, time: time, extra: wave));
-      } catch (e) {
-        // 可以在这里处理错误，例如解析错误
-      }
-    }
-  }
-
-  return timelines;
-}
-
-String parseOrderContent(String data) {
-  String newOrderContent = normalizeNewlines(data);
-  return newOrderContent;
-}
-
-// 一个辅助函数，用于根据行描述返回时间线对象的类型
-int getTypeFromDescription(String description) {
-  if (description.contains('打单')) {
-    return 1;
-  } else if (description.contains('配货')) {
-    return 2;
-  } else if (description.contains('对接收货')) {
-    return 4;
-  } else if (description.contains('拣货')) {
-    return 4;
-  } else if (description.contains('送货')) {
-    return 5;
-  } else if (description.contains('对接')) {
-    return 3;
-  }
-  return 0; // 使用0作为未知类型的默认值
-}
-
-// 一个辅助函数，用于根据行描述返回时间线对象的类型 拣货人：管理员，加入波次3时间：2024-05-14 22:10:35
-String getExtraFromDescription(String description, List<String> parts) {
-  if (description.contains('拣货')) {
-    String key = parts[1].split('：')[0];
-
-    String wave = key.substring(0, key.length - 2);
-    return wave;
-  } else {
-    return "";
-  }
-}
 
 abstract class WaveDetailsScreen extends StatefulWidget {
   final Wave wave;
@@ -154,8 +94,7 @@ abstract class WaveDetailsScreenState extends State<WaveDetailsScreen> {
                           String differenceTimeStr = formatTimeDifference(
                               orderDetail.createTime, orderDetail.curTime);
 
-                          String content =
-                              parseOrderContent(orderDetail.detail);
+                          String content = orderDetail.detail ?? '';
 
                           String orderIdStr = orderDetail.orderId.toString();
 
@@ -193,14 +132,16 @@ abstract class WaveDetailsScreenState extends State<WaveDetailsScreen> {
                                           size: 20, color: Colors.blue),
                                     ),
                                     Text(content),
-                                    // const Center(
-                                    //   child: Icon(Icons.linear_scale_sharp,
-                                    //       size: 14, color: Colors.blue),
-                                    // ),
-                                    // TimelineWidget(
-                                    //   timelines:
-                                    //       parseTimeLine(orderDetail.trace),
-                                    // ),
+                                    const Center(
+                                      child: Icon(Icons.timeline,
+                                          size: 20, color: Colors.blue),
+                                    ),
+                                    SizedBox(
+                                      height:
+                                          150, // Set a fixed height for the TimelineWidget
+                                      child: TimelineWidget(
+                                          traceList: orderDetail.trace ?? []),
+                                    )
                                   ],
                                 ),
                                 isThreeLine: true,
@@ -217,90 +158,4 @@ abstract class WaveDetailsScreenState extends State<WaveDetailsScreen> {
       ],
     );
   }
-}
-
-class TimelineWidget extends StatelessWidget {
-  final List<TimeLine> timelines;
-
-  const TimelineWidget({super.key, required this.timelines});
-
-  // 提供一个方法，用于将TimeLine对象的类型映射到具体的图标和描述
-  Map<String, dynamic> _mapEvent(TimeLine timeline) {
-    IconData icon;
-    String label;
-    switch (timeline.type) {
-      case 1: // 打单
-        icon = Icons.print;
-        label = '打单';
-        break;
-      case 2: // 配货
-        icon = Icons.checklist;
-        label = '配货';
-        break;
-      case 3: // 对接
-        icon = Icons.construction;
-        label = '对接';
-        break;
-      case 4: // 拣货
-        icon = Icons.assignment;
-        label = '拣货';
-        break;
-      case 5: // 送货
-        icon = Icons.local_shipping;
-        label = '送货';
-        break;
-      default:
-        icon = Icons.help_outline;
-        label = '未知';
-    }
-    return {
-      'icon': icon,
-      'label': label,
-      'time': timeline.time,
-      'person': timeline.person,
-      'extra': timeline.extra
-    };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    List<Widget> eventWidgets = timelines.map((TimeLine timeline) {
-      var mappedEvent = _mapEvent(timeline);
-      // 根据时间和参与者是否存在来决定是否展示该行
-      if (mappedEvent['time']?.isNotEmpty == true &&
-          mappedEvent['person']?.isNotEmpty == true) {
-        return Row(
-          children: [
-            Icon(
-              mappedEvent['icon'] as IconData,
-              size: 16,
-              color: Colors.grey,
-            ),
-            const SizedBox(width: 8),
-            Text(
-                '${mappedEvent['label']} ${mappedEvent['person']} ${mappedEvent['time']} ${mappedEvent['extra']}'),
-          ],
-        );
-      }
-      return const SizedBox.shrink(); // 如果时间或参与者为空，则返回一个空的SizedBox
-    }).toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: eventWidgets,
-    );
-  }
-}
-
-class TimeLine {
-  int type;
-  String person;
-  String time;
-  String extra;
-
-  TimeLine(
-      {required this.type,
-      required this.person,
-      required this.time,
-      required this.extra});
 }

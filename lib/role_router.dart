@@ -1,5 +1,7 @@
 import 'package:easyorder_mobile/constants.dart';
 import 'package:easyorder_mobile/my.dart';
+import 'package:easyorder_mobile/scan_assigner.dart';
+import 'package:easyorder_mobile/timeline.dart';
 import 'package:easyorder_mobile/order_task.dart';
 import 'package:easyorder_mobile/scan.dart';
 import 'package:easyorder_mobile/scan_general.dart';
@@ -7,7 +9,6 @@ import 'package:easyorder_mobile/user_role.dart';
 import 'package:flutter/material.dart';
 import 'bottom_nav_bar.dart';
 import 'scan_checker.dart';
-import 'scan_maker.dart';
 import 'scan_shipper.dart';
 import 'user_data.dart';
 import 'wave_list.dart';
@@ -39,10 +40,8 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
       _screens.add(checkerScreen);
     }
 
-    if (roles.any((role) => role.roleCode == duijieRoleCode)) {
-      OrderPage makerScreen = const OrderPage(
-        orderId: '1',
-      );
+    if (roles.any((role) => role.roleCode == fendanRoleCode)) {
+      ScanAssignerScreen makerScreen = const ScanAssignerScreen();
       _screens.add(makerScreen);
     }
 
@@ -110,7 +109,8 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.checklist), label: '配货'),
         ],
         itemsMake: const [
-          BottomNavigationBarItem(icon: Icon(Icons.construction), label: '对接'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.assignment_ind), label: '分单'),
         ],
         itemsPick: const [
           BottomNavigationBarItem(icon: Icon(Icons.assignment), label: '拣货'),
