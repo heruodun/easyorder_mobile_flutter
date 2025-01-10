@@ -172,14 +172,14 @@ class TaskItemScreenState extends State<TaskItem> {
         },
         child: ListTile(
             title: Text(
-              '任务: ${task.id}',
+              '${task.id}. ${task.address}',
               style: Theme.of(context).textTheme.titleSmall,
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${task.allCount}条\n$typeStr：${task.makeCount}条',
+                  '订单条数 ${task.allCount} 条\n$typeStr ${task.makeCount} 条',
                 ),
                 Text(
                   '${task.createTime}',
@@ -192,12 +192,12 @@ class TaskItemScreenState extends State<TaskItem> {
             ), // 显示从1开始的序号
 
             trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-              Text(task.address,
-                  style: Theme.of(context).textTheme.titleSmall,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1),
+              // Text(task.address,
+              //     style: Theme.of(context).textTheme.titleSmall,
+              //     overflow: TextOverflow.ellipsis,
+              //     maxLines: 1),
 
-              const SizedBox(width: 2), // 设置你想要的间距
+              // const SizedBox(width: 2), // 设置你想要的间距
 
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,

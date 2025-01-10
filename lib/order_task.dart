@@ -25,7 +25,7 @@ class _OrderPageState extends State<OrderPage> {
   Map<String, int> _doCountsMap = {};
   Map<String, List<SubTask>> orderSubTaskMap = {};
   bool _isCompleted = false;
-  bool _isSwitched = false; // Switch的状态
+  // bool _isSwitched = false; // Switch的状态
 
   @override
   void initState() {
@@ -60,19 +60,19 @@ class _OrderPageState extends State<OrderPage> {
     return count;
   }
 
-  void _toggleSwitch(bool value) {
-    String tip = value ? '切换到绑定成功' : '切换到不绑定成功';
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-          content: Text(
-            tip,
-          ),
-          backgroundColor: Colors.green),
-    );
-    setState(() {
-      _isSwitched = value; // 更新状态
-    });
-  }
+  // void _toggleSwitch(bool value) {
+  //   String tip = value ? '切换到绑定成功' : '切换到不绑定成功';
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(
+  //         content: Text(
+  //           tip,
+  //         ),
+  //         backgroundColor: Colors.green),
+  //   );
+  //   setState(() {
+  //     _isSwitched = value; // 更新状态
+  //   });
+  // }
 
   Map<String, int> buildDoCountsMap(
       Map<String, List<SubTask>> orderSubTaskMap) {
@@ -295,7 +295,7 @@ class _OrderPageState extends State<OrderPage> {
 
           RichText(
             text: TextSpan(
-              style: const TextStyle(fontSize: 20, color: Colors.black),
+              style: const TextStyle(fontSize: 18, color: Colors.black),
               children: [
                 const TextSpan(text: '总计做货：'),
                 TextSpan(
@@ -305,15 +305,16 @@ class _OrderPageState extends State<OrderPage> {
                       fontWeight: FontWeight.bold,
                     )),
                 TextSpan(text: _order!.guiges[0].danwei),
-                TextSpan(
-                    text: _getStatusText(_task),
-                    style: const TextStyle(
-                      color: Colors.blue, // 根据需要设置颜色
-                      fontWeight: FontWeight.bold, // 根据需要设置样式
-                    )),
               ],
             ),
           ),
+
+          Text(_getStatusText(_task),
+              style: const TextStyle(
+                fontSize: 15,
+                color: Colors.blue, // 根据需要设置颜色
+                fontWeight: FontWeight.bold, // 根据需要设置样式
+              )),
         ],
       ],
     );
@@ -322,16 +323,16 @@ class _OrderPageState extends State<OrderPage> {
   // 定义一个方法来返回状态文本
   String _getStatusText(Task? task) {
     if (task == null) {
-      return '【未分单】'; // 根据情况添加自定义文本
+      return '未分单'; // 根据情况添加自定义文本
     }
     if (task.status == 0) {
-      return '【已分单】'; // 根据情况添加自定义文本
+      return '未开始'; // 根据情况添加自定义文本
     } else if (task.status == 10) {
-      return '【部分完成】';
+      return '部分完成';
     } else if (task.status == 100) {
-      return '【已完成】';
+      return '已完成';
     } else {
-      return '【未分单】';
+      return '未分单';
     }
   }
 

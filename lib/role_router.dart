@@ -1,8 +1,6 @@
 import 'package:easyorder_mobile/constants.dart';
 import 'package:easyorder_mobile/my.dart';
 import 'package:easyorder_mobile/scan_assigner.dart';
-import 'package:easyorder_mobile/timeline.dart';
-import 'package:easyorder_mobile/order_task.dart';
 import 'package:easyorder_mobile/scan.dart';
 import 'package:easyorder_mobile/scan_general.dart';
 import 'package:easyorder_mobile/user_role.dart';
