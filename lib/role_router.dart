@@ -70,14 +70,8 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
 
   Future<void> _onSelect(int index, BottomNavigationBarItem item) async {
     // 启动当前选中屏幕的扫码器
-    if (item.label == '配货' ||
-        item.label == '对接' ||
-        item.label == '送货' ||
-        (roles.any((role) => role.roleName == item.label))) {
-      controller.start();
-    } else {
-      controller.stop();
-    }
+
+    controller.start();
     setState(() {
       _currentIndex = index;
     });

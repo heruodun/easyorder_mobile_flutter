@@ -1,6 +1,5 @@
 import 'package:easyorder_mobile/http_client.dart';
 import 'package:easyorder_mobile/order_task.dart';
-import 'package:easyorder_mobile/scan.dart';
 import 'package:easyorder_mobile/task_data.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // 用于格式化日期
@@ -39,7 +38,6 @@ class _TaskListScreenState extends State<TaskListScreen> {
       setState(() {
         tasks = data;
         _isCompleted = true;
-        controller.stop();
       });
     });
   }
@@ -85,7 +83,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
             ],
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(2.0),
             child: Text('共计${tasks.length}个任务',
                 style: Theme.of(context).textTheme.titleSmall),
           ),
@@ -181,7 +179,7 @@ class TaskItemScreenState extends State<TaskItem> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '全部${task.allCount}条,  $typeStr${task.makeCount}条',
+                  '${task.allCount}条\n$typeStr：${task.makeCount}条',
                 ),
                 Text(
                   '${task.createTime}',

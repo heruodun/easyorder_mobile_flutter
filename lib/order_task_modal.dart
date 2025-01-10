@@ -198,8 +198,8 @@ class _BottomModalSheetState extends State<BottomModalSheet> {
         msg: '做货数量$tempCount条，超过最大值${widget.maxCount}条',
         backgroundColor: Colors.red,
         textColor: Colors.white,
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.CENTER,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP,
       );
     }
   }
@@ -268,9 +268,9 @@ class _BottomModalSheetState extends State<BottomModalSheet> {
           ),
           Expanded(
             child: GridView.builder(
-              padding: const EdgeInsets.all(5),
+              padding: const EdgeInsets.all(3),
               gridDelegate: SliverGridDelegateWithFixedSize(80, 70,
-                  mainAxisSpacing: 5, minCrossAxisSpacing: 5),
+                  mainAxisSpacing: 2, minCrossAxisSpacing: 3),
               itemCount: widget.users.length,
               itemBuilder: (context, index) {
                 return UserInputWidget(
@@ -294,7 +294,7 @@ class _BottomModalSheetState extends State<BottomModalSheet> {
                   backgroundColor: Colors.red,
                   textColor: Colors.white,
                   toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.CENTER,
+                  gravity: ToastGravity.TOP,
                 );
                 return; // Prevent submission
               }

@@ -193,7 +193,7 @@ class _OrderPageState extends State<OrderPage> {
                   },
                 ),
                 SizedBox(
-                  height: 350,
+                  height: 400,
                   child: TabBarView(children: [
                     ListView.builder(
                       itemCount: 1,
@@ -273,27 +273,29 @@ class _OrderPageState extends State<OrderPage> {
               ],
             ),
           ),
-          Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Switch(
-                  value: _isSwitched, // 当前状态
-                  onChanged: _toggleSwitch, // 状态改变时的回调
-                  activeColor: Colors.green, // Switch被激活时的颜色
-                ),
-                const SizedBox(width: 10), // 用于调整Switch与文本之间的间距
-                Text(_isSwitched ? '已绑定' : '未绑定',
-                    style: const TextStyle(
-                        color: Colors.redAccent,
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold)), // 文本显示状态
-              ],
-            ),
-          ),
+
+          // Center(
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.center,
+          //     children: <Widget>[
+          //       Switch(
+          //         value: _isSwitched, // 当前状态
+          //         onChanged: _toggleSwitch, // 状态改变时的回调
+          //         activeColor: Colors.green, // Switch被激活时的颜色
+          //       ),
+          //       const SizedBox(width: 10), // 用于调整Switch与文本之间的间距
+          //       Text(_isSwitched ? '已绑定' : '未绑定',
+          //           style: const TextStyle(
+          //               color: Colors.redAccent,
+          //               fontSize: 25,
+          //               fontWeight: FontWeight.bold)), // 文本显示状态
+          //     ],
+          //   ),
+          // ),
+
           RichText(
             text: TextSpan(
-              style: const TextStyle(fontSize: 25, color: Colors.black),
+              style: const TextStyle(fontSize: 20, color: Colors.black),
               children: [
                 const TextSpan(text: '总计做货：'),
                 TextSpan(
@@ -307,7 +309,7 @@ class _OrderPageState extends State<OrderPage> {
                     text: _getStatusText(_task),
                     style: const TextStyle(
                       color: Colors.blue, // 根据需要设置颜色
-                      fontStyle: FontStyle.italic, // 根据需要设置样式
+                      fontWeight: FontWeight.bold, // 根据需要设置样式
                     )),
               ],
             ),
@@ -320,16 +322,16 @@ class _OrderPageState extends State<OrderPage> {
   // 定义一个方法来返回状态文本
   String _getStatusText(Task? task) {
     if (task == null) {
-      return '（未开始）'; // 根据情况添加自定义文本
+      return '【未分单】'; // 根据情况添加自定义文本
     }
     if (task.status == 0) {
-      return '（未开始）'; // 根据情况添加自定义文本
+      return '【已分单】'; // 根据情况添加自定义文本
     } else if (task.status == 10) {
-      return '（部分完成）';
+      return '【部分完成】';
     } else if (task.status == 100) {
-      return '（已完成）';
+      return '【已完成】';
     } else {
-      return '（未分配）';
+      return '【未分单】';
     }
   }
 
@@ -398,8 +400,10 @@ Future<List<User>> getAllMakers() async {
     // Assuming response.data is a List
     List<dynamic> userList = response.data; // Retrieve the list
     return userList
+        .where((userJson) => userJson != null) // 过滤掉空值
         .map((userJson) => User.fromJson(userJson))
-        .toList(); // Parse each user and return a list
+        .toList();
+    // Parse each user and return a list
   } else {
     throw Exception(response.message);
   }

@@ -9,8 +9,8 @@ class Task {
   String guige;
   int makeCount;
   int allCount;
-  DateTime createTime;
-  DateTime updateTime;
+  dynamic createTime;
+  dynamic updateTime;
   bool deletedFlag;
   List<SubTask>? subTasks;
 
@@ -39,8 +39,8 @@ class Task {
       guige: json['guige'],
       makeCount: json['makeCount'],
       allCount: json['allCount'],
-      createTime: DateTime.parse(json['createTime']),
-      updateTime: DateTime.parse(json['updateTime']),
+      createTime: json['createTime'],
+      updateTime: json['updateTime'],
       deletedFlag: json['deletedFlag'],
       subTasks: json['subTasks'] != null
           ? List<SubTask>.from(

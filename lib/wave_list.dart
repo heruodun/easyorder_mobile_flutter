@@ -43,7 +43,7 @@ class _WaveListScreenState extends State<WaveListScreen> {
       setState(() {
         waves = data;
         _isCompleted = true;
-        controller.stop();
+        // controller.stop();
       });
     });
   }

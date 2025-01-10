@@ -1,4 +1,5 @@
 import 'package:easyorder_mobile/order_task.dart';
+import 'package:easyorder_mobile/order_task_list.dart';
 import 'package:easyorder_mobile/scan.dart';
 import 'package:flutter/material.dart';
 
@@ -20,6 +21,18 @@ class _ScanAssignerState extends ScanScreenState<ScanAssignerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(appBarStr),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.list),
+            onPressed: () {
+              // 点击按钮时导航到 ListPage
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TaskListScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: super.buildScanScreen(context),
     );
