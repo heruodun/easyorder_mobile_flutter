@@ -266,6 +266,11 @@ class _BottomModalSheetState extends State<BottomModalSheet> {
               ],
             ),
           ),
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 5),
+            height: 1, // 分割线的高度
+            color: const Color.fromARGB(255, 231, 228, 222), // 分割线的颜色
+          ),
           Expanded(
             child: GridView.builder(
               padding: const EdgeInsets.all(3),

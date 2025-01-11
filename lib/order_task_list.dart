@@ -1,6 +1,8 @@
 import 'package:easyorder_mobile/http_client.dart';
 import 'package:easyorder_mobile/order_task.dart';
+import 'package:easyorder_mobile/role_router.dart';
 import 'package:easyorder_mobile/task_data.dart';
+import 'package:easyorder_mobile/user_data.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // 用于格式化日期
 import 'constants.dart';
@@ -47,6 +49,24 @@ class _TaskListScreenState extends State<TaskListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('任务列表'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () async {
+              // 在点击按钮时获取当前用户信息
+              User? currentUser = await User.getCurrentUser();
+              if (currentUser != null) {
+                // 导航到 MultiRoleScreen 并传递当前用户
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MultiRoleScreen(user: currentUser),
+                  ),
+                );
+              }
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -172,7 +192,7 @@ class TaskItemScreenState extends State<TaskItem> {
         },
         child: ListTile(
             title: Text(
-              '${task.id}. ${task.address}',
+              '任务${task.id} ${task.address}',
               style: Theme.of(context).textTheme.titleSmall,
             ),
             subtitle: Column(
@@ -192,13 +212,6 @@ class TaskItemScreenState extends State<TaskItem> {
             ), // 显示从1开始的序号
 
             trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-              // Text(task.address,
-              //     style: Theme.of(context).textTheme.titleSmall,
-              //     overflow: TextOverflow.ellipsis,
-              //     maxLines: 1),
-
-              // const SizedBox(width: 2), // 设置你想要的间距
-
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

@@ -3,6 +3,7 @@ import 'package:easyorder_mobile/http_client.dart';
 import 'package:easyorder_mobile/order_data.dart';
 import 'package:easyorder_mobile/order_task_item.dart';
 import 'package:easyorder_mobile/order_task_list.dart';
+import 'package:easyorder_mobile/role_router.dart';
 import 'package:easyorder_mobile/task_data.dart';
 import 'package:easyorder_mobile/user_data.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,7 @@ class _OrderPageState extends State<OrderPage> {
   Map<String, List<SubTask>> orderSubTaskMap = {};
   bool _isCompleted = false;
   // bool _isSwitched = false; // Switch的状态
+  int _initialIndex = 0;
 
   @override
   void initState() {
@@ -47,7 +49,7 @@ class _OrderPageState extends State<OrderPage> {
       orderSubTaskMap = buildOrderSubTaskMap(orderTask);
       _doCountsMap = buildDoCountsMap(orderSubTaskMap);
       _makeCount = totalCount(_doCountsMap);
-      // _index = orderTask.task?.type == 1 ? 0 : 1;
+      _initialIndex = orderTask.task?.type == 1 ? 0 : 1;
     });
     _isCompleted = true;
   }
@@ -147,10 +149,7 @@ class _OrderPageState extends State<OrderPage> {
           Text('${_order!.orderId}', style: const TextStyle(fontSize: 14)),
           RichText(
             text: TextSpan(
-              style: const TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black),
+              style: const TextStyle(fontSize: 20, color: Colors.black),
               children: [
                 TextSpan(text: '${_order!.guiges[0].guige} '),
                 TextSpan(
@@ -160,7 +159,42 @@ class _OrderPageState extends State<OrderPage> {
               ],
             ),
           ),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            RichText(
+              text: TextSpan(
+                style: const TextStyle(fontSize: 20, color: Colors.black),
+                children: [
+                  const TextSpan(text: '总计做货：'),
+                  TextSpan(
+                      text: '$_makeCount ',
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      )),
+                  TextSpan(text: _order!.guiges[0].danwei),
+                ],
+              ),
+            ),
+            const SizedBox(
+              width: 4,
+            ),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+              decoration: BoxDecoration(
+                color: _getBackgroundColor(_task), // 设置背景色
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              child: Text(_getStatusText(_task),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Colors.white, // 根据需要设置颜色
+                    fontWeight: FontWeight.bold, // 根据需要设置样式
+                  )),
+            )
+          ]),
           DefaultTabController(
+            initialIndex: _initialIndex,
             length: 2,
             child: Column(
               children: [
@@ -201,6 +235,8 @@ class _OrderPageState extends State<OrderPage> {
                         return Container(
                             margin: const EdgeInsets.symmetric(
                                 vertical: 2.0), // 为每个元素添加上下间距
+                            padding: const EdgeInsets.all(1.0), // 内边距
+
                             decoration: BoxDecoration(
                                 // color: Colors.white, // 元素背景色
                                 borderRadius: BorderRadius.circular(8.0), // 圆角
@@ -237,6 +273,7 @@ class _OrderPageState extends State<OrderPage> {
                         return Container(
                             margin: const EdgeInsets.symmetric(
                                 vertical: 2.0), // 为每个元素添加上下间距
+                            padding: const EdgeInsets.all(1.0), // 内边距
                             decoration: BoxDecoration(
                                 // color: Colors.white, // 元素背景色
                                 borderRadius: BorderRadius.circular(8.0), // 圆角
@@ -292,29 +329,6 @@ class _OrderPageState extends State<OrderPage> {
           //     ],
           //   ),
           // ),
-
-          RichText(
-            text: TextSpan(
-              style: const TextStyle(fontSize: 18, color: Colors.black),
-              children: [
-                const TextSpan(text: '总计做货：'),
-                TextSpan(
-                    text: '$_makeCount ',
-                    style: const TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                    )),
-                TextSpan(text: _order!.guiges[0].danwei),
-              ],
-            ),
-          ),
-
-          Text(_getStatusText(_task),
-              style: const TextStyle(
-                fontSize: 15,
-                color: Colors.blue, // 根据需要设置颜色
-                fontWeight: FontWeight.bold, // 根据需要设置样式
-              )),
         ],
       ],
     );
@@ -336,12 +350,43 @@ class _OrderPageState extends State<OrderPage> {
     }
   }
 
+  Color _getBackgroundColor(Task? task) {
+    if (task == null) {
+      return Colors.grey; // 根据情况添加自定义文本
+    }
+    if (task.status == 0) {
+      return Colors.red;
+    } else if (task.status == 10) {
+      return Colors.yellow;
+    } else if (task.status == 100) {
+      return Colors.green;
+    } else {
+      return Colors.grey;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('做货分配'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () async {
+              // 在点击按钮时获取当前用户信息
+              User? currentUser = await User.getCurrentUser();
+              if (currentUser != null) {
+                // 导航到 MultiRoleScreen 并传递当前用户
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MultiRoleScreen(user: currentUser),
+                  ),
+                );
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.list),
             onPressed: () {

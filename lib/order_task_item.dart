@@ -85,7 +85,7 @@ class _ItemWidgetState extends State<ItemWidget> {
         Expanded(
           // 使用 Expanded 可以让内容占用剩余空间
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center, // 文本和用户列表居中对齐
+            crossAxisAlignment: CrossAxisAlignment.start, // 文本和用户列表居中对齐
             children: [
               RichText(
                 text: TextSpan(

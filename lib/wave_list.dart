@@ -1,5 +1,4 @@
 import 'package:easyorder_mobile/http_client.dart';
-import 'package:easyorder_mobile/scan.dart';
 import 'package:easyorder_mobile/scan_picker.dart';
 import 'package:easyorder_mobile/wave_detail_picker.dart';
 import 'package:flutter/material.dart';
