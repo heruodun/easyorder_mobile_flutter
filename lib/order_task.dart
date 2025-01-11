@@ -36,9 +36,8 @@ class _OrderPageState extends State<OrderPage> {
   }
 
   Future<void> fetchData() async {
-    setState(() {});
-
     _isCompleted = false;
+    setState(() {});
 
     allUsers = await getAllMakers();
     OrderTask orderTask = await fetchTaskByOrderIdQr(widget.orderIdQr);
@@ -48,19 +47,21 @@ class _OrderPageState extends State<OrderPage> {
       _task = orderTask.task;
       orderSubTaskMap = buildOrderSubTaskMap(orderTask);
       _doCountsMap = buildDoCountsMap(orderSubTaskMap);
-      _makeCount = totalCount(_doCountsMap);
-      _initialIndex = orderTask.task?.type == 1 ? 0 : 1;
+      _makeCount = _calculateMakeCount();
+      _initialIndex =
+          (orderTask.task == null) ? 0 : (orderTask.task?.type == 1 ? 0 : 1);
+
+      _isCompleted = true;
     });
-    _isCompleted = true;
   }
 
-  int totalCount(Map<String, int> doCountsMap) {
-    int count = 0;
-    doCountsMap.forEach((mark, value) {
-      count += value;
-    });
-    return count;
-  }
+  // int totalCount(Map<String, int> doCountsMap) {
+  //   int count = 0;
+  //   doCountsMap.forEach((mark, value) {
+  //     count += value;
+  //   });
+  //   return count;
+  // }
 
   // void _toggleSwitch(bool value) {
   //   String tip = value ? '切换到绑定成功' : '切换到不绑定成功';
@@ -123,8 +124,8 @@ class _OrderPageState extends State<OrderPage> {
     return orderSubTaskMap;
   }
 
-  void _calculateMakeCount() {
-    _makeCount = _doCountsMap.values.fold(0, (a, b) => a + b);
+  int _calculateMakeCount() {
+    return _doCountsMap.values.fold(0, (a, b) => a + b);
   }
 
   Widget _buildResultLayer() {
@@ -140,6 +141,17 @@ class _OrderPageState extends State<OrderPage> {
   }
 
   Widget _buildTaskLayer(BuildContext context) {
+    // if (!_isCompleted) {
+    //   return const SizedBox.shrink();
+    // }
+    if (_order == null) {
+      return Text("");
+    }
+
+    if (_order!.guiges[0].tiaos == null) {
+      return Text("${_order!.address}的 ${_order!.orderId} 订单不支持分单！");
+    }
+
     return Column(
       children: [
         if (_order != null) ...[
@@ -219,11 +231,11 @@ class _OrderPageState extends State<OrderPage> {
                   ],
                   labelColor: Colors.green,
                   unselectedLabelColor: Colors.blueGrey,
-                  onTap: (index) async {
+                  onTap: (index) {
                     fetchData();
-                    setState(() {
-                      _calculateMakeCount();
-                    });
+                    // setState(() {
+                    //   _calculateMakeCount();
+                    // });
                   },
                 ),
                 SizedBox(

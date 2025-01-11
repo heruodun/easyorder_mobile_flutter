@@ -193,15 +193,15 @@ class _BottomModalSheetState extends State<BottomModalSheet> {
     setState(() {
       tempCount = newTempCount;
     });
-    if (tempCount > widget.maxCount) {
-      Fluttertoast.showToast(
-        msg: '做货数量$tempCount条，超过最大值${widget.maxCount}条',
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.TOP,
-      );
-    }
+    // if (tempCount > widget.maxCount) {
+    //   Fluttertoast.showToast(
+    //     msg: '做货数量$tempCount条，超过最大值${widget.maxCount}条',
+    //     backgroundColor: Colors.red,
+    //     textColor: Colors.white,
+    //     toastLength: Toast.LENGTH_SHORT,
+    //     gravity: ToastGravity.TOP,
+    //   );
+    // }
   }
 
   @override
@@ -274,8 +274,8 @@ class _BottomModalSheetState extends State<BottomModalSheet> {
           Expanded(
             child: GridView.builder(
               padding: const EdgeInsets.all(3),
-              gridDelegate: SliverGridDelegateWithFixedSize(80, 70,
-                  mainAxisSpacing: 2, minCrossAxisSpacing: 3),
+              gridDelegate: SliverGridDelegateWithFixedSize(70, 60,
+                  mainAxisSpacing: 0, minCrossAxisSpacing: 0),
               itemCount: widget.users.length,
               itemBuilder: (context, index) {
                 return UserInputWidget(
@@ -320,7 +320,7 @@ class _BottomModalSheetState extends State<BottomModalSheet> {
             label: const Text("提交"),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(
-                  vertical: 20, horizontal: 80), // Increase button size
+                  vertical: 8, horizontal: 80), // Increase button size
               textStyle: const TextStyle(fontSize: 18), // Increase text size
             ),
           ),
