@@ -49,6 +49,8 @@ class _ScanAssignerState extends ScanScreenState<ScanAssignerScreen> {
       return;
     }
 
+    debugPrint('assigner doProcess $result');
+
     _navigateToScreen(result);
   }
 
