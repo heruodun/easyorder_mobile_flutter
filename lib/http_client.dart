@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'package:easyorder_mobile/error.dart';
+import 'package:easyorder_mobile/login.dart';
 import 'package:easyorder_mobile/user_data.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class HttpResponseModel {
@@ -22,6 +25,7 @@ Future<HttpResponseModel> httpClient({
   required Uri uri,
   dynamic body,
   required String method,
+  required BuildContext context,
 }) async {
   late http.Response response;
   User? user = await User.getCurrentUser();
@@ -68,7 +72,31 @@ Future<HttpResponseModel> httpClient({
     final Map<String, dynamic> responseBody =
         json.decode(utf8.decode(response.bodyBytes));
 
+    // 添加处理401的逻辑
+    if (response.statusCode == 200 && responseBody['code'] == 401) {
+      _showLoginPrompt(context);
+      return HttpResponseModel(
+        statusCode: response.statusCode,
+        data: null,
+        message: '登录失效，请重新登录',
+        code: 401,
+        isSuccess: false,
+      );
+    }
+
     bool isSuccess = response.statusCode == 200 && responseBody['code'] == 0;
+
+    // Handling all non-200 status codes
+    if (response.statusCode != 200 || responseBody['code'] != 0) {
+      _navigateToErrorPage(context, responseBody['msg'] ?? '未知错误');
+      return HttpResponseModel(
+        statusCode: response.statusCode,
+        data: null,
+        message: responseBody['msg'] ?? '未知错误',
+        code: responseBody['code'] ?? -1,
+        isSuccess: false,
+      );
+    }
 
     return HttpResponseModel(
       statusCode: response.statusCode,
@@ -87,4 +115,18 @@ Future<HttpResponseModel> httpClient({
       isSuccess: false, // 异常时设置为 false
     );
   }
+}
+
+void _showLoginPrompt(BuildContext context) {
+  // 直接导航到登录页面
+  Navigator.of(context).pushReplacement(
+    MaterialPageRoute(builder: (context) => const LoginScreen()),
+  );
+}
+
+void _navigateToErrorPage(BuildContext context, String errorMessage) {
+  // 导航到错误页面，并传递错误信息
+  Navigator.of(context).push(
+    MaterialPageRoute(builder: (context) => ErrorPage(message: errorMessage)),
+  );
 }

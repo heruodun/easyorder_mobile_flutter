@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class TimelineWidget extends StatelessWidget {
   final List<Trace> traceList;
 
-  TimelineWidget({super.key, required this.traceList});
+  const TimelineWidget({super.key, required this.traceList});
 
   Color _getBackgroundColor(String operation) {
     switch (operation) {
@@ -36,6 +36,7 @@ class TimelineWidget extends StatelessWidget {
         child: Expanded(
           child: ListView.builder(
             shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
             itemCount: displayList.length,
             itemBuilder: (context, index) {
               final trace = displayList[index];
@@ -68,7 +69,7 @@ class TimelineWidget extends StatelessWidget {
                     Expanded(
                       child: Container(
                         // 对 detail 应用宽度限制
-                        constraints: BoxConstraints(maxWidth: 200),
+                        constraints: const BoxConstraints(maxWidth: 200),
                         alignment: Alignment.centerRight,
                         child: Text(
                           trace.detail ?? '',

@@ -57,13 +57,13 @@ class ScanCheckerState extends ScanScreenState<ScanCheckerScreen> {
     } else {
       try {
         var response = await httpClient(
-          uri: Uri.parse('$httpHost/app/order/scan'),
-          body: {
-            'orderIdQr': result,
-            'operation': peihuoRoleCode,
-          },
-          method: 'POST',
-        );
+            uri: Uri.parse('$httpHost/app/order/scan'),
+            body: {
+              'orderIdQr': result,
+              'operation': peihuoRoleCode,
+            },
+            method: 'POST',
+            context: context);
         print(response.message);
         if (response.isSuccess) {
           Vibration.vibrate();

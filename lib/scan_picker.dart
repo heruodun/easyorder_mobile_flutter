@@ -26,9 +26,9 @@ class _ScanPickerState extends ScanScreenState<ScanPickerScreen> {
   // 从服务器获取波次数据的函数
   Future<Wave> fetchWavesById(int waveId) async {
     final response = await httpClient(
-      uri: Uri.parse('$httpHost/app/order/wave/get/$waveId'),
-      method: "GET",
-    );
+        uri: Uri.parse('$httpHost/app/order/wave/get/$waveId'),
+        method: "GET",
+        context: context);
 
     if (response.isSuccess) {
       return Wave.fromJson(response.data);
@@ -131,15 +131,15 @@ class _ScanPickerState extends ScanScreenState<ScanPickerScreen> {
     } else {
       try {
         var response = await httpClient(
-          uri: Uri.parse('$httpHost/app/order/wave/order/addOrDel'),
-          body: {
-            'waveId': waveId,
-            'waveAlias': widget.wave!.waveAlias,
-            'orderId': orderId,
-            'operation': type,
-          },
-          method: "POST",
-        );
+            uri: Uri.parse('$httpHost/app/order/wave/order/addOrDel'),
+            body: {
+              'waveId': waveId,
+              'waveAlias': widget.wave!.waveAlias,
+              'orderId': orderId,
+              'operation': type,
+            },
+            method: "POST",
+            context: context);
 
         print(response.statusCode);
 

@@ -60,13 +60,13 @@ class ScanGeneralState extends ScanScreenState<ScanGeneralScreen> {
     } else {
       try {
         var response = await httpClient(
-          uri: Uri.parse('$httpHost/app/order/scan'),
-          body: {
-            'orderIdQr': result,
-            'operation': operationCode,
-          },
-          method: 'POST',
-        );
+            uri: Uri.parse('$httpHost/app/order/scan'),
+            body: {
+              'orderIdQr': result,
+              'operation': operationCode,
+            },
+            method: 'POST',
+            context: context);
         if (response.isSuccess) {
           Vibration.vibrate();
 

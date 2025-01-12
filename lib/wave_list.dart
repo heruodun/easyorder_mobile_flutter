@@ -47,6 +47,21 @@ class _WaveListScreenState extends State<WaveListScreen> {
     });
   }
 
+  // 从服务器获取波次数据的函数
+  Future<List<Wave>> fetchWavesByDate(DateTime date) async {
+    final String formattedDate = DateFormat('yyyy-MM-dd').format(date);
+    final response = await httpClient(
+        uri: Uri.parse('$httpHost/app/order/wave/list?date=$formattedDate'),
+        method: "GET",
+        context: context);
+
+    if (response.isSuccess) {
+      return waveListFromJson(response.data).wave;
+    } else {
+      throw Exception(response.message);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -178,10 +193,10 @@ class _WaveListScreenState extends State<WaveListScreen> {
     try {
       // 发送HTTP POST请求，将Wave保存到服务器上
       final response = await httpClient(
-        uri: Uri.parse('$httpHost/app/order/wave/create'), // 替换为你的API端点
-        body: {},
-        method: 'POST',
-      );
+          uri: Uri.parse('$httpHost/app/order/wave/create'), // 替换为你的API端点
+          body: {},
+          method: 'POST',
+          context: context);
 
       // 检查服务器响应是否成功
       if (response.isSuccess) {
@@ -379,10 +394,11 @@ class WaveItemScreenState extends State<WaveItem> {
                 if (newCount != null) {
                   // 调用http服务
                   final response = await httpClient(
-                    uri: Uri.parse('$httpHost/app/order/wave/shipCount/update'),
-                    body: {'shipCount': newCount, 'waveId': waveId},
-                    method: "POST",
-                  );
+                      uri: Uri.parse(
+                          '$httpHost/app/order/wave/shipCount/update'),
+                      body: {'shipCount': newCount, 'waveId': waveId},
+                      method: "POST",
+                      context: context);
 
                   if (response.isSuccess) {
                     // 更新内部状态，关闭对话框
@@ -411,20 +427,6 @@ class WaveItemScreenState extends State<WaveItem> {
       },
     );
   }
-}
 
 //-----------------------------------列表------------------------
-
-// 从服务器获取波次数据的函数
-Future<List<Wave>> fetchWavesByDate(DateTime date) async {
-  final String formattedDate = DateFormat('yyyy-MM-dd').format(date);
-  final response = await httpClient(
-      uri: Uri.parse('$httpHost/app/order/wave/list?date=$formattedDate'),
-      method: "GET");
-
-  if (response.isSuccess) {
-    return waveListFromJson(response.data).wave;
-  } else {
-    throw Exception(response.message);
-  }
 }

@@ -84,7 +84,8 @@ class ScanShipperState extends ScanScreenState<ScanShipperScreen> {
     try {
       final response = await httpClient(
           uri: Uri.parse('$httpHost/app/order/wave/queryByOrder/$result'),
-          method: "GET");
+          method: "GET",
+          context: context);
 
       if (response.isSuccess) {
         Wave wave = Wave.fromJson(response.data);

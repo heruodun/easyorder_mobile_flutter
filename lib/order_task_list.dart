@@ -36,7 +36,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
       _isCompleted = false;
     });
 
-    fetchTasksByDate(selectedDate).then((data) {
+    fetchTasksByDate(selectedDate, context).then((data) {
       setState(() {
         tasks = data;
         _isCompleted = true;
@@ -186,7 +186,7 @@ class TaskItemScreenState extends State<TaskItem> {
             context,
             MaterialPageRoute(
               builder: (context) =>
-                  OrderPage(orderIdQr: '${task.orderId}\$xiaowangniujin'),
+                  OrderTaskScreen(orderIdQr: '${task.orderId}\$xiaowangniujin'),
             ),
           );
         },
@@ -265,11 +265,12 @@ class TaskItemScreenState extends State<TaskItem> {
 
 //-----------------------------------列表------------------------
 
-Future<List<Task>> fetchTasksByDate(DateTime date) async {
+Future<List<Task>> fetchTasksByDate(DateTime date, BuildContext context) async {
   final String formattedDate = DateFormat('yyyy-MM-dd').format(date);
   final response = await httpClient(
       uri: Uri.parse('$httpHost/app/order/task/list?date=$formattedDate'),
-      method: "GET");
+      method: "GET",
+      context: context);
 
   if (response.isSuccess) {
     List<dynamic> taskList = response.data; // Retrieve the list

@@ -9,16 +9,16 @@ import 'package:easyorder_mobile/user_data.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
-class OrderPage extends StatefulWidget {
+class OrderTaskScreen extends StatefulWidget {
   final String orderIdQr;
 
-  const OrderPage({super.key, required this.orderIdQr});
+  const OrderTaskScreen({super.key, required this.orderIdQr});
 
   @override
-  _OrderPageState createState() => _OrderPageState();
+  _OrderTaskScreenState createState() => _OrderTaskScreenState();
 }
 
-class _OrderPageState extends State<OrderPage> {
+class _OrderTaskScreenState extends State<OrderTaskScreen> {
   Order? _order;
   Task? _task;
   List<User> allUsers = [];
@@ -422,47 +422,48 @@ class _OrderPageState extends State<OrderPage> {
       ),
     );
   }
-}
 
 //------------------------------http-------------------------------
-Future<OrderTask> fetchTaskByOrderIdQr(String orderIdQr) async {
-  final response = await httpClient(
-      uri: Uri.parse('$httpHost/app/order/task?orderIdQr=$orderIdQr'),
-      method: "GET");
+  Future<OrderTask> fetchTaskByOrderIdQr(String orderIdQr) async {
+    final response = await httpClient(
+        uri: Uri.parse('$httpHost/app/order/task?orderIdQr=$orderIdQr'),
+        method: "GET",
+        context: context);
 
-  if (response.isSuccess) {
-    return OrderTask.fromJson(response.data);
-  } else {
-    throw Exception(response.message);
+    if (response.isSuccess) {
+      return OrderTask.fromJson(response.data);
+    } else {
+      throw Exception(response.message);
+    }
   }
-}
 
-Future<void> deleteSubTasks(String orderIdQr, int type) async {
-  final response = await httpClient(
-    uri: Uri.parse(
-        '$httpHost/app/order/task/delete?orderIdQr=$orderIdQr&type=$type'),
-    method: "GET",
-  );
+  Future<void> deleteSubTasks(String orderIdQr, int type) async {
+    final response = await httpClient(
+        uri: Uri.parse(
+            '$httpHost/app/order/task/delete?orderIdQr=$orderIdQr&type=$type'),
+        method: "GET",
+        context: context);
 
-  if (response.isSuccess) {}
-}
+    if (response.isSuccess) {}
+  }
 
-Future<List<User>> getAllMakers() async {
-  final response = await httpClient(
-    uri: Uri.parse(
-        '$httpHost/app/role/employee/getAllEmployeeByRoleCode/duijie'),
-    method: "GET",
-  );
+  Future<List<User>> getAllMakers() async {
+    final response = await httpClient(
+        uri: Uri.parse(
+            '$httpHost/app/role/employee/getAllEmployeeByRoleCode/duijie'),
+        method: "GET",
+        context: context);
 
-  if (response.isSuccess) {
-    // Assuming response.data is a List
-    List<dynamic> userList = response.data; // Retrieve the list
-    return userList
-        .where((userJson) => userJson != null) // 过滤掉空值
-        .map((userJson) => User.fromJson(userJson))
-        .toList();
-    // Parse each user and return a list
-  } else {
-    throw Exception(response.message);
+    if (response.isSuccess) {
+      // Assuming response.data is a List
+      List<dynamic> userList = response.data; // Retrieve the list
+      return userList
+          .where((userJson) => userJson != null) // 过滤掉空值
+          .map((userJson) => User.fromJson(userJson))
+          .toList();
+      // Parse each user and return a list
+    } else {
+      throw Exception(response.message);
+    }
   }
 }

@@ -43,10 +43,10 @@ class _WaveDetailsShipperScreenState extends WaveDetailsScreenState {
     try {
       // 发送HTTP POST请求，将Wave保存到服务器上
       final response = await httpClient(
-        uri: Uri.parse('$httpHost/app/order/wave/ship'),
-        body: {'waveId': waveId},
-        method: "POST",
-      );
+          uri: Uri.parse('$httpHost/app/order/wave/ship'),
+          body: {'waveId': waveId},
+          method: "POST",
+          context: context);
 
       // 检查服务器响应是否成功
       if (response.isSuccess) {

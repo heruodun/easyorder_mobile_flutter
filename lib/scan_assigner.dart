@@ -57,7 +57,7 @@ class _ScanAssignerState extends ScanScreenState<ScanAssignerScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) => OrderPage(
+          builder: (context) => OrderTaskScreen(
                 orderIdQr: orderIdQr,
               )),
     ).then((_) {
