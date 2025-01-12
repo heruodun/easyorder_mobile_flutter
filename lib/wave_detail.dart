@@ -136,12 +136,8 @@ abstract class WaveDetailsScreenState extends State<WaveDetailsScreen> {
                                       child: Icon(Icons.timeline,
                                           size: 20, color: Colors.blue),
                                     ),
-                                    SizedBox(
-                                      height:
-                                          150, // Set a fixed height for the TimelineWidget
-                                      child: TimelineWidget(
-                                          traceList: orderDetail.trace ?? []),
-                                    )
+                                    TimelineWidget(
+                                        traceList: orderDetail.trace ?? []),
                                   ],
                                 ),
                                 isThreeLine: true,
