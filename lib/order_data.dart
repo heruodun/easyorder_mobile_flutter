@@ -17,7 +17,7 @@ class Order {
   final String curOperator;
   final int? curOperatorId;
   final String creator;
-  final int creatorId;
+  final int? creatorId;
   final int? waveId;
   final bool deletedFlag;
   final DateTime createTime;
@@ -37,7 +37,7 @@ class Order {
     required this.curOperator,
     this.curOperatorId,
     required this.creator,
-    required this.creatorId,
+    this.creatorId,
     this.waveId,
     required this.deletedFlag,
     required this.createTime,

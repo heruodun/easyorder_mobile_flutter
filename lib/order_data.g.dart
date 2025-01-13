@@ -24,7 +24,7 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order(
       curOperator: json['curOperator'] as String,
       curOperatorId: (json['curOperatorId'] as num?)?.toInt(),
       creator: json['creator'] as String,
-      creatorId: (json['creatorId'] as num).toInt(),
+      creatorId: (json['creatorId'] as num?)?.toInt(),
       waveId: (json['waveId'] as num?)?.toInt(),
       deletedFlag: json['deletedFlag'] as bool,
       createTime: DateTime.parse(json['createTime'] as String),

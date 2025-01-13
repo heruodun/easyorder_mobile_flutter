@@ -58,7 +58,7 @@ class _UserInputWidgetState extends State<UserInputWidget> {
               child: Text(
                 widget.user.actualName,
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 14,
                   color: isCountPositive ? Colors.red : Colors.black,
                   fontWeight:
                       isCountPositive ? FontWeight.bold : FontWeight.normal,
@@ -71,7 +71,7 @@ class _UserInputWidgetState extends State<UserInputWidget> {
           keyboardType: TextInputType.number,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            fontSize: 18,
+            fontSize: 14,
             fontWeight: FontWeight.bold,
             color: Colors.red,
           ),
@@ -274,8 +274,8 @@ class _BottomModalSheetState extends State<BottomModalSheet> {
           Expanded(
             child: GridView.builder(
               padding: const EdgeInsets.all(3),
-              gridDelegate: SliverGridDelegateWithFixedSize(70, 60,
-                  mainAxisSpacing: 0, minCrossAxisSpacing: 0),
+              gridDelegate: SliverGridDelegateWithFixedSize(60, 50,
+                  mainAxisSpacing: 1, minCrossAxisSpacing: 1),
               itemCount: widget.users.length,
               itemBuilder: (context, index) {
                 return UserInputWidget(
