@@ -54,24 +54,16 @@ class _UserInputWidgetState extends State<UserInputWidget> {
               });
             },
             child: Container(
-              alignment: Alignment.center,
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: widget.user.actualName,
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: isCountPositive ? Colors.red : Colors.black,
-                        fontWeight: isCountPositive
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )),
+                alignment: Alignment.center,
+                child: Text(
+                  widget.user.actualName,
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: isCountPositive ? Colors.red : Colors.black,
+                    fontWeight:
+                        isCountPositive ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ))),
         const SizedBox(height: 2),
         TextField(
           controller: countController,
@@ -214,176 +206,138 @@ class _BottomModalSheetState extends State<BottomModalSheet> {
   @override
   Widget build(BuildContext context) {
     int remain = widget.maxCount - tempCount;
-    return Scaffold(
-        resizeToAvoidBottomInset: true,
-        body: Expanded(
-            child: Container(
-          padding: const EdgeInsets.all(5),
-          height: MediaQuery.of(context).size.height,
-          child: Column(
+    return Container(
+      padding: const EdgeInsets.all(5),
+      height: MediaQuery.of(context).size.height,
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      // 点击取消按钮时，关闭BottomModalSheet
-                      Navigator.pop(context);
-                    },
-                    child: const Text('取消'),
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        '${widget.mark} x ${widget.maxCount} 条',
-                        style: const TextStyle(fontSize: 15),
-                      ),
-                    ),
-                  ),
-                  ElevatedButton.icon(
-                      onPressed: () async {
-                        if (tempCount > widget.maxCount) {
-                          Fluttertoast.showToast(
-                            msg: '做货数量$tempCount超过最大值${widget.maxCount}',
-                            backgroundColor: Colors.red,
-                            textColor: Colors.white,
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.TOP,
-                          );
-                          return; // Prevent submission
-                        }
-                        Map<int, SubTask> uniqueTasksMap = {};
-
-                        for (var task in orderTasksList) {
-                          if (task.count >= 0) {
-                            uniqueTasksMap[task.userId] = task; // 根据 userId 去重
-                          }
-                        }
-                        List<SubTask> tasksToSubmit =
-                            uniqueTasksMap.values.toList();
-
-                        int total = tasksToSubmit.fold(
-                            0, (sum, task) => sum + task.count);
-                        await submitData(tasksToSubmit, total);
-                      },
-                      label: const Text(
-                        "提交",
-                      )),
-                ],
-              ),
-
-              RichText(
-                text: TextSpan(
-                  children: [
-                    const TextSpan(
-                      text: ' 当前 ',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.black,
-                      ),
-                    ),
-                    TextSpan(
-                      text: '$tempCount',
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const TextSpan(
-                      text: ' 条',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                      ),
-                    ),
-                    const TextSpan(
-                      text: ' 剩余可做 ',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.black,
-                      ),
-                    ),
-                    TextSpan(
-                      text: '$remain',
-                      style: const TextStyle(
-                        color: Colors.blue,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const TextSpan(
-                      text: ' 条',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 5),
-                height: 1, // 分割线的高度
-                color: const Color.fromARGB(255, 231, 228, 222), // 分割线的颜色
+              ElevatedButton(
+                onPressed: () {
+                  // 点击取消按钮时，关闭BottomModalSheet
+                  Navigator.pop(context);
+                },
+                child: const Text('取消'),
               ),
               Expanded(
-                child: GridView.builder(
-                  padding: const EdgeInsets.all(3),
-                  gridDelegate: SliverGridDelegateWithFixedSize(70, 60,
-                      mainAxisSpacing: 1, minCrossAxisSpacing: 1),
-                  itemCount: widget.users.length,
-                  itemBuilder: (context, index) {
-                    return UserInputWidget(
-                      maxCount: widget.maxCount,
-                      user: widget.users[index],
-                      orderSubTask: orderTasksList[index],
-                      onCountChanged: (count) {
-                        orderTasksList[index] =
-                            orderTasksList[index].copyWith(count: count);
-                        updateTempCount();
-                      },
-                    );
-                  },
+                child: Center(
+                  child: Text(
+                    '${widget.mark} x ${widget.maxCount} 条',
+                    style: const TextStyle(fontSize: 15),
+                  ),
                 ),
               ),
-              // ElevatedButton.icon(
-              //   onPressed: () async {
-              //     if (tempCount > widget.maxCount) {
-              //       Fluttertoast.showToast(
-              //         msg: '做货数量$tempCount超过最大值${widget.maxCount}',
-              //         backgroundColor: Colors.red,
-              //         textColor: Colors.white,
-              //         toastLength: Toast.LENGTH_SHORT,
-              //         gravity: ToastGravity.TOP,
-              //       );
-              //       return; // Prevent submission
-              //     }
-              //     Map<int, SubTask> uniqueTasksMap = {};
+              ElevatedButton.icon(
+                  onPressed: () async {
+                    if (tempCount > widget.maxCount) {
+                      Fluttertoast.showToast(
+                        msg: '做货数量$tempCount超过最大值${widget.maxCount}',
+                        backgroundColor: Colors.red,
+                        textColor: Colors.white,
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.TOP,
+                      );
+                      return; // Prevent submission
+                    }
+                    Map<int, SubTask> uniqueTasksMap = {};
 
-              //     for (var task in orderTasksList) {
-              //       if (task.count >= 0) {
-              //         uniqueTasksMap[task.userId] = task; // 根据 userId 去重
-              //       }
-              //     }
-              //     List<SubTask> tasksToSubmit = uniqueTasksMap.values.toList();
+                    for (var task in orderTasksList) {
+                      if (task.count >= 0) {
+                        uniqueTasksMap[task.userId] = task; // 根据 userId 去重
+                      }
+                    }
+                    List<SubTask> tasksToSubmit =
+                        uniqueTasksMap.values.toList();
 
-              //     int total =
-              //         tasksToSubmit.fold(0, (sum, task) => sum + task.count);
-              //     await submitData(tasksToSubmit, total);
-              //   },
-              //   icon: const Icon(Icons.send_rounded),
-              //   label: const Text("提交"),
-              //   style: ElevatedButton.styleFrom(
-              //     padding: const EdgeInsets.symmetric(
-              //         vertical: 8, horizontal: 80), // Increase button size
-              //     textStyle:
-              //         const TextStyle(fontSize: 18), // Increase text size
-              //   ),
-              // ),
+                    int total =
+                        tasksToSubmit.fold(0, (sum, task) => sum + task.count);
+                    await submitData(tasksToSubmit, total);
+                  },
+                  label: const Text(
+                    "提交",
+                  )),
             ],
           ),
-        )));
+          RichText(
+            text: TextSpan(
+              children: [
+                const TextSpan(
+                  text: ' 当前 ',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.black,
+                  ),
+                ),
+                TextSpan(
+                  text: '$tempCount',
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const TextSpan(
+                  text: ' 条',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                  ),
+                ),
+                const TextSpan(
+                  text: ' 剩余可做 ',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.black,
+                  ),
+                ),
+                TextSpan(
+                  text: '$remain',
+                  style: const TextStyle(
+                    color: Colors.blue,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const TextSpan(
+                  text: ' 条',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 5),
+            height: 1, // 分割线的高度
+            color: const Color.fromARGB(255, 231, 228, 222), // 分割线的颜色
+          ),
+          Expanded(
+            child: GridView.builder(
+              padding: const EdgeInsets.all(3),
+              gridDelegate: SliverGridDelegateWithFixedSize(70, 60,
+                  mainAxisSpacing: 1, minCrossAxisSpacing: 1),
+              itemCount: widget.users.length,
+              itemBuilder: (context, index) {
+                return UserInputWidget(
+                  maxCount: widget.maxCount,
+                  user: widget.users[index],
+                  orderSubTask: orderTasksList[index],
+                  onCountChanged: (count) {
+                    orderTasksList[index] =
+                        orderTasksList[index].copyWith(count: count);
+                    updateTempCount();
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> submitData(List<SubTask> lists, int total) async {

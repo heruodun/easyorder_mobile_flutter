@@ -57,20 +57,24 @@ class _ItemWidgetState extends State<ItemWidget> {
     showModalBottomSheet(
       context: context,
       builder: (context) {
-        return BottomModalSheet(
-          mark: widget.mark,
-          type: widget.type,
-          orderId: widget.orderId,
-          maxCount: widget.count,
-          users: widget.allUsers,
-          orderSubTasks: widget.orderSubTasks,
-          onSubmit: (submittedList, total) {
-            setState(() {
-              submittedTasks = submittedList;
-              totalCount = total;
-              widget.onCountChanged(totalCount); // 调用回调
-            });
-          },
+        return MediaQuery(
+          data:
+              MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+          child: BottomModalSheet(
+            mark: widget.mark,
+            type: widget.type,
+            orderId: widget.orderId,
+            maxCount: widget.count,
+            users: widget.allUsers,
+            orderSubTasks: widget.orderSubTasks,
+            onSubmit: (submittedList, total) {
+              setState(() {
+                submittedTasks = submittedList;
+                totalCount = total;
+                widget.onCountChanged(totalCount); // 调用回调
+              });
+            },
+          ),
         );
       },
     );
