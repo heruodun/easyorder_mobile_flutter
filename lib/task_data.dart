@@ -1,4 +1,5 @@
 import 'package:easyorder_mobile/order_data.dart';
+import 'package:easyorder_mobile/user_data.dart';
 
 class Task {
   int id;
@@ -130,24 +131,34 @@ class SubTask {
 class OrderTask {
   Order order;
   Task? task;
+  List<User>? duijieUsers;
 
   OrderTask({
     required this.order,
     this.task,
+    this.duijieUsers,
   });
 
   factory OrderTask.fromJson(Map<String, dynamic> json) {
     return OrderTask(
-      order: Order.fromJson(
-          json['order']), // Assuming Order has a fromJson method.
+      order: Order.fromJson(json['order']),
       task: json['task'] != null ? Task.fromJson(json['task']) : null,
+      duijieUsers: json['duijieUsers'] != null
+          ? List<User>.from(
+              // 先过滤 null 元素，再转换有效元素
+              (json['duijieUsers'] as List) // 明确转换为 List 类型
+                  .where((x) => x != null) // 过滤 null
+                  .map((x) => User.fromJson(x as Map<String, dynamic>)))
+          : null,
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
-      'order': order.toJson(), // Assuming Order has a toJson method.
+      'order': order.toJson(),
       'task': task?.toJson(),
+      'duijieUsers': duijieUsers != null
+          ? List<dynamic>.from(duijieUsers!.map((x) => x.toJson()))
+          : null,
     };
   }
 }

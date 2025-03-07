@@ -39,8 +39,9 @@ class _OrderTaskScreenState extends State<OrderTaskScreen> {
     _isCompleted = false;
     setState(() {});
 
-    allUsers = await getAllMakers();
+    // allUsers = await getAllMakers();
     OrderTask orderTask = await fetchTaskByOrderIdQr(widget.orderIdQr);
+    allUsers = orderTask.duijieUsers ?? [];
 
     setState(() {
       _order = orderTask.order;
