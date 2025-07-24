@@ -2,43 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 const httpHost = 'http://yangyi.ddns.net:1024';
-// const httpHost = 'http://192.168.1.88:1024';
+// const httpHost = 'http://30.7.185.87:1024';
 
-// 配货
-const prefix4checker = "checker_";
-
-// 做货
-const prefix4maker = "maker_";
-
-// 拣货
-const prefix4picker = "picker_";
-
-// 送货
-const prefix4shipper = "shipper_";
-
-//配货
-const int operationCheck = 100;
-
-//对接
-const int operationAlign = 200;
-
-//做货
-const int operationMake = 300;
-
-//拣货
-const int operationPick = 400;
-
-//送货
-const int operationShip = 500;
-
-const String peihuoRoleCode = "peihuo";
 const String fendanRoleCode = "fendan";
 const String jianhuoRoleCode = "jianhuo";
 const String songhuoRoleCode = "songhuo";
 
 bool inList(String roleCode) {
   const List<String> validRoleCodes = [
-    peihuoRoleCode,
     fendanRoleCode,
     jianhuoRoleCode,
     songhuoRoleCode,

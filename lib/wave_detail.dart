@@ -50,7 +50,7 @@ abstract class WaveDetailsScreenState extends State<WaveDetailsScreen> {
       children: [
         // 放置在SingleChildScrollView外面的Padding
         Padding(
-          padding: EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8.0),
           child: Text(
             showWaveInfo,
             style: Theme.of(context).textTheme.titleSmall,
@@ -146,7 +146,7 @@ abstract class WaveDetailsScreenState extends State<WaveDetailsScreen> {
                       ),
                     );
                   },
-                ).toList(),
+                ),
               ],
             ),
           ),

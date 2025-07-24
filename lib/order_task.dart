@@ -10,9 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class OrderTaskScreen extends StatefulWidget {
-  final String orderIdQr;
+  final String? orderId; // 新增，可选
+  final String? orderIdQr; // 可选
 
-  const OrderTaskScreen({super.key, required this.orderIdQr});
+  const OrderTaskScreen({super.key, this.orderIdQr, this.orderId});
 
   @override
   _OrderTaskScreenState createState() => _OrderTaskScreenState();
@@ -40,7 +41,16 @@ class _OrderTaskScreenState extends State<OrderTaskScreen> {
     setState(() {});
 
     // allUsers = await getAllMakers();
-    OrderTask orderTask = await fetchTaskByOrderIdQr(widget.orderIdQr);
+    late OrderTask orderTask;
+    if (widget.orderId != null && widget.orderId!.isNotEmpty) {
+      orderTask = await fetchTaskByOrderId(widget.orderId!);
+    } else if (widget.orderIdQr != null && widget.orderIdQr!.isNotEmpty) {
+      orderTask = await fetchTaskByOrderIdQr(widget.orderIdQr!);
+    } else {
+      // 你也可以处理一下异常
+      throw Exception('orderId or orderIdQr must be provided.');
+    }
+
     allUsers = orderTask.duijieUsers ?? [];
 
     setState(() {
@@ -142,13 +152,22 @@ class _OrderTaskScreenState extends State<OrderTaskScreen> {
   }
 
   Widget _buildTaskLayer(BuildContext context) {
-    // if (!_isCompleted) {
-    //   return const SizedBox.shrink();
-    // }
     if (_order == null) {
-      return Text("");
+      return const Text("");
     }
+    //
+    if (_order!.orderId is int) {
+      return _doBuildTaskLayerV1(context);
+    } else {
+      if (int.tryParse(_order!.orderId) != null) {
+        return _doBuildTaskLayerV1(context);
+      } else {
+        return _doBuildTaskLayerV2(context);
+      }
+    }
+  }
 
+  Widget _doBuildTaskLayerV1(BuildContext context) {
     if (_order!.guiges[0].tiaos == null) {
       return Text("${_order!.address}的 ${_order!.orderId} 订单不支持分单！");
     }
@@ -263,6 +282,7 @@ class _OrderTaskScreenState extends State<OrderTaskScreen> {
                               allUsers: allUsers,
                               count: _order!.guiges[0].count,
                               mark: _order!.guiges[0].guige,
+                              danwei: '条',
                               orderSubTasks:
                                   orderSubTaskMap[_order!.guiges[0].guige] ??
                                       [],
@@ -300,6 +320,7 @@ class _OrderTaskScreenState extends State<OrderTaskScreen> {
                               allUsers: allUsers,
                               count: _order!.guiges[0].tiaos![index].count,
                               mark: _order!.guiges[0].tiaos![index].length,
+                              danwei: '条',
                               orderSubTasks: orderSubTaskMap[
                                       _order!.guiges[0].tiaos![index].length] ??
                                   [],
@@ -315,6 +336,209 @@ class _OrderTaskScreenState extends State<OrderTaskScreen> {
                               },
                               doCount: _doCountsMap[_order!
                                   .guiges[0].tiaos![index].length], // 传递当前计数
+                            ));
+                      },
+                    ),
+                  ]),
+                ),
+              ],
+            ),
+          ),
+
+          // Center(
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.center,
+          //     children: <Widget>[
+          //       Switch(
+          //         value: _isSwitched, // 当前状态
+          //         onChanged: _toggleSwitch, // 状态改变时的回调
+          //         activeColor: Colors.green, // Switch被激活时的颜色
+          //       ),
+          //       const SizedBox(width: 10), // 用于调整Switch与文本之间的间距
+          //       Text(_isSwitched ? '已绑定' : '未绑定',
+          //           style: const TextStyle(
+          //               color: Colors.redAccent,
+          //               fontSize: 25,
+          //               fontWeight: FontWeight.bold)), // 文本显示状态
+          //     ],
+          //   ),
+          // ),
+        ],
+      ],
+    );
+  }
+
+  Widget _doBuildTaskLayerV2(BuildContext context) {
+    if (_order == null) {
+      return const Text("");
+    }
+
+    final guiges = _order!.guiges;
+    final guigeString = guiges.map((g) => g.guige).join(' ');
+    final totalCount = guiges.fold<int>(0, (sum, g) => sum + g.count);
+
+    return Column(
+      children: [
+        if (_order != null) ...[
+          Text(_order!.address,
+              style:
+                  const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          Text('${_order!.orderId}', style: const TextStyle(fontSize: 14)),
+          ...guiges.map((g) => Text(
+                '${g.guige} x ${g.count} ${g.danwei}',
+                style: const TextStyle(fontSize: 13),
+              )),
+
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            RichText(
+              text: TextSpan(
+                style: const TextStyle(fontSize: 18, color: Colors.black),
+                children: [
+                  TextSpan(
+                    text: '总计 $totalCount ',
+                    style: const TextStyle(color: Colors.blue),
+                  ),
+                ],
+              ),
+            ),
+            RichText(
+              text: TextSpan(
+                style: const TextStyle(fontSize: 18, color: Colors.black),
+                children: [
+                  TextSpan(
+                      text: '做货 $_makeCount ',
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      )),
+                ],
+              ),
+            ),
+            const SizedBox(
+              width: 4,
+            ),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+              decoration: BoxDecoration(
+                color: _getBackgroundColor(_task), // 设置背景色
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              child: Text(_getStatusText(_task),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Colors.white, // 根据需要设置颜色
+                    fontWeight: FontWeight.bold, // 根据需要设置样式
+                  )),
+            )
+          ]),
+          DefaultTabController(
+            initialIndex: _initialIndex,
+            length: 2,
+            child: Column(
+              children: [
+                TabBar(
+                  tabs: const [
+                    Tab(
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                          Icon(Icons.circle),
+                          SizedBox(width: 4),
+                          Text('全部做货')
+                        ])),
+                    Tab(
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                          Text('部分做货'),
+                          SizedBox(width: 4),
+                          Icon(Icons.pie_chart)
+                        ])),
+                  ],
+                  labelColor: Colors.green,
+                  unselectedLabelColor: Colors.blueGrey,
+                  onTap: (index) {
+                    fetchData();
+                    // setState(() {
+                    //   _calculateMakeCount();
+                    // });
+                  },
+                ),
+                SizedBox(
+                  height: 400,
+                  child: TabBarView(children: [
+                    ListView.builder(
+                      itemCount: 1,
+                      itemBuilder: (context, index) {
+                        String markStr = '全部';
+                        return Container(
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 2.0), // 为每个元素添加上下间距
+                            padding: const EdgeInsets.all(1.0), // 内边距
+
+                            decoration: BoxDecoration(
+                                // color: Colors.white, // 元素背景色
+                                borderRadius: BorderRadius.circular(8.0), // 圆角
+                                border: Border.all(
+                                    color: const Color.fromARGB(
+                                        255, 245, 241, 241))),
+                            child: ItemWidget(
+                              task: _task,
+                              type: 1,
+                              orderId: _order!.orderId,
+                              allUsers: allUsers,
+                              count: totalCount,
+                              mark: markStr,
+                              danwei: '',
+                              orderSubTasks: orderSubTaskMap[markStr] ?? [],
+                              index: index,
+                              // Pass the order data here
+                              onCountChanged: (count) {
+                                fetchData();
+                                setState(() {
+                                  _doCountsMap[markStr] = count;
+                                  _calculateMakeCount();
+                                });
+                              },
+                              doCount: _doCountsMap[markStr], // 传递当前计数
+                            ));
+                      },
+                    ),
+                    ListView.builder(
+                      itemCount: _order!.guiges.length,
+                      itemBuilder: (context, index) {
+                        String markStr =
+                            '(${index + 1}) ${_order!.guiges[index].guige}';
+                        return Container(
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 2.0), // 为每个元素添加上下间距
+                            padding: const EdgeInsets.all(1.0), // 内边距
+                            decoration: BoxDecoration(
+                                // color: Colors.white, // 元素背景色
+                                borderRadius: BorderRadius.circular(8.0), // 圆角
+                                border: Border.all(
+                                    color: const Color.fromARGB(
+                                        255, 245, 241, 241))),
+                            child: ItemWidget(
+                              task: _task,
+                              type: 0,
+                              orderId: _order!.orderId,
+                              allUsers: allUsers,
+                              count: _order!.guiges[index].count,
+                              mark: markStr,
+                              danwei: _order!.guiges[index].danwei,
+                              orderSubTasks: orderSubTaskMap[markStr] ?? [],
+                              index: index,
+                              // Pass the order data here
+                              onCountChanged: (count) {
+                                fetchData();
+                                setState(() {
+                                  _doCountsMap[markStr] = count;
+                                  _calculateMakeCount();
+                                });
+                              },
+                              doCount: _doCountsMap[markStr], // 传递当前计数
                             ));
                       },
                     ),
@@ -428,6 +652,19 @@ class _OrderTaskScreenState extends State<OrderTaskScreen> {
   Future<OrderTask> fetchTaskByOrderIdQr(String orderIdQr) async {
     final response = await httpClient(
         uri: Uri.parse('$httpHost/app/order/task?orderIdQr=$orderIdQr'),
+        method: "GET",
+        context: context);
+
+    if (response.isSuccess) {
+      return OrderTask.fromJson(response.data);
+    } else {
+      throw Exception(response.message);
+    }
+  }
+
+  Future<OrderTask> fetchTaskByOrderId(String orderId) async {
+    final response = await httpClient(
+        uri: Uri.parse('$httpHost/app/order/task?orderId=$orderId'),
         method: "GET",
         context: context);
 

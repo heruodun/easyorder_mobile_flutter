@@ -14,7 +14,8 @@ class UserInputWidget extends StatefulWidget {
   final Function(int) onCountChanged;
 
   const UserInputWidget(
-      {required this.user,
+      {super.key,
+      required this.user,
       required this.orderSubTask,
       required this.onCountChanged,
       required this.maxCount});
@@ -131,11 +132,12 @@ extension OrderSubTaskExtension on SubTask {
 class BottomModalSheet extends StatefulWidget {
   final List<User> users;
   final List<SubTask>? orderSubTasks;
-  final int orderId;
+  final dynamic orderId;
   final Function(List<SubTask>, int) onSubmit;
   final int maxCount;
   final int type;
   final String mark;
+  final String danwei;
 
   const BottomModalSheet(
       {super.key,
@@ -145,7 +147,8 @@ class BottomModalSheet extends StatefulWidget {
       required this.maxCount,
       required this.orderId,
       required this.type,
-      required this.mark});
+      required this.mark,
+      required this.danwei});
 
   @override
   _BottomModalSheetState createState() => _BottomModalSheetState();
@@ -192,15 +195,6 @@ class _BottomModalSheetState extends State<BottomModalSheet> {
     setState(() {
       tempCount = newTempCount;
     });
-    // if (tempCount > widget.maxCount) {
-    //   Fluttertoast.showToast(
-    //     msg: '做货数量$tempCount条，超过最大值${widget.maxCount}条',
-    //     backgroundColor: Colors.red,
-    //     textColor: Colors.white,
-    //     toastLength: Toast.LENGTH_SHORT,
-    //     gravity: ToastGravity.TOP,
-    //   );
-    // }
   }
 
   @override
@@ -224,7 +218,7 @@ class _BottomModalSheetState extends State<BottomModalSheet> {
               Expanded(
                 child: Center(
                   child: Text(
-                    '${widget.mark} x ${widget.maxCount} 条',
+                    '${widget.mark} x ${widget.maxCount} ${widget.danwei}',
                     style: const TextStyle(fontSize: 15),
                   ),
                 ),
@@ -278,9 +272,9 @@ class _BottomModalSheetState extends State<BottomModalSheet> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const TextSpan(
-                  text: ' 条',
-                  style: TextStyle(
+                TextSpan(
+                  text: ' ${widget.danwei}',
+                  style: const TextStyle(
                     color: Colors.black,
                     fontSize: 18,
                   ),
@@ -300,9 +294,9 @@ class _BottomModalSheetState extends State<BottomModalSheet> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const TextSpan(
-                  text: ' 条',
-                  style: TextStyle(
+                TextSpan(
+                  text: ' ${widget.danwei}',
+                  style: const TextStyle(
                     color: Colors.black,
                     fontSize: 18,
                   ),

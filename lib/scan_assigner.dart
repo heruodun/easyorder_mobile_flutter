@@ -40,15 +40,6 @@ class _ScanAssignerState extends ScanScreenState<ScanAssignerScreen> {
 
   @override
   void doProcess(String result) async {
-    RegExp pattern = RegExp(r'\d+');
-    RegExpMatch? match = pattern.firstMatch(result);
-
-    String? orderIdStr = match?.group(0);
-    if (orderIdStr == null) {
-      //异常了
-      return;
-    }
-
     debugPrint('assigner doProcess $result');
 
     _navigateToScreen(result);

@@ -25,9 +25,13 @@ class MyScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(user.actualName, style: const TextStyle(fontSize: 24)),
+              Text("主账号：${user.tenant!.loginName}",
+                  style: const TextStyle(fontSize: 24)),
               const SizedBox(height: 20), // 添加间隔
-              Text(user.phone, style: const TextStyle(fontSize: 20)),
+              Text("子账号：${user.actualName}",
+                  style: const TextStyle(fontSize: 24)),
+              const SizedBox(height: 20), // 添加间隔
+              Text("手机号码：${user.phone}", style: const TextStyle(fontSize: 20)),
             ],
           ),
         ));

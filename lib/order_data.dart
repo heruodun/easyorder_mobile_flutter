@@ -5,7 +5,7 @@ part 'order_data.g.dart';
 @JsonSerializable()
 class Order {
   final int id;
-  final int orderId;
+  final dynamic orderId;
   final String address;
   final int? addressId;
   final List<Guige> guiges;

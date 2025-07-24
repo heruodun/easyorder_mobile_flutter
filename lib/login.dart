@@ -23,6 +23,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _mainUsernameController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -40,11 +41,12 @@ class LoginScreenState extends State<LoginScreen> {
 
     // // 这里应替换为对应的HTTP请求URL和登录逻辑
     var response = await http.post(
-      Uri.parse('$httpHost/mobile/login'),
+      Uri.parse('$httpHost/app/login'),
       headers: {
         'Content-Type': 'application/json',
       },
       body: json.encode({
+        'mainLoginName': _mainUsernameController.text,
         'loginName': _usernameController.text,
         'password': _passwordController.text,
         'loginDevice': loginDevice.toString(),
@@ -58,8 +60,8 @@ class LoginScreenState extends State<LoginScreen> {
         // 保存登录状态到本地
         User user = User.fromJson(data['data']);
 
-        if (user.roleInfoList == null || user.roleInfoList!.isEmpty) {
-          // 显示错误信息
+        if (user.roleInfoList == null ||
+            !user.roleInfoList!.any((role) => role!.roleType == 1)) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("角色为空，请找管理员添加角色")),
           );
@@ -102,9 +104,16 @@ class LoginScreenState extends State<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             TextField(
+              controller: _mainUsernameController,
+              decoration: const InputDecoration(
+                labelText: '主账号',
+                prefixIcon: Icon(Icons.person),
+              ),
+            ),
+            TextField(
               controller: _usernameController,
               decoration: const InputDecoration(
-                labelText: '用户名',
+                labelText: '子账号',
                 prefixIcon: Icon(Icons.person),
               ),
             ),

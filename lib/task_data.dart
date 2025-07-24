@@ -3,7 +3,7 @@ import 'package:easyorder_mobile/user_data.dart';
 
 class Task {
   int id;
-  int orderId;
+  dynamic orderId;
   int status;
   int type;
   String address;
@@ -17,7 +17,7 @@ class Task {
 
   Task({
     required this.id,
-    required this.orderId,
+    this.orderId,
     required this.status,
     required this.type,
     required this.address,
@@ -72,7 +72,7 @@ class SubTask {
   int id;
   int taskId;
   int userId;
-  int orderId;
+  dynamic orderId;
   String userName;
   int count;
   int status;
@@ -143,15 +143,13 @@ class OrderTask {
     return OrderTask(
       order: Order.fromJson(json['order']),
       task: json['task'] != null ? Task.fromJson(json['task']) : null,
-      duijieUsers: json['duijieUsers'] != null
-          ? List<User>.from(
-              // 先过滤 null 元素，再转换有效元素
-              (json['duijieUsers'] as List) // 明确转换为 List 类型
-                  .where((x) => x != null) // 过滤 null
-                  .map((x) => User.fromJson(x as Map<String, dynamic>)))
-          : null,
+      duijieUsers: (json['duijieUsers'] as List?)
+          ?.where((x) => x != null)
+          .map((x) => User.fromJson(x as Map<String, dynamic>))
+          .toList(),
     );
   }
+
   Map<String, dynamic> toJson() {
     return {
       'order': order.toJson(),

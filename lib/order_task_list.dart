@@ -186,7 +186,8 @@ class TaskItemScreenState extends State<TaskItem> {
             context,
             MaterialPageRoute(
               builder: (context) =>
-                  OrderTaskScreen(orderIdQr: '${task.orderId}\$xiaowangniujin'),
+                  //如果
+                  OrderTaskScreen(orderId: task.orderId),
             ),
           );
         },

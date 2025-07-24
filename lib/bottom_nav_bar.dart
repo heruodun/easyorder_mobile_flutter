@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 
 class RoleBasedNavBar extends StatefulWidget {
   final List<Role> roles;
-  final List<BottomNavigationBarItem> itemsCheck;
   final List<BottomNavigationBarItem> itemsMake;
   final List<BottomNavigationBarItem> itemsPick;
   final List<BottomNavigationBarItem> itemsShip;
@@ -16,7 +15,6 @@ class RoleBasedNavBar extends StatefulWidget {
   const RoleBasedNavBar({
     super.key,
     required this.roles,
-    required this.itemsCheck,
     required this.itemsMake,
     required this.itemsPick,
     required this.itemsShip,
@@ -39,9 +37,6 @@ class _RoleBasedNavBarState extends State<RoleBasedNavBar> {
     super.initState();
     // 假设你在这里构建了`navBarItems`列表
 
-    if (widget.roles.any((role) => role.roleCode == peihuoRoleCode)) {
-      navBarItems.addAll(widget.itemsCheck);
-    }
     if (widget.roles.any((role) => role.roleCode == fendanRoleCode)) {
       navBarItems.addAll(widget.itemsMake);
     }

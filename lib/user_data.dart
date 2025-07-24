@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'user_tenant.dart';
 part 'user_data.g.dart';
 
 @JsonSerializable()
@@ -19,20 +20,25 @@ class User {
   String phone;
   @JsonKey(name: "token")
   String token;
+  @JsonKey(name: "erpToken")
+  String? erpToken;
   @JsonKey(name: "roleInfoList")
   List<Role?>? roleInfoList; // Updated line
   @JsonKey(name: "scanRuleList")
   List<String?>? scanRuleList;
+  @JsonKey(name: "tenant")
+  Tenant? tenant;
 
-  User({
-    required this.employeeId,
-    required this.loginName,
-    required this.actualName,
-    required this.phone,
-    required this.token,
-    required this.roleInfoList,
-    required this.scanRuleList,
-  });
+  User(
+      {required this.employeeId,
+      required this.loginName,
+      required this.actualName,
+      required this.phone,
+      required this.token,
+      this.erpToken,
+      required this.roleInfoList,
+      required this.scanRuleList,
+      this.tenant});
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 

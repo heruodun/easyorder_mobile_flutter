@@ -8,6 +8,7 @@ import 'bottom_nav_bar.dart';
 import 'main.dart';
 import 'scanner_button_widgets.dart';
 import 'scanner_error_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 MobileScannerController controller = MobileScannerController(
   torchEnabled: false, useNewCameraSelector: true,
@@ -143,7 +144,26 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
                     // StartStopMobileScannerButton(controller: controller),
                     Expanded(child: Center(child: _buildBarcode(_barcode))),
                     // SwitchCameraButton(controller: controller),
-                    AnalyzeImageFromGalleryButton(controller: controller),
+                    AnalyzeImageFromGalleryButton(
+                      controller: controller,
+                      onBarcodeDetected: (code) async {
+                        if (code != null) {
+                          await _processScanResult(code); // 间接调用自身的处理函数
+                        } else {
+                          setState(() {
+                            scanResultText = "没有识别到条码";
+                            scanResultColor = Colors.red;
+                            _isResultDisplayed = true;
+                          });
+                          await Future.delayed(const Duration(seconds: 1));
+                          setState(() {
+                            _isResultDisplayed = false;
+                            scanResultText = "扫码中...";
+                            scanResultColor = Colors.grey;
+                          });
+                        }
+                      },
+                    ),
                   ],
                 ),
               ],
@@ -222,7 +242,8 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
   Future<bool> isMatch(result) async {
     User? user = await User.getCurrentUser();
     List<String?>? scanRuleList = user?.scanRuleList;
-    if (result != null && (RegExp(r'^\d+\$xiaowangniujin$').hasMatch(result))) {
+    String tag = user!.tenant!.tag;
+    if (result != null && (result.endsWith(tag))) {
       return true;
     }
     for (String? rule in scanRuleList ?? []) {
@@ -260,6 +281,30 @@ abstract class ScanScreenState<T extends ScanScreenStateful> extends State<T>
   void doProcess(String result);
 
   bool canProcess(String currentLabel);
+
+  Future<bool> isProcessed(String operationCode, String processTag) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String key = _makeScanKey(operationCode, processTag);
+    int? lastTimestamp = prefs.getInt(key);
+    int currentTimeMillis = DateTime.now().millisecondsSinceEpoch;
+    if (lastTimestamp == null ||
+        (currentTimeMillis - lastTimestamp) >= 5 * 60 * 1000) {
+      return false;
+    }
+    return true;
+  }
+
+  void setProcessed(String operationCode, String processTag) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String key = _makeScanKey(operationCode, processTag);
+    int currentTimeMillis = DateTime.now().millisecondsSinceEpoch;
+    prefs.setInt(key, currentTimeMillis);
+  }
+
+  String _makeScanKey(String operationCode, String processTag) {
+    String key = 'prefix$operationCode$processTag';
+    return key;
+  }
 
   @override
   Future<void> dispose() async {

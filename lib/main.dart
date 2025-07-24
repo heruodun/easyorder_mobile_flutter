@@ -39,13 +39,13 @@ class MyApp extends StatelessWidget {
       title: '小王牛筋',
 
       // 配置本地化
-      localizationsDelegates: [
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
       ],
-      supportedLocales: [
-        const Locale('zh', 'CH'),
-        const Locale('en', 'US'),
+      supportedLocales: const [
+        Locale('zh', 'CH'),
+        Locale('en', 'US'),
       ],
       locale: const Locale("zh"),
 

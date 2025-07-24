@@ -6,7 +6,6 @@ import 'package:easyorder_mobile/scan_general.dart';
 import 'package:easyorder_mobile/user_role.dart';
 import 'package:flutter/material.dart';
 import 'bottom_nav_bar.dart';
-import 'scan_checker.dart';
 import 'scan_shipper.dart';
 import 'user_data.dart';
 import 'wave_list.dart';
@@ -32,11 +31,6 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
     // 初始化屏幕列表，基于角色
     roles = widget.user.roleInfoList!.cast<Role>();
     _screens = [];
-
-    if (roles.any((role) => role.roleCode == peihuoRoleCode)) {
-      ScanCheckerScreen checkerScreen = const ScanCheckerScreen();
-      _screens.add(checkerScreen);
-    }
 
     if (roles.any((role) => role.roleCode == fendanRoleCode)) {
       ScanAssignerScreen makerScreen = const ScanAssignerScreen();
@@ -97,9 +91,6 @@ class _MultiRoleScreenState extends State<MultiRoleScreen> {
       ),
       bottomNavigationBar: RoleBasedNavBar(
         roles: roles,
-        itemsCheck: const [
-          BottomNavigationBarItem(icon: Icon(Icons.checklist), label: '配货'),
-        ],
         itemsMake: const [
           BottomNavigationBarItem(
               icon: Icon(Icons.assignment_ind), label: '分单'),

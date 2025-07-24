@@ -101,16 +101,6 @@ class _ScanPickerState extends ScanScreenState<ScanPickerScreen> {
   }
 
   Future<void> doProcessOrder(String result) async {
-    RegExp pattern = RegExp(r'\d+');
-    RegExpMatch? match = pattern.firstMatch(result);
-
-    String? orderIdStr = match?.group(0);
-    if (orderIdStr == null) {
-      //异常了
-      return;
-    }
-
-    int orderId = int.parse(orderIdStr);
     int waveId = widget.wave!.waveId;
     int widgetType = widget.type;
 
@@ -119,13 +109,13 @@ class _ScanPickerState extends ScanScreenState<ScanPickerScreen> {
       type = -1;
     }
 
-    bool hasProcessed = await isProcessed(orderIdStr, waveId, type);
+    bool hasProcessed = await isProcessedPick(result, waveId, type);
 
     if (hasProcessed) {
       if (type == 1) {
-        super.scanResultText = "已加入波次\n$orderId";
+        super.scanResultText = "已加入波次\n$result";
       } else {
-        super.scanResultText = "已撤出波次\n$orderId";
+        super.scanResultText = "已撤出波次\n$result";
       }
       super.scanResultColor = Colors.yellow;
     } else {
@@ -135,7 +125,7 @@ class _ScanPickerState extends ScanScreenState<ScanPickerScreen> {
             body: {
               'waveId': waveId,
               'waveAlias': widget.wave!.waveAlias,
-              'orderId': orderId,
+              'orderIdQr': result,
               'operation': type,
             },
             method: "POST",
@@ -148,34 +138,34 @@ class _ScanPickerState extends ScanScreenState<ScanPickerScreen> {
 
           setState(() {
             if (type == 1) {
-              super.scanResultText = "加入波次成功\n$orderId";
+              super.scanResultText = "加入波次成功\n$result";
               fetchData();
             } else {
-              super.scanResultText = "撤出波次成功\n$orderId";
+              super.scanResultText = "撤出波次成功\n$result";
               fetchData();
             }
             super.scanResultColor = Colors.green;
           });
 
-          setProcessed(orderIdStr, waveId, type);
+          setProcessedPick(result, waveId, type);
         } else {
           String msg = response.message;
 
           setState(() {
-            super.scanResultText = "$msg\n$orderId";
+            super.scanResultText = "$msg\n$result";
             super.scanResultColor = Colors.red;
           });
         }
       } catch (e) {
         setState(() {
-          super.scanResultText = "扫码异常\n$orderId";
+          super.scanResultText = "扫码异常\n$result";
           super.scanResultColor = Colors.red;
         });
       }
     }
   }
 
-  Future<bool> isProcessed(String orderId, int waveId, int type) async {
+  Future<bool> isProcessedPick(String orderId, int waveId, int type) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String key = _makeScanKey(orderId, waveId, type);
     int? lastTimestamp = prefs.getInt(key);
@@ -190,7 +180,7 @@ class _ScanPickerState extends ScanScreenState<ScanPickerScreen> {
     return true;
   }
 
-  void setProcessed(String orderId, int waveId, int type) async {
+  void setProcessedPick(String orderId, int waveId, int type) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String key = _makeScanKey(orderId, waveId, type);
     String revertKey = _makeScanKey(orderId, waveId, -type);

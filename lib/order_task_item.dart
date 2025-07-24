@@ -4,11 +4,12 @@ import 'package:easyorder_mobile/user_data.dart';
 import 'package:flutter/material.dart';
 
 class ItemWidget extends StatefulWidget {
-  final int orderId;
+  final dynamic orderId;
   //订单上的数量
   final int count;
   //订单上的长度或者规格
   final String mark;
+  final String danwei;
   final int? doCount;
   //第几个元素
   final int index;
@@ -24,6 +25,7 @@ class ItemWidget extends StatefulWidget {
       {super.key,
       required this.count,
       required this.mark,
+      required this.danwei,
       required this.index,
       required this.onCountChanged,
       required this.allUsers,
@@ -65,6 +67,7 @@ class _ItemWidgetState extends State<ItemWidget> {
             type: widget.type,
             orderId: widget.orderId,
             maxCount: widget.count,
+            danwei: widget.danwei,
             users: widget.allUsers,
             orderSubTasks: widget.orderSubTasks,
             onSubmit: (submittedList, total) {
@@ -95,7 +98,8 @@ class _ItemWidgetState extends State<ItemWidget> {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: '${widget.mark} x ${widget.count} 条 ',
+                      text:
+                          '${widget.mark} x ${widget.count} ${widget.danwei} ',
                       style: const TextStyle(
                         fontSize: 18, // 字体大小放大
                         color: Colors.black, // 确保文本颜色
@@ -108,9 +112,9 @@ class _ItemWidgetState extends State<ItemWidget> {
                         fontSize: 18, // 字体大小放大
                       ),
                     ),
-                    const TextSpan(
-                      text: ' 条',
-                      style: TextStyle(
+                    TextSpan(
+                      text: ' ${widget.danwei} ',
+                      style: const TextStyle(
                         color: Colors.black,
                         fontSize: 18, // 字体大小放大
                       ),

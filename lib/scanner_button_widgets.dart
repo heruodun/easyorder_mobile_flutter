@@ -1,13 +1,18 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class AnalyzeImageFromGalleryButton extends StatelessWidget {
-  const AnalyzeImageFromGalleryButton({required this.controller, super.key});
+  const AnalyzeImageFromGalleryButton({
+    required this.controller,
+    this.onBarcodeDetected,
+    super.key,
+  });
 
   final MobileScannerController controller;
+
+  /// 新增：扫码后递交条码字符串
+  final Future<void> Function(String? code)? onBarcodeDetected;
 
   @override
   Widget build(BuildContext context) {
@@ -17,34 +22,21 @@ class AnalyzeImageFromGalleryButton extends StatelessWidget {
       iconSize: 32.0,
       onPressed: () async {
         final ImagePicker picker = ImagePicker();
-
-        final XFile? image = await picker.pickImage(
-          source: ImageSource.gallery,
-        );
+        final XFile? image =
+            await picker.pickImage(source: ImageSource.gallery);
 
         if (image == null) {
           return;
         }
 
-        final BarcodeCapture? barcodes = await controller.analyzeImage(
-          image.path,
-        );
+        final BarcodeCapture? barcodes =
+            await controller.analyzeImage(image.path);
+        final Barcode? barcode = barcodes?.barcodes.firstOrNull; // 取第一个条码
 
-        if (!context.mounted) {
-          return;
+        // 只用回调，不再弹Snackbar!
+        if (onBarcodeDetected != null) {
+          await onBarcodeDetected!(barcode?.rawValue);
         }
-
-        final SnackBar snackbar = barcodes != null
-            ? const SnackBar(
-                content: Text('Barcode found!'),
-                backgroundColor: Colors.green,
-              )
-            : const SnackBar(
-                content: Text('No barcode found!'),
-                backgroundColor: Colors.red,
-              );
-
-        ScaffoldMessenger.of(context).showSnackBar(snackbar);
       },
     );
   }
@@ -177,4 +169,3 @@ class ToggleFlashlightButton extends StatelessWidget {
     );
   }
 }
-
