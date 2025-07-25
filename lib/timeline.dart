@@ -27,63 +27,62 @@ class TimelineWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final displayList = traceList;
     return Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-              color: const Color.fromARGB(255, 248, 245, 245),
-              width: 1.0), // 外层边框颜色和宽度
-          borderRadius: BorderRadius.circular(5.0), // 圆角边框
-        ),
-        child: Expanded(
-          child: ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: displayList.length,
-            itemBuilder: (context, index) {
-              final trace = displayList[index];
-              return Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      color: _getBackgroundColor(trace.operation),
-                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                      child: Text(
-                        trace.operation,
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    const SizedBox(width: 5), // 设置固定宽度
-                    Text(
-                      trace.operator,
-                      style: const TextStyle(color: Colors.black),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(width: 5), // 设置固定宽度
-                    Text(
-                      trace.time,
-                      style: const TextStyle(color: Colors.black),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(width: 5), // 设置固定宽度
-                    Expanded(
-                      child: Container(
-                        // 对 detail 应用宽度限制
-                        constraints: const BoxConstraints(maxWidth: 200),
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          trace.detail ?? '',
-                          style: const TextStyle(color: Colors.black),
-                          maxLines: 2, // 支持换行
-                          overflow: TextOverflow.ellipsis, // 溢出处理
-                        ),
-                      ),
-                    ),
-                  ],
+      decoration: BoxDecoration(
+        border: Border.all(
+            color: const Color.fromARGB(255, 248, 245, 245),
+            width: 1.0), // 外层边框颜色和宽度
+        borderRadius: BorderRadius.circular(5.0), // 圆角边框
+      ),
+      child: ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: displayList.length,
+        itemBuilder: (context, index) {
+          final trace = displayList[index];
+          return Padding(
+            padding: const EdgeInsets.all(5.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  color: _getBackgroundColor(trace.operation),
+                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                  child: Text(
+                    trace.operation,
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 ),
-              );
-            },
-          ),
-        ));
+                const SizedBox(width: 5), // 设置固定宽度
+                Text(
+                  trace.operator,
+                  style: const TextStyle(color: Colors.black),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(width: 5), // 设置固定宽度
+                Text(
+                  trace.time,
+                  style: const TextStyle(color: Colors.black),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(width: 5), // 设置固定宽度
+                Expanded(
+                  child: Container(
+                    // 对 detail 应用宽度限制
+                    constraints: const BoxConstraints(maxWidth: 200),
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      trace.detail ?? '',
+                      style: const TextStyle(color: Colors.black),
+                      maxLines: 2, // 支持换行
+                      overflow: TextOverflow.ellipsis, // 溢出处理
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 }
